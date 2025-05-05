@@ -1,15 +1,10 @@
 package kebab_simulator.control;
 
 import KAGO_framework.control.ViewController;
-import kebab_simulator.event.events.KeyPressedEvent;
-import kebab_simulator.event.events.MouseClickedEvent;
 import kebab_simulator.event.events.UpdateEvent;
 import kebab_simulator.view.InputManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
 
 /**
  * Ein Objekt der Klasse ProgramController dient dazu das Programm zu steuern.
@@ -22,8 +17,7 @@ import java.awt.event.MouseEvent;
 public class ProgramController {
 
     private final ViewController viewController;
-    private Logger logger;
-    private Wrapper wrapper;
+    private final static Logger logger = LoggerFactory.getLogger(ProgramController.class);
 
     /**
      * Konstruktor
@@ -41,30 +35,23 @@ public class ProgramController {
      * nach Erstellen des Fensters, usw. erst aufgerufen.
      */
     public void preStartProgram() {
-        this.logger = LoggerFactory.getLogger(ProgramController.class);
-        this.wrapper = new Wrapper();
-
         /* Beispiel mit Update Event
         Wrapper.getEventManager().addEventListener("update", (UpdateEvent e) -> {
-            this.logger.info("Update: {}", e.getDeltaTime());
+            ProgramController.logger.info("Update: {}", e.getDeltaTime());
         });
         */
 
         /* Beispiel mit Keypressed Event
-
-        */
         Wrapper.getEventManager().addEventListener("keypressed", (KeyPressedEvent e) -> {
-            this.logger.info("Key wurde gedrückt: {}", KeyEvent.getKeyText(e.getKeyCode()));
-            this.logger.warn("Key wurde gedrückt: {}", KeyEvent.getKeyText(e.getKeyCode()));
-            this.logger.error("Key wurde gedrückt: {}", KeyEvent.getKeyText(e.getKeyCode()));
+            ProgramController.logger.info("Key wurde gedrückt: {}", KeyEvent.getKeyText(e.getKeyCode()));
         });
+        */
 
         /* Beispiel mit Mouseclicked Event
-
-        */
         Wrapper.getEventManager().addEventListener("mouseclicked", (MouseClickedEvent e) -> {
-            this.logger.info("Button wurde gedrückt: {}", e.toString());
+            ProgramController.logger.info("Button wurde gedrückt: {}", e.toString());
         });
+        */
     }
 
     /**
