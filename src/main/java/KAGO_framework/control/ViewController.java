@@ -3,22 +3,32 @@ package KAGO_framework.control;
 import KAGO_framework.Config;
 import KAGO_framework.view.DrawTool;
 //import KAGO_scenario_framework.control.ScenarioController;
+import com.google.common.util.concurrent.*;
 import kebab_simulator.control.ProgramController;
 import KAGO_framework.view.DrawFrame;
 import KAGO_framework.view.DrawingPanel;
+import kebab_simulator.control.Wrapper;
+import kebab_simulator.model.entity.Entity;
+import kebab_simulator.view.InputManager;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Diese Klasse kontrolliert die DrawingPanels einer ihr zugewiesenen DrawingFrame.
  * Sie kann verschiedene Objekte erzeugen und den Panels hinzufuegen.
  * Vorgegebene Klasse des Frameworks. Modifikation auf eigene Gefahr.
  */
-public class ViewController implements ActionListener, KeyListener, MouseListener, MouseMotionListener {
+public class ViewController implements KeyListener, MouseListener, MouseMotionListener {
 
     /**
      * Die innere Klasse kapselt jeweils eine Szene.
@@ -40,25 +50,32 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
         }
     }
 
-    // Referenzen
+    private Logger logger = LoggerFactory.getLogger(ViewController.class);
     private DrawFrame drawFrame;    // das Fenster des Programms
     private ProgramController programController; // das Objekt, das das Programm steuern soll
-    private Timer gameProcess;
     private static ArrayList<Integer> currentlyPressedKeys = new ArrayList<>();;
     private ArrayList<Scene> scenes;
     private SoundController soundController;
 
-    // Attribute
+    private ListeningExecutorService gameExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+    private ListeningExecutorService physicsExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+    private ListeningExecutorService backgroundServiceExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+
+    private int totalFrames, fps;
+    private long lastFramesTime;
     private int dt;
+    private int lastScene;
     private long lastLoop_Drawables, elapsedTime_Drawables;
     private long lastLoop, elapsedTime;
+    private long lastLoop_Physics, elapsedTime_Physics;
     private int currentScene;
     private boolean notChangingInteractables, notChangingDrawables;
+    private final AtomicBoolean watchPhysics = new AtomicBoolean(true);
 
     /**
      * Erzeugt ein Objekt zur Kontrolle des Programmflusses.
      */
-    ViewController(){
+    public ViewController() {
         programController = new ProgramController(this);
         programController.preStartProgram();
         notChangingDrawables = true;
@@ -67,13 +84,13 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
         // Erzeuge Fenster und erste Szene
         createWindow();
         // Setzt die Ziel-Zeit zwischen zwei aufeinander folgenden Frames in Millisekunden
-        dt = 35; //Vernuenftiger Startwert
+        dt = 1; //Vernuenftiger Startwert
         if ( Config.INFO_MESSAGES) System.out.println("  > ViewController: Erzeuge ProgramController und starte Spielprozess (Min. dt = "+dt+"ms)...");
         if ( Config.INFO_MESSAGES) System.out.println("     > Es wird nun einmalig die Methode startProgram von dem ProgramController-Objekt aufgerufen.");
         if ( Config.INFO_MESSAGES) System.out.println("     > Es wird wiederholend die Methode updateProgram von dem ProgramController-Objekt aufgerufen.");
         if ( Config.INFO_MESSAGES) System.out.println("-------------------------------------------------------------------------------------------------\n");
         if ( Config.INFO_MESSAGES) System.out.println("** Ab hier folgt das Log zum laufenden Programm: **");
-        if(kebab_simulator.Config.useSound){
+        if(kebab_simulator.Config.useSound) {
             soundController = new SoundController();
         } else {
             if ( Config.INFO_MESSAGES) System.out.println("** Achtung! Sound deaktiviert => soundController ist NULL (kann in Config geändert werden). **");
@@ -83,18 +100,114 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
             setDrawFrameVisible(false);
             if(Config.INFO_MESSAGES) System.out.println("** Achtung! Standardfenster deaktiviert => wird nicht angezeigt.). **");
         }
-        startProgram();
+        this.startProgram();
     }
 
     /**
      * Startet das Programm, nachdem Vorarbeiten abgeschlossen sind.
      */
-    private void startProgram(){
-        programController.startProgram();
-        // Starte nebenlaeufigen Prozess, der Zeichnen und Animation uebernimmt
-        lastLoop = System.nanoTime();
-        gameProcess = new Timer(dt, this);
-        gameProcess.start();
+    private void startProgram() {
+        this.startGameEngine();
+        this.startPhysicsEngine();
+        this.startBackgroundServices();
+    }
+
+    private void startGameEngine() {
+        gameExecutor.submit(() -> {
+            this.programController.startProgram();
+            for (Map.Entry<String, Entity> entry : Wrapper.getEntityManager().getEntities().entrySet()) {
+                Entity entity = entry.getValue();
+                this.draw(entity);
+                this.register(entity);
+            }
+            this.register(new InputManager(this.programController));
+            this.lastLoop = System.nanoTime();
+            var scene = this.scenes.get(this.currentScene);
+
+            while (true) {
+                totalFrames++;
+                if (System.nanoTime() > this.lastFramesTime + 1000_000_000L) {
+                    this.lastFramesTime = System.nanoTime();
+                    this.fps = totalFrames;
+                    this.totalFrames = 0;
+                }
+
+                this.elapsedTime = System.nanoTime() - this.lastLoop;
+                this.lastLoop = System.nanoTime();
+                int dt = (int) (elapsedTime / 1000000L);
+                double dtSeconds = (double) dt / 1000;
+                if (dtSeconds == 0) dtSeconds = 0.01;
+                if (this.currentScene != this.lastScene) {
+                    scene = this.scenes.get(this.currentScene);
+                }
+
+                scene.drawingPanel.repaint();
+                this.programController.updateProgram(dtSeconds);
+                if (this.soundController != null) this.soundController.update(dtSeconds);
+                Thread.sleep(this.dt);
+            }
+        });
+    }
+
+    private void startPhysicsEngine() {
+        physicsExecutor.submit(() -> {
+            this.lastLoop_Physics = System.nanoTime();
+            while (true) {
+                if (!this.watchPhysics.get()) {
+                    Thread.sleep(100);
+                    continue;
+                }
+
+                this.elapsedTime_Physics = System.nanoTime() - this.lastLoop_Physics;
+                this.lastLoop_Physics = System.nanoTime();
+                int dt = (int) (elapsedTime_Physics / 1000000L);
+                double dtSeconds = (double) dt / 1000;
+                if (dtSeconds == 0) dtSeconds = 0.01;
+
+                Wrapper.getColliderManager().updateBodies(dtSeconds);
+
+                try {
+                    Thread.sleep(this.dt);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+    private void startBackgroundServices() {
+        // Sobald Hintergrundprozesse benötigt werden, wird es auskommentiert
+        // Zur Zeit useless
+        // this.backgroundServiceExecutor.submit(() -> {});
+    }
+
+    private void shutdown() {
+        physicsExecutor.shutdown();
+        gameExecutor.shutdown();
+        try {
+            if (!physicsExecutor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                physicsExecutor.shutdownNow();
+            }
+            if (!gameExecutor.awaitTermination(800, TimeUnit.MILLISECONDS)) {
+                gameExecutor.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            physicsExecutor.shutdownNow();
+            gameExecutor.shutdownNow();
+        }
+    }
+
+    public boolean watchPhysics() {
+        return this.watchPhysics.get();
+    }
+
+    public void setWatchPhyics(boolean flag) {
+        this.watchPhysics.set(flag);
+        this.lastLoop_Physics = System.nanoTime();
+    }
+
+    public int getFps() {
+        return this.fps;
     }
 
     /**
@@ -124,6 +237,10 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
         // Erzeuge ein neues Fenster zum Zeichnen
         drawFrame = new DrawFrame(kebab_simulator.Config.WINDOW_TITLE, x, y, kebab_simulator.Config.WINDOW_WIDTH, kebab_simulator.Config.WINDOW_HEIGHT, scenes.get(0).drawingPanel);
         drawFrame.setResizable(false);
+        if (kebab_simulator.Config.WINDOW_FULLSCREEN) {
+            drawFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            gd.setFullScreenWindow(Window.getWindows()[0]);
+        }
         showScene(0);
         // Übergibt den weiteren Programmfluss an das neue Objekt der Klasse ViewController
         if ( Config.INFO_MESSAGES) System.out.println("  > ViewController: Fenster eingerichtet. Startszene (Index: 0) angelegt.");
@@ -136,6 +253,7 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
     public void showScene(int index){
         // Setze das gewuenschte DrawingPanel und lege eine Referenz darauf an.
         if (index < scenes.size()) {
+            this.lastScene = currentScene;
             currentScene = index;
             drawFrame.setActiveDrawingPanel(scenes.get(currentScene).drawingPanel);
         } else {
@@ -252,28 +370,6 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
                 notChangingInteractables = true;
             });
         }
-    }
-
-    /**
-     * Wird vom Timer-Thread aufgerufen. Es wird dafuer gesorgt, dass das aktuelle Drawing-Panel
-     * alle seine Objekte zeichnet und deren Update-Methoden aufruft.
-     * Zusaetzlich wird die updateProgram-Methode des GameControllers regelmaeßig nach jeder Frame
-     * aufgerufen.
-     * @param e Das uebergebene Action-Event-Objekt
-     */
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        elapsedTime = System.nanoTime() - lastLoop;
-        lastLoop = System.nanoTime();
-        int dt = (int) ((elapsedTime / 1000000L));
-        double dtSeconds = (double)dt/1000;
-        if ( dtSeconds == 0 ) dtSeconds = 0.01;
-        // Führe Berechnungen und Aktualisierungen im Hauptobjekt aus
-        programController.updateProgram(dtSeconds);
-        // Zeichne alle Objekte der aktuellen Szene
-        scenes.get(currentScene).drawingPanel.repaint();
-        // Aktualisiere SoundController, wenn vorhanden
-        if(soundController != null) soundController.update(dtSeconds);
     }
 
     /**
@@ -404,5 +500,4 @@ public class ViewController implements ActionListener, KeyListener, MouseListene
             tmpInteractable.keyReleased(e.getKeyCode());
         }
     }
-
 }

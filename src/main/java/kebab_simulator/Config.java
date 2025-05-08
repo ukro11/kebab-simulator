@@ -13,6 +13,7 @@ public class Config {
     public final static boolean SHOW_DEFAULT_WINDOW = true;
     public final static int WINDOW_WIDTH = 600;
     public final static int WINDOW_HEIGHT = 600+29;   // Effektive Höhe ist etwa 29 Pixel geringer (Titelleiste wird mitgezählt)
+    public final static boolean WINDOW_FULLSCREEN = false;
 
     // Weitere Optionen für das Projekt
     public final static boolean useSound = true;

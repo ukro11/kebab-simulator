@@ -135,6 +135,10 @@ public class DrawTool {
         if (graphics2D!= null) graphics2D.setColor( Color.getHSBColor(h,s,b));
     }
 
+    public void resetColor(){
+        if (graphics2D!= null) graphics2D.setColor(Color.WHITE);
+    }
+
     /**
      * Zeichnet einen Kreis ohne Fuellung als Linie
      * @param x Die x-Koordinate des Mittelpunkts
