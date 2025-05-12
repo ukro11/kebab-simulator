@@ -30,8 +30,8 @@ public class Button extends Label implements Interactable {
     public Button(ButtonHandler bH, int actionCode, double x, double y, String text, int textsize){
         super(x,y,text,textsize,true);
         buttonHandler = bH;
-        buttonHandler.getViewController().draw(this,buttonHandler.getSceneIndex());
-        buttonHandler.getViewController().register(this,buttonHandler.getSceneIndex());
+        //buttonHandler.getViewController().draw(this,buttonHandler.getSceneIndex());
+        //buttonHandler.getViewController().register(this,buttonHandler.getSceneIndex());
         this.actionCode = actionCode;
     }
 

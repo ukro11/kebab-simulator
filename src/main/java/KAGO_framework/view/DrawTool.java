@@ -1,9 +1,12 @@
 package KAGO_framework.view;
 
+import kebab_simulator.utils.Vec2;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.util.List;
 
 /**
  * Diese Klasse dient als vereinfachte Schnittstelle zum Zeichnen. Es handelt sich um eine BlackBox fuer die
@@ -15,6 +18,7 @@ public class DrawTool {
     // Referenzen
     private Graphics2D graphics2D; //java-spezifisches Objekt zum Arbeiten mit 2D-Grafik
     private JComponent parent;
+    private AffineTransform transform;
 
     /**
      * Zeichnet ein Objekt der Klasse BufferedImage
@@ -196,6 +200,14 @@ public class DrawTool {
         graphics2D.draw(getPolygon(eckpunkte));
     }
 
+    public void drawPolygon(Vec2... eckpunkte) {
+        graphics2D.draw(getPolygon(List.of(eckpunkte)));
+    }
+
+    public void drawPolygon(List<Vec2> eckpunkte) {
+        graphics2D.draw(getPolygon(eckpunkte));
+    }
+
     /**
      * Zeichnet ein gefülltes Polygon mit beliebig vielen Eckpunkten (Mehr als 3).
      * @param eckpunkte eine gerade anzahl an Ecken des Polygons. Diese folgen dem Schema: [[x1], [y1], [x2], [y2], [x1]] etc.
@@ -220,6 +232,19 @@ public class DrawTool {
 
         for (int i = 0; i < eckPunkte.length - 1; i += 2) {
             p.addPoint ((int)eckPunkte[i], (int) eckPunkte[i + 1]);
+        }
+        return p;
+    }
+
+    private Polygon getPolygon(List<Vec2> eckPunkte) {
+        //garantiert das eine gerade anzahl an ecken vorhanden ist und das es mehr als 3 ecken sind
+        assert eckPunkte.size() % 2 == 0 && eckPunkte.size() >= 3;
+        assert graphics2D != null;
+
+        Polygon p = new Polygon();
+
+        for (int i = 0; i < eckPunkte.size(); i++) {
+            p.addPoint ((int)eckPunkte.get(i).x, (int) eckPunkte.get(i).y);
         }
         return p;
     }
@@ -351,7 +376,19 @@ public class DrawTool {
     public void formatText(String fontName, int style, int size){
         if (graphics2D != null) graphics2D.setFont(new Font(fontName, style, size));
     }
-	
+
+    public void push() {
+        if (graphics2D != null) {
+            this.transform = graphics2D.getTransform();
+        }
+    }
+
+    public void pop() {
+        if (graphics2D != null) {
+            graphics2D.setTransform(this.transform);
+        }
+    }
+
     /**
      * Spezifiziert das zu verwendende Grafikobjekt von Java und
      * das Objekt in dem gezeichnet wird.

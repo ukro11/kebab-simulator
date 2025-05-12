@@ -13,6 +13,12 @@ public class EntityManager {
         }
     }
 
+    public void unregister(Entity entity) {
+        if (entity != null) {
+            this.entities.remove(entity.getId());
+        }
+    }
+
     public Map<String, Entity> getEntities() {
         return this.entities;
     }

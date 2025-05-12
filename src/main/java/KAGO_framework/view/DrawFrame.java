@@ -12,7 +12,7 @@ public class DrawFrame extends JFrame {
     // Attribute
 
     // Referenzen
-    private DrawingPanel activePanel;           // Das im Moment sichtbare DrawingPanel
+    private JPanel activePanel;           // Das im Moment sichtbare DrawingPanel
 
     /**
      * Konstruktor
@@ -22,7 +22,7 @@ public class DrawFrame extends JFrame {
      * @param width Die Breite des Fensters
      * @param height Die Höhe des Fensters
      */
-    public DrawFrame(String name, int x, int y, int width, int height, DrawingPanel startingPanel) {
+    public DrawFrame(String name, int x, int y, int width, int height, JPanel startingPanel) {
         activePanel = startingPanel;
         setLocation(x,y);
         setSize(width,height);
@@ -36,7 +36,7 @@ public class DrawFrame extends JFrame {
      * Ändert das aktuell vom DrawFrame gezeigte DrawingPanel.
      * @param panel Das anzuzeigende Panel.
      */
-    public void setActiveDrawingPanel(DrawingPanel panel){
+    public void setActiveDrawingPanel(JPanel panel){
         remove(panel);
         add(panel);
         revalidate();

@@ -1,6 +1,10 @@
 package KAGO_framework.view;
 
 import KAGO_framework.control.ViewController;
+import kebab_simulator.animation.Easings;
+import kebab_simulator.control.CameraController;
+import kebab_simulator.control.Wrapper;
+import kebab_simulator.utils.TimerUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,28 +15,20 @@ import java.awt.*;
  * Diese Modellierung ist nicht sauber, da das DrawingPanel damit Funktionen eines Controllers übernimmt.
  * Vorgegebene Klasse des Frameworks. Modifikation auf eigene Gefahr.
  */
-public class DrawingPanel extends JPanel  {
+public class DrawingPanel  {
 
-    //Attribute
-    private boolean requested = false;
+    /*private boolean requested = false;
 
-    // Referenzen
     private DrawTool drawTool;
     private ViewController viewController;
 
-    /**
-     * Konstruktor
-     */
     public DrawingPanel(ViewController viewController){
         super();
         this.viewController = viewController;
         setDoubleBuffered(true);
-        drawTool = new DrawTool();
+        this.drawTool = new DrawTool();
     }
 
-    /**
-     * Zeichnen aller registrierten Objekte
-     */
     @Override
     public void paintComponent(Graphics g) {
         if(!requested){
@@ -47,8 +43,15 @@ public class DrawingPanel extends JPanel  {
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         drawTool.setGraphics2D(g2d,this);
-        viewController.drawAndUpdateObjects(drawTool);
+        TimerUtils.update();
+
+        this.cameraController.attach(drawTool);
+        this.viewController.drawAndUpdateObjects(drawTool, TimerUtils.getDeltaTime());
+        this.cameraController.detach(drawTool);
     }
 
+    public CameraController getCameraController() {
+        return this.cameraController;
+    }*/
 }
 

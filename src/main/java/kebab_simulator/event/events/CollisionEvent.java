@@ -1,26 +1,26 @@
 package kebab_simulator.event.events;
 
 import kebab_simulator.event.Event;
-import kebab_simulator.physics.Body;
+import kebab_simulator.physics.Collider;
 
 public class CollisionEvent extends Event {
 
-    private final Body mainBody;
-    private final Body collidedBody;
+    private final Collider mainBody;
+    private final Collider collidedBody;
     private final CollisionState state;
 
-    public CollisionEvent(Body mainBody, Body collidedBody, CollisionState state) {
+    public CollisionEvent(Collider mainBody, Collider collidedBody, CollisionState state) {
         super("bodyCollided");
         this.mainBody = mainBody;
         this.collidedBody = collidedBody;
         this.state = state;
     }
 
-    public Body getMainBody() {
+    public Collider getMainBody() {
         return this.mainBody;
     }
 
-    public Body getCollidedBody() {
+    public Collider getCollidedBody() {
         return this.collidedBody;
     }
 
@@ -32,7 +32,7 @@ public class CollisionEvent extends Event {
      * Die Methode überprüft, ob {@code body} dasselbe ist wie {@code mainBody} oder {@code collidedBody}.
      * @return {@code true}, wenn {@code body} {@code mainBody} oder {@code collidedBody} ist.
      */
-    public boolean isBodyInvolved(Body body) {
+    public boolean isBodyInvolved(Collider body) {
         return this.mainBody.equals(body) || this.collidedBody.equals(body);
     }
 

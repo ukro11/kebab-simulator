@@ -31,6 +31,12 @@ javafx {
     modules = [ 'javafx.swing', 'javafx.media' ]
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(15)
+    }
+}
+
 dependencies {
     implementation name: 'forms_rt'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
