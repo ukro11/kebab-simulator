@@ -2,74 +2,107 @@ package kebab_simulator.model.entity;
 
 import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
+import KAGO_framework.control.ViewController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.AnimationState;
 import kebab_simulator.control.ProgramController;
+import kebab_simulator.graphics.IOrder;
+import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.Collider;
+import kebab_simulator.utils.Vec2;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Entity implements Drawable, Interactable {
+public abstract class Entity implements Drawable, Interactable, IOrder {
 
-    private final String id;
-    private final Collider body;
-    private double bodyOffsetX;
-    private double bodyOffsetY;
-    private double x;
-    private double y;
-    private double width;
-    private double height;
-    private boolean showHitbox = false;
+    protected ViewController viewController;
+    protected ProgramController programController;
+    protected final Logger logger = LoggerFactory.getLogger(Entity.class);
 
-    private AnimationRenderer<AnimationState> renderer;
+    protected final String id;
+    protected final Collider body;
+    protected double bodyOffsetX;
+    protected double bodyOffsetY;
+    protected double x;
+    protected double y;
+    protected double width;
+    protected double height;
+    protected Vec2 highestPoint;
+    protected Vec2 highestPointOffset;
+    protected boolean showHitbox = false;
+    protected double scaleX = 1;
+    protected double scaleY = 1;
+
+    protected AnimationRenderer<AnimationState> renderer;
 
     public Entity(double x, double y, double width, double height) {
         this(null, x, y, width, height);
     }
 
     public Entity(Collider body, double x, double y, double width, double height) {
+        this.viewController = ViewController.getInstance();
+        this.programController = this.viewController.getProgramController();
+
         this.id = UUID.randomUUID().toString();
         this.body = body;
         this.width = width;
         this.height = height;
 
         if (this.body != null) {
+            this.body.setEntity(this);
             this.bodyOffsetX = x;
             this.bodyOffsetY = y;
             this.x = body.getX() + this.bodyOffsetX;
             this.y = body.getY() + this.bodyOffsetY;
-            this.body.setEntity(this);
 
         } else {
             this.x = x;
             this.y = y;
         }
+        this.highestPoint = new Vec2(body.getX() + this.bodyOffsetX, body.getY() + this.bodyOffsetY);
+        this.highestPointOffset = new Vec2();
+
+        GameScene.getInstance().getRenderer().register(this);
     }
 
     @Override
     public void draw(DrawTool drawTool) {
-        if (ProgramController.TEST_SCALE) drawTool.getGraphics2D().scale(4, 4);
-        if (this.renderer != null) {
-            drawTool.resetColor();
-            this.renderer.getCurrentFrame().paintIcon(drawTool.getParent(), drawTool.getGraphics2D(), (int) this.x, (int) this.y);
-            drawTool.resetColor();
+        if (this.renderer != null && this.renderer.getCurrentFrame() != null) {
+            drawTool.push();
+            drawTool.getGraphics2D().scale(this.scaleX, this.scaleY);
+            if (this.scaleX == -1) {
+                drawTool.getGraphics2D().translate(-((int) this.x) * 2 - this.width, 0);
+            }
+            drawTool.getGraphics2D().drawImage(this.renderer.getCurrentFrame(), (int) this.x, (int) this.y, (int) this.width, (int) this.height, null);
+            drawTool.setCurrentColor(Color.RED);
+            drawTool.drawFilledCircle(this.highestPoint.x, this.highestPoint.y, 1);
+            drawTool.pop();
         }
         if (this.showHitbox && this.body != null) this.body.renderHitbox(drawTool);
     }
 
     @Override
     public void update(double dt) {
-        /*if (this.body != null) {
-            this.x = body.getX() + this.bodyOffsetX;
-            this.y = body.getY() + this.bodyOffsetY;
-        }*/
         if (this.renderer != null) {
             if (!this.renderer.isRunning()) this.renderer.start();
             this.renderer.update(dt);
+            this.highestPoint.set(this.x + this.highestPointOffset.x, this.y + this.highestPointOffset.y);
         }
+    }
+
+    @Override
+    public double zIndex() {
+        return this.highestPoint.y;
+    }
+
+    public void setHighestPointOffset(Vec2 offset) {
+        this.highestPointOffset.set(offset);
     }
 
     public AnimationRenderer<AnimationState> getRenderer() {
@@ -80,7 +113,7 @@ public class Entity implements Drawable, Interactable {
         this.renderer = renderer;
     }
 
-    public boolean showHitbox() {
+    public boolean shouldShowHitbox() {
         return this.showHitbox;
     }
 
@@ -129,39 +162,25 @@ public class Entity implements Drawable, Interactable {
     }
 
     @Override
-    public void keyPressed(int key) {
-
-    }
+    public void keyPressed(int key) {}
 
     @Override
-    public void keyReleased(int key) {
-
-    }
+    public void keyReleased(int key) {}
 
     @Override
-    public void mouseReleased(MouseEvent e) {
-
-    }
+    public void mouseReleased(MouseEvent e) {}
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-
-    }
+    public void mouseClicked(MouseEvent e) {}
 
     @Override
-    public void mouseDragged(MouseEvent e) {
-
-    }
+    public void mouseDragged(MouseEvent e) {}
 
     @Override
-    public void mouseMoved(MouseEvent e) {
-
-    }
+    public void mouseMoved(MouseEvent e) {}
 
     @Override
-    public void mousePressed(MouseEvent e) {
-
-    }
+    public void mousePressed(MouseEvent e) {}
 
     @Override
     public boolean equals(Object o) {
@@ -174,5 +193,12 @@ public class Entity implements Drawable, Interactable {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public enum EntityDirection {
+        TOP,
+        LEFT,
+        BOTTOM,
+        RIGHT,
     }
 }

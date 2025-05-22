@@ -1,5 +1,6 @@
 package kebab_simulator.animation;
 
+/* Quelle: easings.net */
 public class Easings {
 
     public static double linear(double x) {

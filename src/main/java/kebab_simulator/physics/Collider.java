@@ -2,23 +2,20 @@ package kebab_simulator.physics;
 
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.control.Wrapper;
-import kebab_simulator.event.Event;
-import kebab_simulator.event.EventListener;
-import kebab_simulator.event.EventListenerIntegration;
-import kebab_simulator.event.events.CollisionEvent;
+import kebab_simulator.event.events.collider.ColliderCollisionEvent;
+import kebab_simulator.event.events.collider.ColliderDestroyEvent;
 import kebab_simulator.model.entity.Entity;
-import kebab_simulator.utils.MathUtils;
 import kebab_simulator.utils.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.security.InvalidParameterException;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
-import java.util.UUID;
 import java.util.function.Consumer;
 
-public abstract class Collider implements EventListenerIntegration<CollisionEvent, Collider.ColliderEvents> {
+public abstract class Collider {
 
     protected final Logger logger = LoggerFactory.getLogger(Collider.class);
 
@@ -34,8 +31,13 @@ public abstract class Collider implements EventListenerIntegration<CollisionEven
     protected Entity entity;
     protected String colliderClass;
     protected boolean sensor = false;
+    protected Color hitboxColor = Color.RED;
+    private boolean destroyed = false;
 
-    private boolean wasColliding = false;
+    protected Consumer<ColliderCollisionEvent> onCollision;
+    protected Consumer<ColliderDestroyEvent> onDestroy;
+
+    private HashMap<String, Boolean> wasColliding = new HashMap<>();
 
     /**
      * Setzt die lineare Geschwindigkeit des Bodys in der x- und y-Richtung. Damit kann der Body bewegt werden.
@@ -44,23 +46,6 @@ public abstract class Collider implements EventListenerIntegration<CollisionEven
      */
     public void setLinearVelocity(double velocityX, double velocityY) {
         this.velocity.set(velocityX, velocityY);
-    }
-
-    @Override
-    public EventListener<CollisionEvent> addEventListener(ColliderEvents event, Consumer<CollisionEvent> handle) {
-        if (event.getEventClass().equals(CollisionEvent.class)) {
-            EventListener<CollisionEvent> listener = (CollisionEvent e) -> handle.accept(e);
-            Wrapper.getEventManager().addEventListener("bodyCollided", listener);
-            return listener;
-        }
-        return null;
-    }
-
-    @Override
-    public void once(ColliderEvents event, Consumer<CollisionEvent> handle) {
-        if (event.getEventClass().equals(CollisionEvent.class)) {
-            Wrapper.getEventManager().once("bodyCollided", (CollisionEvent e) -> handle.accept(e));
-        }
     }
 
     /**
@@ -74,65 +59,37 @@ public abstract class Collider implements EventListenerIntegration<CollisionEven
             return false;
         }
         boolean handle = this.handleCollision(other);
-        if (handle && !this.wasColliding) {
-            this.wasColliding = true;
-            Wrapper.getEventManager().dispatchEvent(new CollisionEvent(this, other, CollisionEvent.CollisionState.COLLISION_BEGIN_CONTACT));
+        boolean check = this.wasColliding.getOrDefault(other.getId(), false);
+        if (handle && !check) {
+            var event = new ColliderCollisionEvent(this, other, ColliderCollisionEvent.CollisionState.COLLISION_BEGIN_CONTACT);
+            this.wasColliding.put(other.getId(), true);
+            if (this.onCollision != null) this.onCollision.accept(event);
+            Wrapper.getEventManager().dispatchEvent(event);
 
-        } else if (!handle && this.wasColliding) {
-            this.wasColliding = false;
-            Wrapper.getEventManager().dispatchEvent(new CollisionEvent(this, other, CollisionEvent.CollisionState.COLLISION_END_CONTACT));
+        } else if (!handle && check) {
+            var event = new ColliderCollisionEvent(this, other, ColliderCollisionEvent.CollisionState.COLLISION_END_CONTACT);
+            this.wasColliding.put(other.getId(), false);
+            if (this.onCollision != null) this.onCollision.accept(event);
+            Wrapper.getEventManager().dispatchEvent(event);
 
-        } else if (handle && this.wasColliding) {
-            Wrapper.getEventManager().dispatchEvent(new CollisionEvent(this, other, CollisionEvent.CollisionState.COLLISION_NORMAL_CONTACT));
+        } else if (handle && check) {
+            var event = new ColliderCollisionEvent(this, other, ColliderCollisionEvent.CollisionState.COLLISION_NORMAL_CONTACT);
+            if (this.onCollision != null) this.onCollision.accept(event);
+            Wrapper.getEventManager().dispatchEvent(event);
         }
         return handle;
     }
 
     public abstract boolean handleCollision(Collider other);
     public abstract void renderHitbox(DrawTool drawTool);
+    public abstract Vec2 getCenter();
+    public abstract Interval project(Vec2 vector);
+    public abstract List<Vec2> getAxes();
+    public abstract AABB computeAABB();
 
-    /**
-     * Berechnet, ob eine Kollision vorliegt.<br>
-     * <strong>Die Methode wird nur aufgerufen, wenn der Body (this) ein Rectangle ist.</strong>
-     * @return {@code true}, wenn eine Kollision vorliegt.
-     */
-    private boolean handleCollisionRectangle(Collider other) {
-        return false;
+    public boolean isDestroyed() {
+        return this.destroyed;
     }
-
-    /**
-     * Berechnet, ob eine Kollision vorliegt.<br>
-     * <strong>Die Methode wird nur aufgerufen, wenn der Body (this) ein Kreis ist.</strong>
-     * @return {@code true}, wenn eine Kollision vorliegt.
-     */
-    /*private boolean handleCollisionCircle(Collider other) {
-        // ! WICHTIG: Diese Methode sollte nur aufgerufen werden, wenn body (this) ein rectangle ist
-        if (this.form != ColliderForm.CIRCLE) {
-            throw new InvalidParameterException("To call checkCollisionRectangle(...) you need to make sure that your body is a circle!");
-        }
-        switch (other.getForm()) {
-            case CIRCLE -> {
-                double dx = this.x - other.getX();
-                double dy = this.y - other.getY();
-                double distance = Math.sqrt(dx * dx + dy * dy);
-                boolean res = distance < (this.radius + other.getRadius());
-                if (res) {
-                    double overlap = this.radius + other.getRadius() - distance;
-                    double offsetX = dx / distance * overlap / 2;
-                    double offsetY = dy / distance * overlap / 2;
-                    this.setX(this.x + offsetX);
-                    this.setY(this.y + offsetY);
-                    other.setX(other.getX() - offsetX);
-                    other.setY(other.getY() - offsetY);
-                }
-                return res;
-            }
-            case RECTANGLE -> {
-                return this.calculateCollisionRectangleCircle(other, this);
-            }
-        }
-        return false;
-    }*/
 
     public void setSensor(boolean sensor) {
         this.sensor = sensor;
@@ -143,27 +100,25 @@ public abstract class Collider implements EventListenerIntegration<CollisionEven
     }
 
     public void destroy() {
-        this.x = 0;
-        this.y = 0;
-        this.width = 0;
-        this.height = 0;
-        this.radius = 0;
-        this.velocity = new Vec2();
         Wrapper.getColliderManager().destroyBody(this);
+        this.destroyed = true;
+        if (this.onDestroy != null) this.onDestroy.accept(new ColliderDestroyEvent(this));
     }
 
-    public void overwriteEntity() {
-        this.entity.setX(this.getX() + this.entity.getBodyOffsetX());
-        this.entity.setY(this.getY() + this.entity.getBodyOffsetY());
+    public void onCollision(Consumer<ColliderCollisionEvent> onCollision) {
+        this.onCollision = onCollision;
+    }
+
+    public void onDestroy(Consumer<ColliderDestroyEvent> onDestroy) {
+        this.onDestroy = onDestroy;
     }
 
     public void update(double dt) {
-        if (this.type == BodyType.DYNAMIC && this.velocity.len() > 0) {
+        if (this.type == BodyType.DYNAMIC && this.velocity.magnitude() > 0) {
             this.x += this.velocity.x * dt;
             this.y += this.velocity.y * dt;
-        }
-        if (this.entity != null) {
-            this.overwriteEntity();
+            this.entity.setX(this.x);
+            this.entity.setY(this.y);
         }
     }
 
@@ -235,23 +190,11 @@ public abstract class Collider implements EventListenerIntegration<CollisionEven
         return velocity;
     }
 
-    public enum ColliderEvents {
-        BODY_COLISSION_EVENT("bodyCollided", CollisionEvent.class);
+    public Color getHitboxColor() {
+        return hitboxColor;
+    }
 
-        private final String event;
-        private final Class<? extends Event> eventClass;
-
-        private ColliderEvents(String event, Class<? extends Event> eventClass) {
-            this.event = event;
-            this.eventClass = eventClass;
-        }
-
-        public String getEvent() {
-            return event;
-        }
-
-        public Class<? extends Event> getEventClass() {
-            return eventClass;
-        }
+    public void setHitboxColor(Color hitboxColor) {
+        this.hitboxColor = hitboxColor;
     }
 }

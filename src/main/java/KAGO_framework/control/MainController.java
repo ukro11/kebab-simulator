@@ -16,11 +16,6 @@ public class MainController {
      * ProgramController aus dem Paket "my_project > control"
      */
     public static void startFramework(){
-        if ( Config.INFO_MESSAGES) System.out.println("***** PROGRAMMSTART ("+" Framework: "+Config.VERSION+") *****.");
-        if ( Config.INFO_MESSAGES) System.out.println("** Supported Java-Versions: "+ Config.JAVA_SUPPORTED);
-        if ( Config.INFO_MESSAGES) System.out.println("");
-        if ( Config.INFO_MESSAGES) System.out.println("** Ablauf der Framework-Initialisierung: **");
-        if ( Config.INFO_MESSAGES) System.out.println("  > MainController: Ich wurde erzeugt. Erstelle ein ViewController-Objekt zur Steuerung der View...");
         new ViewController();
     }
 }

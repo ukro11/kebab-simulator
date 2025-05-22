@@ -7,6 +7,7 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.Stack;
 
 /**
  * Diese Klasse dient als vereinfachte Schnittstelle zum Zeichnen. Es handelt sich um eine BlackBox fuer die
@@ -18,7 +19,7 @@ public class DrawTool {
     // Referenzen
     private Graphics2D graphics2D; //java-spezifisches Objekt zum Arbeiten mit 2D-Grafik
     private JComponent parent;
-    private AffineTransform transform;
+    private Stack<GraphicsState> stack = new Stack<>();
 
     /**
      * Zeichnet ein Objekt der Klasse BufferedImage
@@ -217,6 +218,10 @@ public class DrawTool {
         graphics2D.fill(getPolygon(eckpunkte));
     }
 
+    public void drawFilledPolygon (Vec2 ... eckpunkte) {
+        graphics2D.fill(getPolygon(List.of(eckpunkte)));
+    }
+
     /**
      * Helper funktion für doppelten Code-block um ein Polygon aus einem Array von Ecken zu erzeugen.
      * @param eckPunkte eine gerade anzahl an Ecken des Polygons. Diese folgen dem Schema: [[x1], [y1], [x2], [y2], [x1]] etc.
@@ -377,15 +382,27 @@ public class DrawTool {
         if (graphics2D != null) graphics2D.setFont(new Font(fontName, style, size));
     }
 
+    private void resetGraphics() {
+        graphics2D.setTransform(new AffineTransform());
+        graphics2D.setRenderingHints(new RenderingHints(null));
+        graphics2D.setStroke(new BasicStroke());
+    }
+
     public void push() {
         if (graphics2D != null) {
-            this.transform = graphics2D.getTransform();
+            GraphicsState currentState = new GraphicsState(
+                (AffineTransform) graphics2D.getTransform().clone(),
+                graphics2D.getRenderingHints()
+            );
+            stack.push(currentState);
         }
     }
 
     public void pop() {
-        if (graphics2D != null) {
-            graphics2D.setTransform(this.transform);
+        if (!stack.isEmpty()) {
+            var state = stack.pop();
+            graphics2D.setTransform(state.getTransform());
+            //graphics2D.setRenderingHints(state.getRenderingHints());
         }
     }
 
@@ -408,4 +425,21 @@ public class DrawTool {
         return parent;
     }
 
+    private class GraphicsState {
+        private final AffineTransform transform;
+        private final RenderingHints renderingHints;
+
+        public GraphicsState(AffineTransform transform, RenderingHints renderingHints) {
+            this.transform = transform;
+            this.renderingHints = renderingHints;
+        }
+
+        public AffineTransform getTransform() {
+            return this.transform;
+        }
+
+        public RenderingHints getRenderingHints() {
+            return this.renderingHints;
+        }
+    }
 }

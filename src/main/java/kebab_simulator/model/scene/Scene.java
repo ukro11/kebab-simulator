@@ -1,38 +1,32 @@
 package kebab_simulator.model.scene;
 
-import KAGO_framework.control.Drawable;
 import KAGO_framework.control.ViewController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.control.ProgramController;
 import kebab_simulator.model.visual.VisualModel;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class Scene {
 
     private static HashMap<String, Scene> scenes = new HashMap<>();
     private static Scene last;
     private static Scene current;
-    protected static ViewController viewController;
-    protected static ProgramController programController;
+    protected ViewController viewController;
+    protected ProgramController programController;
 
     private String id;
-    protected List<VisualModel> visuals;
-    private boolean resort = true;
+    protected CopyOnWriteArrayList<VisualModel> visuals;
 
     public Scene(String id) {
+        this.viewController = ViewController.getInstance();
+        this.programController = this.viewController.getProgramController();
         this.id = id;
-        this.visuals = new ArrayList<>();
+        this.visuals = new CopyOnWriteArrayList<>();
         Scene.scenes.put(this.id, this);
-    }
-
-    public static void initialize(ViewController viewController) {
-        Scene.viewController = viewController;
-        Scene.programController = viewController.getProgramController();
     }
 
     public static void open(Scene scene) {
@@ -65,10 +59,6 @@ public abstract class Scene {
     }
 
     public void draw(DrawTool drawTool) {
-        if (this.resort) {
-            Collections.sort(this.visuals);
-            this.resort = false;
-        }
         for (VisualModel visual : this.visuals) {
             visual.draw(drawTool);
         }
@@ -83,46 +73,23 @@ public abstract class Scene {
     public void onOpen(Scene last) {}
     public void onClose(Scene newScene) {}
 
-    /**
-     * Wird einmalig aufgerufen, wenn eine Taste heruntergedrückt wird. Nach der Anschlagverzögerung löst Windows den Tastendruck dann
-     * in schneller Folge erneut aus. Eignet sich NICHT, um Bewegungen zu realisieren.
-     * @param key Enthält den Zahlencode für die Taste. Kann direkt aus der Klasse KeyEvent geladen werden, z.B. KeyEvent_VK_3
-     */
-    public void keyPressed(int key) {}
+    public void mouseEntered(MouseEvent e) {}
 
-    /**
-     * Wird einmalig aufgerufen, wenn eine Taste losgelassen wird.
-     * @param key Enthält den Zahlencode für die Taste. Kann direkt aus der Klasse KeyEvent geladen werden, z.B. KeyEvent_VK_3
-     */
-    public void keyReleased(int key) {}
+    public void mouseExited(MouseEvent e) {}
 
-    /**
-     * Wird einmalig aufgerufen, wenn eine Maustaste losgelassen wurde.
-     * @param e Das übergebene Objekt der Klasse MouseEvent enthält alle Information über das Ereignis.
-     */
     public void mouseReleased(MouseEvent e) {}
 
-    /**
-     * Wird einmalig aufgerufen, wenn eine Maustaste geklickt wurde.
-     * @param e Das übergebene Objekt der Klasse MouseEvent enthält alle Information über das Ereignis.
-     */
     public void mouseClicked(MouseEvent e) {}
 
-    /**
-     * Wird einmalig aufgerufen, wenn eine Maustaste gehalten wird und die Maus bewegt wird.
-     * @param e Das übergebene Objekt der Klasse MouseEvent enthält alle Information über das Ereignis.
-     */
     public void mouseDragged(MouseEvent e) {}
 
-    /**
-     * Wird einmalig aufgerufen, wenn die Maus bewegt wurde.
-     * @param e Das übergebene Objekt der Klasse MouseEvent enthält alle Information über das Ereignis.
-     */
     public void mouseMoved(MouseEvent e) {}
 
-    /**
-     * Wird einmalig aufgerufen, wenn eine Maustaste heruntergedrückt wurde.
-     * @param e Das übergebene Objekt der Klasse MouseEvent enthält alle Information über das Ereignis.
-     */
     public void mousePressed(MouseEvent e) {}
+
+    public void keyTyped(KeyEvent e) {}
+
+    public void keyPressed(KeyEvent e) {}
+
+    public void keyReleased(KeyEvent e) {}
 }

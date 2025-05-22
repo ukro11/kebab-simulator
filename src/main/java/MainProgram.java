@@ -1,5 +1,4 @@
 import KAGO_framework.control.MainController;
-import kebab_simulator.event.EventManager;
 
 public class MainProgram {
 

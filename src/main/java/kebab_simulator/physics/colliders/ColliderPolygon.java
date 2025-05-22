@@ -2,86 +2,264 @@ package kebab_simulator.physics.colliders;
 
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.control.Wrapper;
-import kebab_simulator.physics.BodyType;
-import kebab_simulator.physics.Collider;
-import kebab_simulator.physics.ColliderForm;
+import kebab_simulator.physics.*;
 import kebab_simulator.utils.MathUtils;
 import kebab_simulator.utils.Vec2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.UUID;
 
 public class ColliderPolygon extends Collider {
 
-    private final Logger logger = LoggerFactory.getLogger(ColliderPolygon.class);
-    protected List<Vec2> polygonVertices = new ArrayList<>();
-    private java.awt.Polygon polygonShape;
+    public Vec2[] vertices;
+    public Vec2[] normals;
+    private static double INV_3 = 1.0 / 3.0;
+    private Vec2 center;
 
-    public ColliderPolygon(BodyType type, List<Vec2> vertices) {
-        this(UUID.randomUUID().toString(), type, vertices);
+    public static ColliderPolygon createCIPolygon(String id, BodyType type, double x, double y, double width, double height, double curvedInFactor) {
+        double offsetY = 0;
+        var vertices = new Vec2[] {
+            new Vec2(-width/2, -height/2 + curvedInFactor - offsetY), new Vec2(-width/2 + curvedInFactor, -height/2 - offsetY),
+            new Vec2(width/2 - curvedInFactor, -height/2 - offsetY), new Vec2(width/2, -height/2 + curvedInFactor - offsetY),
+            new Vec2(width/2, height/2 - curvedInFactor - offsetY), new Vec2(width/2 - curvedInFactor, height/2 - offsetY),
+            new Vec2(-width/2 + curvedInFactor, height/2 - offsetY), new Vec2(-width/2, height/2 - curvedInFactor - offsetY)
+        };
+        return new ColliderPolygon(id, type, x, y, vertices);
     }
 
-    public ColliderPolygon(String id, BodyType type, List<Vec2> vertices) {
+    public ColliderPolygon(BodyType type, double x, double y, Vec2[] vertices) {
+        this(UUID.randomUUID().toString(), type, x, y, vertices);
+    }
+
+    public ColliderPolygon(String id, BodyType type, double x, double y, Vec2[] vertices) {
+        this(id, type, x, y, vertices, true);
+    }
+
+    public ColliderPolygon(String id, BodyType type, double x, double y, Vec2[] vertices, boolean register) {
         this.id = id;
         this.type = type;
-        this.polygonVertices = vertices;
+        if (vertices.length <= 2) {
+            throw new InvalidParameterException("Nice try diddy");
+        }
+        this.x = x;
+        this.y = y;
+        for (int i = 0; i < vertices.length; i++) {
+            vertices[i].add(x, y);
+        }
+        this.vertices = vertices;
         this.form = ColliderForm.POLYGON;
         this.colliderClass = "default";
-        this.polygonShape = new Polygon();
-        for (Vec2 vertice : this.polygonVertices) {
-            this.polygonShape.addPoint((int) vertice.x, (int) vertice.y);
+        this.normals = this.getCounterClockwiseEdgeNormals(this.vertices);
+        this.computeCenter();
+
+        if (register) Wrapper.getColliderManager().createBody(this);
+    }
+
+    public boolean isConvex() {
+        if (vertices.length < 4) return true; // Dreiecke sind immer konvex
+
+        boolean gotNegative = false;
+        boolean gotPositive = false;
+
+        for (int i = 0; i < vertices.length; i++) {
+            Vec2 a = vertices[i];
+            Vec2 b = vertices[(i+1) % vertices.length];
+            Vec2 c = vertices[(i+2) % vertices.length];
+
+            Vec2 ab = b.clone().sub(a);
+            Vec2 bc = c.clone().sub(b);
+            double cross = ab.cross(bc);
+
+            if (cross < 0) gotNegative = true;
+            else if (cross > 0) gotPositive = true;
+
+            if (gotNegative && gotPositive) return false;
         }
-        Wrapper.getColliderManager().createBody(this);
+
+        return true;
     }
 
     @Override
     public boolean handleCollision(Collider other) {
-        return MathUtils.isPolygonCollided(this, other);
+        if (this.isDestroyed()) {
+            return false;
+        }
+
+        if (!MathUtils.AABB(this, other)) {
+            this.setHitboxColor(Color.RED);
+            other.setHitboxColor(Color.RED);
+            return false;
+        }
+
+        return MathUtils.SAT(this, other);
     }
 
     @Override
-    public void overwriteEntity() {
-        // TODO: polygon
+    public AABB computeAABB() {
+        Vec2 p = this.vertices[0];
+        double minX = p.x;
+        double maxX = p.x;
+        double minY = p.y;
+        double maxY = p.y;
+        int size = this.vertices.length;
+        for(int i = 1; i < size; i++) {
+            double px = this.vertices[i].x;
+            double py = this.vertices[i].y;
+            if (px < minX) {
+                minX = px;
+            } else if (px > maxX) {
+                maxX = px;
+            }
+            if (py < minY) {
+                minY = py;
+            } else if (py > maxY) {
+                maxY = py;
+            }
+        }
+        return new AABB(minX, minY, maxX, maxY);
     }
 
     @Override
     public void update(double dt) {
-        if (this.type == BodyType.DYNAMIC && this.velocity.len() > 0) {
-            for (int i = 0; i < this.polygonVertices.size(); i++) {
-                Vec2 vertice = this.polygonVertices.get(i);
-                vertice.add(this.velocity.x * dt, this.velocity.y * dt);
-                this.polygonShape.xpoints[i] = (int) vertice.x;
-                this.polygonShape.ypoints[i] = (int) vertice.y;
+        if (this.type == BodyType.DYNAMIC) {
+            if (this.vertices != null && !this.isDestroyed() && this.velocity.magnitude() > 0) {
+                for (int i = 0; i < this.vertices.length; i++) {
+                    this.vertices[i].add(this.velocity.x * dt, this.velocity.y * dt);
+                }
+                this.x += this.velocity.x * dt;
+                this.y += this.velocity.y * dt;
+                this.center.add(this.velocity.x * dt, this.velocity.y * dt);
             }
-        }
-        if (this.entity != null) {
-            this.overwriteEntity();
+            if (this.entity != null) {
+                this.entity.setX(this.x + this.entity.getBodyOffsetX());
+                this.entity.setY(this.y + this.entity.getBodyOffsetY());
+            }
         }
     }
 
     @Override
     public void renderHitbox(DrawTool drawTool) {
-        drawTool.setCurrentColor(Color.RED);
-        drawTool.setLineWidth(1);
-        drawTool.drawPolygon(this.polygonVertices);
-        drawTool.resetColor();
+        if (this.vertices != null && !this.isDestroyed()) {
+            drawTool.setCurrentColor(this.hitboxColor);
+            drawTool.drawFilledCircle(this.center.x, this.center.y, 1);
+            for (int i = 0; i < this.vertices.length; i++) {
+                drawTool.drawLine(this.vertices[i].x, this.vertices[i].y, this.vertices[(i + 1) % this.vertices.length].x, this.vertices[(i + 1) % this.vertices.length].y);
+            }
+            drawTool.resetColor();
+        }
     }
 
-    private boolean isPointInRectangle(ColliderRectangle rectangle, Vec2 point) {
-        return point.x >= rectangle.getX() && point.x <= rectangle.getX() + rectangle.getWidth() &&
-                point.y >= rectangle.getY() && point.y <= rectangle.getY() + rectangle.getHeight();
+    private Vec2[] getCounterClockwiseEdgeNormals(Vec2... vertices) {
+        if (vertices == null) return null;
+
+        int size = vertices.length;
+        if (size == 0) return null;
+
+        Vec2[] normals = new Vec2[size];
+        for (int i = 0; i < size; i++) {
+            Vec2 p1 = vertices[i];
+            Vec2 p2 = vertices[(i + 1) % size];
+            Vec2 n = p2.clone().sub(p1).left();
+            n.normalize();
+            normals[i] = n;
+        }
+
+        return normals;
     }
 
-    public List<Vec2> getPolygonVertices() {
-        return this.polygonVertices;
+    @Override
+    public List<Vec2> getAxes() {
+        List<Vec2> axes = new ArrayList<>();
+        for (int i = 0; i < this.vertices.length; i++) {
+            Vec2 v = this.normals[i];
+            axes.add(v);
+        }
+        return axes;
     }
 
-    public Polygon getPolygonShape() {
-        return this.polygonShape;
+    @Override
+    public Interval project(Vec2 vector) {
+        if (this.vertices == null) return null;
+
+        double v = 0.0;
+        Vec2 p = this.vertices[0];
+        double min = vector.dot(p);
+        double max = min;
+        int size = this.vertices.length;
+        for(int i = 1; i < size; i++) {
+            p = this.vertices[i];
+            v = vector.dot(p);
+            if (v < min) {
+                min = v;
+            } else if (v > max) {
+                max = v;
+            }
+        }
+        return new Interval(min, max);
+    }
+
+    private void computeCenter() {
+        if (this.isDestroyed() || this.vertices == null) return;
+
+        Vec2 ac = this.getAverageCenter(this.vertices);
+        int size = this.vertices.length;
+
+        Vec2 center = new Vec2();
+        double area = 0.0;
+        for (int i = 0; i < size; i++) {
+            Vec2 p1 = this.vertices[i].clone();
+            Vec2 p2 = i + 1 < size ? this.vertices[i + 1].clone() : this.vertices[0].clone();
+            p1 = p1.sub(ac);
+            p2 = p2.sub(ac);
+            double d = p1.cross(p2);
+            double triangleArea = 0.5 * d;
+            area += triangleArea;
+
+            // area weighted centroid
+            // (p1 + p2) * (D / 3)
+            // = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 3
+            center.add(p1.add(p2).mul(ColliderPolygon.INV_3).mul(triangleArea));
+        }
+        if (Math.abs(area) <= Epsilon.E) {
+            // zero area can only happen if all the points are the same point
+            this.center = this.vertices[0].clone();
+            return;
+        }
+        center.div(area).add(ac);
+        this.center = center;
+    }
+
+    @Override
+    public Vec2 getCenter() {
+        return this.center;
+    }
+
+    public Vec2 getAverageCenter(Vec2[] points) {
+        points = points.clone();
+        if (points == null)
+            throw new NullPointerException("points");
+
+        if (points.length == 0)
+            throw new NullPointerException("points");
+
+        int size = points.length;
+        if (size == 1) {
+            Vec2 p = points[0];
+            if (p == null)
+                throw new NullPointerException("points");
+            return p.clone();
+        }
+
+        Vec2 ac = new Vec2();
+        for (int i = 0; i < size; i++) {
+            Vec2 point = points[i];
+            if (point == null)
+                throw new NullPointerException("points");
+            ac.add(point);
+        }
+
+        return ac.div(size);
     }
 }

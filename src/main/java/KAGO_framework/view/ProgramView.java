@@ -22,8 +22,8 @@ public abstract class ProgramView extends InteractiveGraphicalObject {
     public ProgramView(ViewController viewController, ProgramController programController){
         this.viewController = viewController;
         this.programController = programController;
-        viewController.register(this);
-        viewController.draw(this);
+        //viewController.register(this);
+        //viewController.draw(this);
     }
 
     /**
@@ -31,8 +31,8 @@ public abstract class ProgramView extends InteractiveGraphicalObject {
      * Achtung: eventuell über die GUI hinzugefügte Objekte werden nicht entfernt
      */
     public void disposeView(){
-        viewController.removeDrawable(this);
-        viewController.removeInteractable(this);
+        //viewController.removeDrawable(this);
+        //viewController.removeInteractable(this);
     }
 
 

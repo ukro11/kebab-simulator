@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.awt.*;
 import java.time.Instant;
 import java.util.*;
-import java.util.List;
 import java.util.function.Function;
 
 public class CameraController {
@@ -83,14 +82,6 @@ public class CameraController {
         return this;
     }
 
-    public double getX() {
-        return this.x;
-    }
-
-    public double getY() {
-        return this.y;
-    }
-
     public void attach(DrawTool drawTool) {
         if (this.prevScale == null) {
             this.prevScale = new Vec2();
@@ -118,6 +109,17 @@ public class CameraController {
         this.queue.put(Instant.now(), duration);
     }
 
+    public void focusNoLimit(double x, double y, double dt) {
+        double camX = x * this.zoom - Config.WINDOW_WIDTH / 2 + this.offset.x;
+        double camY = y * this.zoom - Config.WINDOW_HEIGHT / 2 + this.offset.y;
+        double diffX = camX - this.x;
+        double diffY = camY - this.y;
+        double tempX = this.x + diffX;
+        double tempY = this.y + diffY;
+        this.x = tempX;
+        this.y = tempY;
+    }
+
     private void focus(double x, double y, double dt) {
         double camX = x * this.zoom - Config.WINDOW_WIDTH / 2 + this.offset.x;
         double camY = y * this.zoom - Config.WINDOW_HEIGHT / 2 + this.offset.y;
@@ -143,7 +145,7 @@ public class CameraController {
 
     public void update(double dt) {
         if (this.focusEntity != null) {
-            this.focus(this.focusEntity.getX() + this.focusEntity.getWidth() / 2, this.focusEntity.getY() + this.focusEntity.getHeight() / 2, dt);
+            this.focus(this.focusEntity.getBody().getX(), this.focusEntity.getBody().getY(), dt);
         }
         if (this.queue.size() > 0) {
             if (this.currentShake == null) {
@@ -170,5 +172,17 @@ public class CameraController {
                 this.y = MathUtils.clamp(this.y + shakeOffsetY, 0, Config.WINDOW_HEIGHT);
             }
         }
+    }
+
+    public double getX() {
+        return this.x;
+    }
+
+    public double getY() {
+        return this.y;
+    }
+
+    public double getZoom() {
+        return this.zoom;
     }
 }

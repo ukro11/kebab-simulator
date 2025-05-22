@@ -58,7 +58,6 @@ public class SoundController {
         try {
             SwingUtilities.invokeLater(() -> {
                 try {
-                    if ( Config.INFO_MESSAGES) System.out.println("Instanziiere JFXPanel für Tonwiedergabe...");
                     new JFXPanel(); // initializes JavaFX environment
                     initialized = true;
                 } catch (Exception e) {
@@ -80,7 +79,6 @@ public class SoundController {
             if (soundDelay > 0) soundDelay -= dt;
             if(!started){
                 started = true;
-                if ( Config.INFO_MESSAGES) System.out.println("SoundController hat Arbeit aufgenommen.");
             }
             if(soundDelay <= 0) {
                 Iterator<SoundData> iterator = soundsToLoad.iterator();

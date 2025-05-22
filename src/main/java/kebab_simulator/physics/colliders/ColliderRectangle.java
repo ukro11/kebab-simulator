@@ -1,69 +1,64 @@
 package kebab_simulator.physics.colliders;
 
-import KAGO_framework.view.DrawTool;
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.physics.AABB;
 import kebab_simulator.physics.BodyType;
-import kebab_simulator.physics.Collider;
 import kebab_simulator.physics.ColliderForm;
-import kebab_simulator.utils.MathUtils;
+import kebab_simulator.utils.Vec2;
 
-import java.awt.*;
 import java.util.UUID;
 
-public class ColliderRectangle extends Collider {
-
-    private Polygon rectangleShape;
+public class ColliderRectangle extends ColliderPolygon {
 
     public ColliderRectangle(BodyType type, double x, double y, double width, double height) {
         this(UUID.randomUUID().toString(), type, x, y, width, height);
     }
 
     public ColliderRectangle(String id, BodyType type, double x, double y, double width, double height) {
-        this.id = id;
-        this.type = type;
+        super(id, type, x, y, new Vec2[] { new Vec2(0, 0), new Vec2(width, 0), new Vec2(width, height), new Vec2(0, height) });
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-        this.rectangleShape = new Polygon();
-        rectangleShape.addPoint((int) this.getX(), (int) this.getY());
-        rectangleShape.addPoint((int) this.getX() + (int) this.getWidth(), (int) this.getY());
-        rectangleShape.addPoint((int) this.getX() + (int) this.getWidth(), (int) this.getY() + (int) this.getHeight());
-        rectangleShape.addPoint((int) this.getX(), (int) this.getY() + (int) this.getHeight());
         this.form = ColliderForm.RECTANGLE;
-        this.colliderClass = "default";
-        Wrapper.getColliderManager().createBody(this);
     }
 
     @Override
-    public void update(double dt) {
-        super.update(dt);
-        if (this.type == BodyType.DYNAMIC && this.velocity.len() > 0) {
-            this.rectangleShape.xpoints[0] = (int) this.getX();
-            this.rectangleShape.xpoints[1] = (int) (this.getX() + this.getWidth());
-            this.rectangleShape.xpoints[2] = (int) (this.getX() + this.getWidth());
-            this.rectangleShape.xpoints[3] = (int) this.getX();
+    public AABB computeAABB() {
+        AABB aabb = new AABB(0, 0, 0, 0);
+        double v0x = this.vertices[0].x;
+        double v0y = this.vertices[0].y;
+        double v1x = this.vertices[1].x;
+        double v1y = this.vertices[1].y;
+        double v2x = this.vertices[2].x;
+        double v2y = this.vertices[2].y;
+        double v3x = this.vertices[3].x;
+        double v3y = this.vertices[3].y;
 
-            this.rectangleShape.ypoints[0] = (int) this.getY();
-            this.rectangleShape.ypoints[1] = (int) this.getY();
-            this.rectangleShape.ypoints[2] = (int) (this.getY() + this.getHeight());
-            this.rectangleShape.ypoints[3] = (int) (this.getY() + this.getHeight());
+        if (v0y > v1y) {
+            if (v0x < v1x) {
+                aabb.minX = v0x;
+                aabb.minY = v1y;
+                aabb.maxX = v2x;
+                aabb.maxY = v3y;
+            } else {
+                aabb.minX = v1x;
+                aabb.minY = v2y;
+                aabb.maxX = v3x;
+                aabb.maxY = v0y;
+            }
+        } else {
+            if (v0x < v1x) {
+                aabb.minX = v3x;
+                aabb.minY = v0y;
+                aabb.maxX = v1x;
+                aabb.maxY = v2y;
+            } else {
+                aabb.minX = v2x;
+                aabb.minY = v3y;
+                aabb.maxX = v0x;
+                aabb.maxY = v1y;
+            }
         }
-    }
-
-    @Override
-    public boolean handleCollision(Collider other) {
-        return MathUtils.isRectangleCollided(this, other);
-    }
-
-    @Override
-    public void renderHitbox(DrawTool drawTool) {
-        drawTool.setCurrentColor(new Color(150, 0, 0));
-        drawTool.drawRectangle(this.x, this.y, this.width, this.height);
-        drawTool.resetColor();
-    }
-
-    public Polygon getRectangleShape() {
-        return this.rectangleShape;
+        return aabb;
     }
 }

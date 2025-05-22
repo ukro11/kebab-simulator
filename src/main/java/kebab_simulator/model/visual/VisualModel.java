@@ -1,19 +1,24 @@
 package kebab_simulator.model.visual;
 
+import KAGO_framework.control.ViewController;
 import KAGO_framework.view.DrawTool;
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.control.ProgramController;
 
 public abstract class VisualModel implements Comparable<VisualModel> {
 
-    private String id;
-    private int zIndex;
-    private boolean pauseGame = false;
+    protected ViewController viewController;
+    protected ProgramController programController;
+    protected String id;
+    protected int zIndex;
+    protected boolean pauseGame = false;
 
     public VisualModel(String id) {
         this(id, 0);
     }
 
     public VisualModel(String id, int zIndex) {
+        this.viewController = ViewController.getInstance();
+        this.programController = this.viewController.getProgramController();
         this.id = id;
         this.zIndex = zIndex;
     }
