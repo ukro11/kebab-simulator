@@ -5,11 +5,12 @@ import kebab_simulator.control.Wrapper;
 import kebab_simulator.event.events.collider.ColliderCollisionEvent;
 import kebab_simulator.event.events.collider.ColliderDestroyEvent;
 import kebab_simulator.model.entity.Entity;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -33,6 +34,9 @@ public abstract class Collider {
     protected boolean sensor = false;
     protected Color hitboxColor = Color.RED;
     private boolean destroyed = false;
+    private Vec2 lastVelocity = new Vec2();
+    protected Collider parent;
+    protected List<Collider> children = new ArrayList<>();
 
     protected Consumer<ColliderCollisionEvent> onCollision;
     protected Consumer<ColliderDestroyEvent> onDestroy;
@@ -87,6 +91,19 @@ public abstract class Collider {
     public abstract List<Vec2> getAxes();
     public abstract AABB computeAABB();
 
+    public void addChild(Collider collider) {
+        if (collider.getType() == BodyType.DYNAMIC) {
+            this.children.add(collider);
+
+        } else {
+            this.logger.info("Collider {} could not be added as child because collider is not dynamic", collider.getId());
+        }
+    }
+
+    public void removeChild(Collider collider) {
+        this.children.remove(collider);
+    }
+
     public boolean isDestroyed() {
         return this.destroyed;
     }
@@ -119,6 +136,12 @@ public abstract class Collider {
             this.y += this.velocity.y * dt;
             this.entity.setX(this.x);
             this.entity.setY(this.y);
+        }
+        if (!this.lastVelocity.equals(this.velocity)) {
+            this.children.forEach(child -> {
+                child.setLinearVelocity(this.velocity.x, this.velocity.y);
+            });
+            this.lastVelocity = this.velocity.clone();
         }
     }
 
@@ -187,11 +210,11 @@ public abstract class Collider {
     }
 
     public Vec2 getVelocity() {
-        return velocity;
+        return this.velocity;
     }
 
     public Color getHitboxColor() {
-        return hitboxColor;
+        return this.hitboxColor;
     }
 
     public void setHitboxColor(Color hitboxColor) {

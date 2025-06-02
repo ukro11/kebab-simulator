@@ -9,7 +9,8 @@ import kebab_simulator.control.Wrapper;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.model.scene.Scene;
-import kebab_simulator.utils.TimerUtils;
+import kebab_simulator.model.visual.impl.gui.GuiScreen;
+import kebab_simulator.utils.misc.TimerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,13 +60,13 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         this.initializing = new AtomicBoolean(true);
 
         this.programController.preStartProgram();
-        /*while (this.initializing.get()) {
+        while (this.initializing.get()) {
             try {
-                Thread.sleep(1);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
-        }*/
+        }
         logger.info("PreStart Setup is finished.");
         logger.info("Starting Engine.");
 
@@ -109,6 +110,7 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             TimerUtils.update();
             this.programController.updateProgram(TimerUtils.getDeltaTime());
             if (Scene.getCurrentScene() != null) Scene.getCurrentScene().update(TimerUtils.getDeltaTime());
+            if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().update(TimerUtils.getDeltaTime());
             if (this.soundController != null) this.soundController.update(TimerUtils.getDeltaTime());
             repaint();
             Thread.sleep(this.threadSleep);
@@ -167,7 +169,9 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
     }
 
     private void createWindow(){
-        //this.setBackground(Color.RED);
+        //
+        // #947052
+        this.setBackground(Color.decode("#d0b99c"));
         this.setDoubleBuffered(true);
 
         GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
@@ -200,18 +204,22 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
                 public void windowDeactivated(WindowEvent e) {}
             });
         }
+        this.drawFrame.addWindowFocusListener(new WindowFocusListener() {
+            @Override
+            public void windowGainedFocus(WindowEvent e) {
+
+            }
+            @Override
+            public void windowLostFocus(WindowEvent e) {
+                currentlyPressedKeys.clear();
+                currentlyPressedMouseButtons.clear();
+            }
+        });
 
         if (kebab_simulator.Config.WINDOW_FULLSCREEN) {
             this.drawFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
             gd.setFullScreenWindow(Window.getWindows()[0]);
         }
-
-        Graphics2D g2d = (Graphics2D) this.drawFrame.getGraphics();
-        //g2d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-        // g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        // g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         this.drawFrame.setActiveDrawingPanel(this);
     }
 
@@ -229,7 +237,8 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         Graphics2D g2d = (Graphics2D) g;
         this.drawTool.setGraphics2D(g2d,this);
         if (this.soundController != null) this.soundController.update(TimerUtils.getDeltaTime());
-        Scene.getCurrentScene().draw(this.drawTool);
+        if (Scene.getCurrentScene() != null) Scene.getCurrentScene().draw(this.drawTool);
+        if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().draw(this.drawTool);
     }
 
     /**
@@ -266,12 +275,13 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         drawFrame.setVisible(b);
     }
 
-    /* INTERFACE METHODEN */
-
     @Override
     public void mouseEntered(MouseEvent e) {
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().mouseEntered(e);
+        }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().mouseEntered(e);
         }
     }
 
@@ -279,6 +289,9 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
     public void mouseExited(MouseEvent e) {
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().mouseExited(e);
+        }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().mouseExited(e);
         }
     }
 
@@ -289,6 +302,9 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().mouseReleased(e);
         }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().mouseReleased(e);
+        }
     }
 
     @Override
@@ -297,6 +313,9 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().mouseClicked(e);
         }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().mouseClicked(e);
+        }
     }
 
     @Override
@@ -304,12 +323,18 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().mouseDragged(e);
         }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().mouseDragged(e);
+        }
     }
 
     @Override
     public void mouseMoved(MouseEvent e) {
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().mouseMoved(e);
+        }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().mouseMoved(e);
         }
     }
 
@@ -325,15 +350,21 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().keyTyped(e);
         }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().keyTyped(e);
+        }
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if (!ViewController.currentlyPressedKeys.contains(e.getKeyCode()))
             ViewController.currentlyPressedKeys.add(e.getKeyCode());
-        Wrapper.getEventManager().dispatchEvent(new KeyPressedEvent(e.getKeyCode()));
+        Wrapper.getEventManager().dispatchEvent(new KeyPressedEvent(e));
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().keyPressed(e);
+        }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().keyPressed(e);
         }
     }
 
@@ -342,6 +373,9 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         currentlyPressedKeys.remove(Integer.valueOf(e.getKeyCode()));
         if (Scene.getCurrentScene() != null) {
             Scene.getCurrentScene().keyReleased(e);
+        }
+        if (GuiScreen.getCurrentScreen() != null) {
+            GuiScreen.getCurrentScreen().keyReleased(e);
         }
     }
 

@@ -7,7 +7,7 @@ import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.Collider;
 import kebab_simulator.physics.colliders.ColliderCircle;
 import kebab_simulator.physics.colliders.ColliderPolygon;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.Vec2;
 
 public class ColliderTest extends Test {
 
@@ -30,11 +30,12 @@ public class ColliderTest extends Test {
                 145,
                 firstPolygonY,
                 new Vec2[] {
-                    new Vec2(-60, 20),
-                    new Vec2(-20, 30),
-                    new Vec2(0, 0),
-                    new Vec2(-20, 0),
-                    new Vec2(-20,-10),
+                    new Vec2(-60, 0),
+                    new Vec2(-60, 10),
+                    new Vec2(0, 10),
+                    new Vec2(0, -30),
+                    new Vec2(-10,-30),
+                    new Vec2(-10,0),
                 }
         );
         polygonFirst.onCollision((event) -> logger.info("SECOND: {}", event.getState()));
@@ -42,15 +43,29 @@ public class ColliderTest extends Test {
         ColliderPolygon polygonSecond = new ColliderPolygon(
                 "test2",
                 BodyType.DYNAMIC,
-                100,
+                120,
                 secondPolygonY,
                 new Vec2[] {
+                    new Vec2(-60, 20),
+                    new Vec2(-20, 30),
                     new Vec2(0, 0),
-                    new Vec2(10, 20),
-                    new Vec2(20, 10)
+                    new Vec2(-20, 0),
+                    new Vec2(-20,-10),
                 });
-        polygonSecond.onCollision((event) -> logger.info("SECOND: {}", event.getState()));
         polygonSecond.setLinearVelocity(velocity.x, velocity.y);
+
+        ColliderPolygon polygonThird = new ColliderPolygon(
+                "test3",
+                BodyType.DYNAMIC,
+                120,
+                secondPolygonY,
+                new Vec2[] {
+                        new Vec2(0, 0),
+                        new Vec2(20, 0),
+                        new Vec2(20, 20),
+                        new Vec2(0, 20)
+                });
+        polygonThird.setLinearVelocity(velocity.x, velocity.y);
 
         GameScene.getInstance().getDrawables().add(new Drawable() {
             @Override

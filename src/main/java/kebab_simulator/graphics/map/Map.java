@@ -4,20 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
 
-/*
-"columns":16,
-"firstgid":1169,
-"image":"/graphic/map/pixel-top-down/TX Props.png",
-"imageheight":512,
-"imagewidth":512,
-"margin":0,
-"name":"TX Props",
-"spacing":0,
-"tilecount":256,
-"tileheight":32,
-"tilewidth":32
-*/
-
 public class Map {
 
     private int width;
@@ -43,9 +29,32 @@ public class Map {
 
     public class Tile {
         private int id;
+        private List<TileAnimationFrame> animation;
+        private Property loop;
 
         public int getId() {
             return this.id;
+        }
+
+        public List<TileAnimationFrame> getAnimation() {
+            return this.animation;
+        }
+
+        public Property getLoop() {
+            return this.loop;
+        }
+    }
+
+    public static class TileAnimationFrame {
+        private int tileid;
+        private int duration;
+
+        public int getTileId() {
+            return this.tileid;
+        }
+
+        public int getDuration() {
+            return this.duration;
         }
     }
 
@@ -113,40 +122,59 @@ public class Map {
         private String type;
         private int width;
         private int height;
-        private List<Integer> data;
         private List<ObjectCollider> objects;
+        private List<Chunk> data;
+        private List<Chunk> chunks;
 
-        public String getName() {
-            return this.name;
-        }
+        public String getName() { return this.name; }
+        public String getType() { return this.type; }
+        public int getWidth() { return this.width; }
+        public int getHeight() { return this.height; }
+        public List<ObjectCollider> getObjects() { return this.objects; }
+        public List<Chunk> getChunks() { return this.chunks; }
+        public List<Chunk> getData() { return data; }
 
-        public String getType() {
-            return this.type;
-        }
-
-        public int getWidth() {
-            return this.width;
-        }
-
-        public int getHeight() {
-            return this.height;
-        }
-
-        public List<Integer> getData() {
-            return this.data;
-        }
-
-        public List<ObjectCollider> getObjects() {
-            return this.objects;
+        @Override
+        public String toString() {
+            return "Layer{" +
+                    "name='" + name + '\'' +
+                    ", type='" + type + '\'' +
+                    ", width=" + width +
+                    ", height=" + height +
+                    ", objects=" + objects +
+                    ", chunks=" + chunks +
+                    ", layers=" + layers +
+                    '}';
         }
     }
 
+    public class Chunk {
+        private int x;
+        private int y;
+        private int width;
+        private int height;
+        private List<Integer> data;
+
+        public int getX() { return x; }
+        public int getY() { return y; }
+        public int getWidth() { return width; }
+        public int getHeight() { return height; }
+        public List<Integer> getData() { return data; }
+    }
+
     public class ObjectCollider {
+        private String name;
         private int x;
         private int y;
         private int width;
         private int height;
         private List<Polygon> polygon;
+        private boolean ellipse;
+        private boolean visible;
+
+        public String getName() {
+            return this.name;
+        }
 
         public int getX() {
             return this.x;
@@ -167,9 +195,17 @@ public class Map {
         public List<Polygon> getPolygon() {
             return this.polygon;
         }
+
+        public Boolean isEllipse() {
+            return this.ellipse;
+        }
+
+        public boolean isVisible() {
+            return this.visible;
+        }
     }
 
-    class Polygon {
+    public class Polygon {
         private int x;
         private int y;
 
@@ -180,5 +216,10 @@ public class Map {
         public int getY() {
             return this.y;
         }
+    }
+
+    public class Property<T> {
+        private String name;
+        private T value;
     }
 }

@@ -2,16 +2,15 @@ package kebab_simulator.graphics;
 
 import KAGO_framework.view.DrawTool;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class OrderRenderer {
 
-    private final List<IOrder> drawables;
+    private final CopyOnWriteArrayList<IOrder> drawables;
 
     public OrderRenderer() {
-        this.drawables = new ArrayList<>();
+        this.drawables = new CopyOnWriteArrayList<>();
     }
 
     public void draw(DrawTool drawTool) {

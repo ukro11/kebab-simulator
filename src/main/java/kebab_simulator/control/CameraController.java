@@ -5,8 +5,8 @@ import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
 import kebab_simulator.animation.Easings;
 import kebab_simulator.model.entity.Entity;
-import kebab_simulator.utils.MathUtils;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.MathUtils;
+import kebab_simulator.utils.misc.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,12 +25,11 @@ public class CameraController {
     private double y;
     private boolean smooth = false;
     private Function<Double, Double> easing = (x) -> Easings.easeInCubic(x);
-    private double delay = 0.0;
     private double zoom = 1.0;
     private double angle = 0;
     private double duration = 1.0;
+    private double elapsed = 0.0;
     private Vec2 offset = new Vec2();
-    private double elapsed = this.duration;
     private Vec2 prevScale;
     private Entity focusEntity;
     private Vec2 cameraMax = new Vec2(10000, 10000);
@@ -57,11 +56,6 @@ public class CameraController {
         return this;
     }
 
-    public CameraController delay(double delay) {
-        this.delay = delay;
-        return this;
-    }
-
     public CameraController zoom(double zoom) {
         this.zoom = zoom;
         return this;
@@ -69,11 +63,6 @@ public class CameraController {
 
     public CameraController angle(double angle) {
         this.angle = angle;
-        return this;
-    }
-
-    public CameraController duration(double duration) {
-        this.duration = duration;
         return this;
     }
 
@@ -109,6 +98,25 @@ public class CameraController {
         this.queue.put(Instant.now(), duration);
     }
 
+    private double smoothDamp(double current, double target, double currentVelocity, double smoothTime, double maxSpeed, double deltaTime) {
+        smoothTime = Math.max(0.0001, smoothTime);
+        double direction = target - current;
+        double distance = Math.abs(direction);
+        if (distance < 0.1) {
+            return target;
+        }
+        double maxVelocity = maxSpeed * smoothTime;
+        direction = MathUtils.clamp(direction, -maxVelocity, maxVelocity);
+        double targetVelocity = direction / smoothTime;
+        double newVelocity = currentVelocity + (targetVelocity - currentVelocity) * deltaTime * 5;
+        double newPosition = current + newVelocity * deltaTime;
+        if ((target > current && newPosition > target) ||
+                (target < current && newPosition < target)) {
+            newPosition = target;
+        }
+        return newPosition;
+    }
+
     public void focusNoLimit(double x, double y, double dt) {
         double camX = x * this.zoom - Config.WINDOW_WIDTH / 2 + this.offset.x;
         double camY = y * this.zoom - Config.WINDOW_HEIGHT / 2 + this.offset.y;
@@ -127,12 +135,30 @@ public class CameraController {
         double diffY = camY - this.y;
         double tempX = this.x + diffX;
         double tempY = this.y + diffY;
-        this.x = MathUtils.clamp(tempX, 0, cameraMax.x * this.zoom);
-        this.y = MathUtils.clamp(tempY, 0, cameraMax.y * this.zoom);
+        this.x = MathUtils.clamp(tempX, 0, this.cameraMax.x * this.zoom);
+        this.y = MathUtils.clamp(tempY, 0, this.cameraMax.y * this.zoom);
+    }
+
+    private void focusSmooth(double x, double y, double dt) {
+        double camX = x * this.zoom - Config.WINDOW_WIDTH / 2 + this.offset.x;
+        double camY = y * this.zoom - Config.WINDOW_HEIGHT / 2 + this.offset.y;
+        Vec2 velocity = new Vec2(camX - this.x, camY - this.y);
+        camX = MathUtils.clamp(camX, 0, this.cameraMax.x * this.zoom);
+        camY = MathUtils.clamp(camY, 0, this.cameraMax.y * this.zoom);
+
+        this.x = smoothDamp(this.x, camX, velocity.x, 0.1, 100_000, dt * 5);
+        this.y = smoothDamp(this.y, camY, velocity.y, 0.1, 100_000, dt * 5);
     }
 
     public void focusAt(double x, double y, double dt) {
-        if (this.focusEntity == null) this.focus(x, y, dt);
+        if (this.focusEntity == null) {
+            if (this.smooth) {
+                this.focusSmooth(x, y, dt);
+
+            } else {
+                this.focus(x, y, dt);
+            }
+        }
     }
 
     public void focusAtEntity(Entity entity) {
@@ -145,7 +171,12 @@ public class CameraController {
 
     public void update(double dt) {
         if (this.focusEntity != null) {
-            this.focus(this.focusEntity.getBody().getX(), this.focusEntity.getBody().getY(), dt);
+            if (this.smooth) {
+                this.focusSmooth(this.focusEntity.getBody().getX(), this.focusEntity.getBody().getY(), dt);
+
+            } else {
+                this.focus(this.focusEntity.getBody().getX(), this.focusEntity.getBody().getY(), dt);
+            }
         }
         if (this.queue.size() > 0) {
             if (this.currentShake == null) {

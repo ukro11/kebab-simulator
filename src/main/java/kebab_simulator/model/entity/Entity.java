@@ -5,16 +5,15 @@ import KAGO_framework.control.Interactable;
 import KAGO_framework.control.ViewController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
-import kebab_simulator.animation.AnimationState;
+import kebab_simulator.animation.states.CharacterAnimationState;
 import kebab_simulator.control.ProgramController;
 import kebab_simulator.graphics.IOrder;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.Collider;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,16 +35,28 @@ public abstract class Entity implements Drawable, Interactable, IOrder {
     protected Vec2 highestPoint;
     protected Vec2 highestPointOffset;
     protected boolean showHitbox = false;
+    protected boolean invertLeft = false;
     protected double scaleX = 1;
     protected double scaleY = 1;
 
-    protected AnimationRenderer<AnimationState> renderer;
+    protected AnimationRenderer<CharacterAnimationState> renderer;
 
     public Entity(double x, double y, double width, double height) {
         this(null, x, y, width, height);
     }
 
     public Entity(Collider body, double x, double y, double width, double height) {
+        try {
+            StackTraceElement stackTrace1 = Thread.currentThread().getStackTrace()[3];
+            StackTraceElement stackTrace2 = Thread.currentThread().getStackTrace()[4];
+            if (!stackTrace1.getClassName().equals(EntityManager.class.getName()) && !stackTrace2.getClassName().equals(EntityManager.class.getName())) {
+                throw new RuntimeException(String.format("To create an entity (%s) use \"Wrapper.getEntityManager().spawnPlayer(...)\"", this.getClass().getSimpleName()));
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
         this.viewController = ViewController.getInstance();
         this.programController = this.viewController.getProgramController();
 
@@ -76,15 +87,17 @@ public abstract class Entity implements Drawable, Interactable, IOrder {
         if (this.renderer != null && this.renderer.getCurrentFrame() != null) {
             drawTool.push();
             drawTool.getGraphics2D().scale(this.scaleX, this.scaleY);
-            if (this.scaleX == -1) {
+            if (this.scaleX == -1 && this.isInvertLeft()) {
                 drawTool.getGraphics2D().translate(-((int) this.x) * 2 - this.width, 0);
             }
             drawTool.getGraphics2D().drawImage(this.renderer.getCurrentFrame(), (int) this.x, (int) this.y, (int) this.width, (int) this.height, null);
-            drawTool.setCurrentColor(Color.RED);
-            drawTool.drawFilledCircle(this.highestPoint.x, this.highestPoint.y, 1);
             drawTool.pop();
         }
-        if (this.showHitbox && this.body != null) this.body.renderHitbox(drawTool);
+        if (this.showHitbox && this.body != null) {
+            drawTool.setCurrentColor(this.getBody().getHitboxColor());
+            drawTool.drawFilledCircle(this.highestPoint.x, this.highestPoint.y, 1);
+            this.body.renderHitbox(drawTool);
+        }
     }
 
     @Override
@@ -105,11 +118,19 @@ public abstract class Entity implements Drawable, Interactable, IOrder {
         this.highestPointOffset.set(offset);
     }
 
-    public AnimationRenderer<AnimationState> getRenderer() {
+    public Vec2 getHighestPoint() {
+        return highestPoint;
+    }
+
+    public AnimationRenderer<CharacterAnimationState> getRenderer() {
         return this.renderer;
     }
 
-    public void setRenderer(AnimationRenderer<AnimationState> renderer) {
+    public void setInvertLeft(boolean invertLeft) { this.invertLeft = invertLeft; }
+
+    public boolean isInvertLeft() { return this.invertLeft; }
+
+    public void setRenderer(AnimationRenderer<CharacterAnimationState> renderer) {
         this.renderer = renderer;
     }
 

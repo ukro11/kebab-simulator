@@ -55,7 +55,7 @@ public class EventHttpProcess extends EventProcess {
             if (this.callback != null) this.callback.onSuccess(new EventHttpProcessData(this.request, response));
 
         } catch (InterruptedException | IOException e) {
-            this.logger.info("Error while sending HTTP Request {}", e.getMessage());
+            this.logger.info("Error while sending HTTP Request", e.getMessage());
             if (this.callback != null) this.callback.onFailure(e);
         }
     }
@@ -70,11 +70,11 @@ public class EventHttpProcess extends EventProcess {
         }
 
         public HttpRequest getRequest() {
-            return request;
+            return this.request;
         }
 
         public HttpResponse<String> getResponse() {
-            return response;
+            return this.response;
         }
 
         @Override

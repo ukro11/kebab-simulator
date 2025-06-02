@@ -3,13 +3,16 @@ package kebab_simulator.graphics.map;
 import KAGO_framework.view.DrawTool;
 import com.google.gson.Gson;
 import kebab_simulator.Config;
-import kebab_simulator.control.CameraController;
 import kebab_simulator.graphics.IOrder;
+import kebab_simulator.graphics.map.spawner.FridgeSpawner;
+import kebab_simulator.graphics.map.spawner.OvenSpawner;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.BodyType;
+import kebab_simulator.physics.Collider;
+import kebab_simulator.physics.colliders.ColliderCircle;
 import kebab_simulator.physics.colliders.ColliderPolygon;
 import kebab_simulator.physics.colliders.ColliderRectangle;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,15 +31,13 @@ public class MapManager {
     private Logger logger = LoggerFactory.getLogger(MapManager.class);
 
     private Map map;
-    private CameraController cameraController;
     private final HashMap<Map.Tileset, Batch> batches;
     private final List<String> staticLayers;
     private final List<Quad> staticQuads;
 
     private MapManager(String fileName, List<String> staticLayers) {
-        this.cameraController = cameraController;
         this.staticLayers = staticLayers;
-        InputStream fileStream = getClass().getResourceAsStream("/graphic/map/" + fileName);
+        InputStream fileStream = getClass().getResourceAsStream("/graphic" + fileName);
         if (fileStream == null) throw new NullPointerException("The map you want to import does not exist");
         Gson gson = new Gson();
         this.map = gson.fromJson(new InputStreamReader(fileStream, StandardCharsets.UTF_8), Map.class);
@@ -52,90 +53,179 @@ public class MapManager {
     private void load() {
         for (Map.Layer layer : this.map.getLayers()) {
             if (layer.getType().equals("tilelayer")) {
-                for (int y = 0; y < layer.getHeight() - 1; y++) {
-                    for (int x = 0; x < layer.getWidth() - 1; x++) {
-                        int index = y * layer.getWidth() + x + 1;
-                        int gid = layer.getData().get(index);
-                        if (gid > 0) {
-                            Map.Tileset currentTileset = null;
-                            for (Map.Tileset tileset : this.map.getTilesets()) {
-                                if (tileset.getTiles() != null && tileset.getTiles().size() > 0) {
-                                    Map.Tile imageInfo = null;
-
-                                    if (gid >= tileset.getFirstGid() && gid < tileset.getFirstGid() + tileset.getTileCount()) {
-                                        imageInfo = tileset.getTiles().stream().filter(t -> {
-                                            int id = gid - tileset.getFirstGid();
-                                            return t.getId() == id;
-                                        }).findFirst().get();
-                                    }
-
-                                    if (imageInfo != null) {
-                                        // TODO
-                                    }
-                                } else if (gid >= tileset.getFirstGid()
-                                        && gid < tileset.getFirstGid() + (tileset.getImageWidth() / tileset.getTileWidth()) * (tileset.getImageHeight() / tileset.getTileHeight())) {
-                                    currentTileset = tileset;
-                                    break;
-                                }
-                            }
-
-                            if (currentTileset != null && !this.batches.containsKey(currentTileset)) {
-                                try {
-                                    BufferedImage image = ImageIO.read(getClass().getResource(currentTileset.getImage()));
-                                    currentTileset.setPath(currentTileset.getImage());
-                                    this.batches.put(currentTileset, new Batch(
-                                            image, currentTileset.getImage(), currentTileset, layer
-                                    ));
-
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                            }
-
-                            double tilesInX = currentTileset.getImageWidth() / currentTileset.getTileWidth();
-                            double offsetGid = (gid - currentTileset.getFirstGid());
-
-                            double tileX = Math.floor(x * currentTileset.getTileWidth());
-                            double tileY = Math.floor(y * currentTileset.getTileHeight());
-
-                            Quad quad = new Quad(
-                                    this.batches.get(currentTileset),
-                                    tileX,
-                                    tileY,
-                                    (int) (offsetGid % tilesInX * currentTileset.getTileWidth()),
-                                    (int) (currentTileset.getTileHeight() * Math.floor(offsetGid / tilesInX)),
-                                    currentTileset.getTileWidth(),
-                                    currentTileset.getTileHeight()
-                            );
-
-                            if (this.staticLayers.contains(layer.getName())) {
-                                this.staticQuads.add(quad);
-
-                            } else {
-                                GameScene.getInstance().getRenderer().register(quad);
-                            }
-                        }
+                if (layer.getChunks() != null && !layer.getChunks().isEmpty()) {
+                    for (Map.Chunk chunk : layer.getChunks()) {
+                        this.loadChunk(layer, chunk);
                     }
                 }
-
-            } else if (layer.getType().equals("objectgroup") && false) {
+            } else if (layer.getType().equals("objectgroup")) {
                 for (Map.ObjectCollider o : layer.getObjects()) {
+                    if (!o.isVisible()) continue;
+                    Collider collider = null;
+
                     if (o.getPolygon() != null) {
                         Vec2[] vertices = new Vec2[o.getPolygon().size()];
                         for (int i = 0; i < vertices.length; i++) {
                             var v = o.getPolygon().get(i);
                             vertices[i] = new Vec2(v.getX(), v.getY());
                         }
-                        var p = new ColliderPolygon(String.format("polygon-%s-%d", layer.getName(), layer.getObjects().indexOf(o)), BodyType.STATIC, o.getX() - 32, o.getY(), vertices);
-                        p.setColliderClass("map");
+                        collider = new ColliderPolygon(String.format("polygon-%s-%d", layer.getName(), layer.getObjects().indexOf(o)), BodyType.STATIC, o.getX(), o.getY(), vertices);
+                        if (layer.getName().equals("sensors")) collider.setSensor(true);
+                        collider.setColliderClass("map");
+
+                    } else if (o.isEllipse()) {
+                        var radius = o.getWidth() / 2;
+                        collider = new ColliderCircle(
+                            String.format("circle-%s-%d", layer.getName(), layer.getObjects().indexOf(o)),
+                            BodyType.STATIC, o.getX(), o.getY(), radius
+                        );
+                        if (layer.getName().equals("sensors")) collider.setSensor(true);
+                        collider.setColliderClass("map");
 
                     } else {
-                        var r = new ColliderRectangle(String.format("rectangle-%s-%d", layer.getName(), layer.getObjects().indexOf(o)), BodyType.STATIC, o.getX() - 32, o.getY(), o.getWidth(), o.getHeight());
-                        r.setColliderClass("map");
+                        collider = new ColliderRectangle(String.format("rectangle-%s-%d", layer.getName(), layer.getObjects().indexOf(o)), BodyType.STATIC, o.getX(), o.getY(), o.getWidth(), o.getHeight());
+                        if (layer.getName().equals("sensors")) collider.setSensor(true);
+                        collider.setColliderClass("map");
+                    }
+
+                    if (layer.getName().equals("spawner")) {
+                        String[] args = o.getName().split("_");
+                        switch (args[0]) {
+                            case "oven": {
+                                GameScene.getInstance().getRenderer().register(new OvenSpawner(o.getName(), collider));
+                                break;
+                            }
+                            case "fridge": {
+                                var type = args[1].equals("meat") ? FridgeSpawner.FridgeType.MEAT_FRIDGE : FridgeSpawner.FridgeType.VEGETABLES_FRIDGE;
+                                GameScene.getInstance().getRenderer().register(new FridgeSpawner(type, o.getName(), collider));
+                                break;
+                            }
+                        }
+
+                    } else if (layer.getName().equals("sensors")) {
+                        var spawner = ObjectSpawner.fetchById(o.getName());
+                        if (spawner != null) {
+                            spawner.setSensorCollider(collider);
+
+                        } else {
+                            ObjectSpawner.mapSensor(o.getName(), collider);
+                        }
                     }
                 }
             }
         }
+    }
+
+    private void loadChunk(Map.Layer layer, Map.Chunk chunk) {
+        int chunkX = chunk.getX();
+        int chunkY = chunk.getY();
+
+        for (int y = 0; y < chunk.getHeight(); y++) {
+            for (int x = 0; x < chunk.getWidth(); x++) {
+                int index = y * chunk.getWidth() + x;
+                int gid = chunk.getData().get(index);
+                if (gid > 0) {
+                    Map.Tileset currentTileset = this.findTilesetForGid(gid);
+                    if (currentTileset == null) continue;
+                    if (!this.batches.containsKey(currentTileset)) {
+                        try {
+                            String path = currentTileset.getImage().replace("sprites", "/graphic/map/sprites").toString();
+                            BufferedImage image = ImageIO.read(getClass().getResource(path));
+                            currentTileset.setPath(path);
+                            this.batches.put(currentTileset, new Batch(
+                                    image, currentTileset.getImage(), currentTileset, layer
+                            ));
+
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                    double tilesInX = currentTileset.getImageWidth() / currentTileset.getTileWidth();
+                    double offsetGid = (gid - currentTileset.getFirstGid());
+
+                    double tileX = Math.floor((chunkX + x) * currentTileset.getTileWidth());
+                    double tileY = Math.floor((chunkY + y) * currentTileset.getTileHeight());
+
+                    int localTileId = gid - currentTileset.getFirstGid();
+                    //BufferedImage tileImage = getAnimatedTileImage(currentTileset, image, localTileId, (int) System.currentTimeMillis());
+
+
+                    Quad quad = new Quad(
+                            this.batches.get(currentTileset),
+                            gid,
+                            tileX,
+                            tileY,
+                            (int) (offsetGid % tilesInX * currentTileset.getTileWidth()),
+                            (int) (currentTileset.getTileHeight() * Math.floor(offsetGid / tilesInX)),
+                            currentTileset.getTileWidth(),
+                            currentTileset.getTileHeight()
+                    );
+
+                    if (this.staticLayers.contains(layer.getName())) {
+                        this.staticQuads.add(quad);
+
+                    } else {
+                        GameScene.getInstance().getRenderer().register(quad);
+                    }
+                }
+            }
+        }
+    }
+
+    protected Map.Tile getTile(Map.Tileset tileset, int tileId) {
+        if (tileset.getTiles() == null) return null;
+
+        return tileset.getTiles().stream().filter(t -> t.getId() == tileId).findFirst().orElse(null);
+    }
+
+    protected boolean isTileAnimated(Map.Tile tile) {
+        return tile.getAnimation() != null;
+    }
+
+    private BufferedImage getAnimatedTileImage(Map.Tileset tileset, BufferedImage image, int finalTileId, int elapsedTime) {
+        if (tileset.getTiles() == null) return null;
+
+        Map.Tile tile = tileset.getTiles().stream()
+                .filter(t -> finalTileId == t.getId())
+                .findFirst()
+                .orElse(null);
+
+        int tileId = finalTileId;
+
+        if (!this.isTileAnimated(tile)) return null;
+
+        if (tile != null && tile.getAnimation() != null) {
+            List<Map.TileAnimationFrame> frames = tile.getAnimation();
+            int totalDuration = frames.stream().mapToInt(f -> f.getDuration()).sum();
+            int currentTime = elapsedTime % totalDuration;
+            int accumulatedTime = 0;
+
+            for (Map.TileAnimationFrame frame : frames) {
+                accumulatedTime += frame.getDuration();
+                if (currentTime < accumulatedTime) {
+                    tileId = frame.getTileId();
+                    break;
+                }
+            }
+        } else {
+            return null;
+        }
+
+        int tilesPerRow = tileset.getImageWidth() / tileset.getTileWidth();
+        int tileX = (tileId % tilesPerRow) * tileset.getTileWidth();
+        int tileY = (tileId / tilesPerRow) * tileset.getTileHeight();
+
+        return image.getSubimage(tileX, tileY, tileset.getTileWidth(), tileset.getTileHeight());
+    }
+
+    private Map.Tileset findTilesetForGid(int gid) {
+        for (Map.Tileset tileset : this.map.getTilesets()) {
+            if (gid >= tileset.getFirstGid() &&
+                    gid < tileset.getFirstGid() + tileset.getTileCount()) {
+                return tileset;
+            }
+        }
+        return null;
     }
 
     public void draw(DrawTool drawTool) {
@@ -148,9 +238,9 @@ public class MapManager {
 
     private boolean inView(Quad quad) {
         int quadSize = 32;
-        if (quad.getX() >= this.cameraController.getX() / this.cameraController.getZoom() - quadSize && quad.getY() >= this.cameraController.getY() / this.cameraController.getZoom() - quadSize) {
-            if (quad.getX() + quad.getWidth() <= (this.cameraController.getX() + Config.WINDOW_WIDTH) / this.cameraController.getZoom() + quadSize &&
-                    quad.getY() + quad.getHeight() <= (this.cameraController.getY() + Config.WINDOW_HEIGHT) / this.cameraController.getZoom() + quadSize) {
+        if (quad.getX() >= GameScene.getInstance().getCameraController().getX() / GameScene.getInstance().getCameraController().getZoom() - quadSize && quad.getY() >= GameScene.getInstance().getCameraController().getY() / GameScene.getInstance().getCameraController().getZoom() - quadSize) {
+            if (quad.getX() + quad.getWidth() <= (GameScene.getInstance().getCameraController().getX() + Config.WINDOW_WIDTH) / GameScene.getInstance().getCameraController().getZoom() + quadSize &&
+                    quad.getY() + quad.getHeight() <= (GameScene.getInstance().getCameraController().getY() + Config.WINDOW_HEIGHT) / GameScene.getInstance().getCameraController().getZoom() + quadSize) {
                 return true;
             }
         }
@@ -190,6 +280,9 @@ public class MapManager {
     public class Quad implements IOrder {
         private Batch batch;
         private BufferedImage quadImage;
+        private int tileId;
+        private Map.Tile tile;
+        private int gid;
         private double x;
         private double y;
         private double quadX;
@@ -197,13 +290,28 @@ public class MapManager {
         private double width;
         private double height;
 
-        public Quad(Batch batch, double x, double y, int quadX, int quadY, int width, int height) {
+        public Quad(Batch batch, int gid, double x, double y, int quadX, int quadY, int width, int height) {
             this.batch = batch;
             this.quadImage = batch.getImage().getSubimage(quadX, quadY, width, height);
+            this.gid = gid;
+            this.tileId = gid - batch.getTileset().getFirstGid();
+            this.tile = getTile(batch.getTileset(), gid - batch.getTileset().getFirstGid());
             this.x = x;
             this.y = y;
             this.quadX = quadX;
             this.quadY = quadY;
+            this.width = width;
+            this.height = height;
+        }
+
+        public Quad(Batch batch, int gid, double x, double y, BufferedImage tileImage, int width, int height) {
+            this.batch = batch;
+            this.quadImage = tileImage;
+            this.gid = gid;
+            this.tileId = gid - batch.getTileset().getFirstGid();
+            this.tile = getTile(batch.getTileset(), gid - batch.getTileset().getFirstGid());
+            this.x = x;
+            this.y = y;
             this.width = width;
             this.height = height;
         }
@@ -218,7 +326,15 @@ public class MapManager {
         }
 
         public BufferedImage getQuadImage() {
+            if (this.tile != null && isTileAnimated(this.tile)) {
+                return getAnimatedTileImage(this.batch.getTileset(), this.batch.getImage(), this.tileId, (int) System.currentTimeMillis());
+            }
+
             return this.quadImage;
+        }
+
+        public int getGid() {
+            return this.gid;
         }
 
         public double getX() {

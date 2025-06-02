@@ -6,11 +6,10 @@ import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.Easings;
 import kebab_simulator.control.CameraController;
 import kebab_simulator.control.Wrapper;
-import kebab_simulator.event.services.EventProcessCallback;
-import kebab_simulator.event.services.process.EventLoadAssetsProcess;
 import kebab_simulator.graphics.OrderRenderer;
 import kebab_simulator.graphics.map.MapManager;
-import kebab_simulator.model.visual.impl.component.InfoVisual;
+import kebab_simulator.graphics.map.ObjectSpawner;
+import kebab_simulator.model.visual.impl.component.InfoComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,26 +39,11 @@ public class GameScene extends Scene {
         this.interactables = new ArrayList<>();
         this.cameraController = CameraController
                 .create(this.viewController, this.viewController.getProgramController(), 0, 0)
-                .zoom(3)
-                .smooth((x) -> Easings.easeInCubic(x))
-                .delay(1.0);
+                .zoom(2)
+                .smooth((x) -> Easings.easeInCubic(x));
         this.renderer = new OrderRenderer();
 
-        this.visuals.add(new InfoVisual());
-
-        Wrapper.getProcessManager().queue(new EventLoadAssetsProcess("Loading map", () -> {
-            MapManager map = MapManager.importMap("map.json", List.of("floor", "grass"));
-            GameScene.getInstance().setGameMap(map);
-            return map;
-
-        }, new EventProcessCallback<MapManager>() {
-            @Override
-            public void onSuccess(MapManager data) {
-                viewController.continueStart();
-            }
-            @Override
-            public void onFailure(Throwable e) {}
-        }));
+        this.visuals.add(new InfoComponent());
     }
 
     public void updatePhysics(double dt) {
@@ -70,6 +54,9 @@ public class GameScene extends Scene {
     @Override
     public void update(double dt) {
         this.getDrawables().forEach(d -> d.update(dt));
+        for (ObjectSpawner<?> spawner : ObjectSpawner.objects) {
+            spawner.update(dt);
+        }
         super.update(dt);
     }
 
@@ -84,9 +71,9 @@ public class GameScene extends Scene {
         GameScene.getInstance().getRenderer().draw(drawTool);
         this.getDrawables().forEach(d -> d.draw(drawTool));
 
-        Wrapper.getColliderManager().getColliders().values().forEach(r -> {
+        /*Wrapper.getColliderManager().getColliders().values().forEach(r -> {
             r.renderHitbox(drawTool);
-        });
+        });*/
 
         this.cameraController.detach(drawTool);
     }

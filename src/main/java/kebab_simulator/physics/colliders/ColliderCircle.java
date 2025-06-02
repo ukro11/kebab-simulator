@@ -3,10 +3,9 @@ package kebab_simulator.physics.colliders;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.control.Wrapper;
 import kebab_simulator.physics.*;
-import kebab_simulator.utils.MathUtils;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.MathUtils;
+import kebab_simulator.utils.misc.Vec2;
 
-import java.awt.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,8 +39,6 @@ public class ColliderCircle extends Collider {
                 if (MathUtils.AABB(this, other)) {
                     return MathUtils.SAT(this, other);
                 }
-                this.setHitboxColor(Color.RED);
-                other.setHitboxColor(Color.RED);
             }
         }
         return false;

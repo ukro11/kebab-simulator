@@ -1,6 +1,6 @@
 package kebab_simulator.event.services;
 
 public interface EventProcessCallback<T> {
-    void onSuccess(T data);
-    void onFailure(Throwable e);
+    default void onSuccess(T data) {}
+    default void onFailure(Throwable e) {}
 }

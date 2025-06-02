@@ -1,6 +1,6 @@
 package kebab_simulator.physics;
 
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.Vec2;
 
 import java.security.InvalidParameterException;
 
