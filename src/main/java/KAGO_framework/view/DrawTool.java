@@ -1,6 +1,6 @@
 package KAGO_framework.view;
 
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.Vec2;
 
 import javax.swing.*;
 import java.awt.*;
@@ -125,6 +125,13 @@ public class DrawTool {
      */
     public void setCurrentColor(Color color){
         if (graphics2D!= null && color != null) graphics2D.setColor( color );
+    }
+
+    public void setCurrentColor(Color color, int alpha){
+        if (graphics2D!= null && color != null) {
+            var c = new Color(color.getRed(), color.getGreen(), color.getBlue(), alpha);
+            graphics2D.setColor(c);
+        }
     }
 
     /**
@@ -368,8 +375,8 @@ public class DrawTool {
      * @param y Die y-Position des Textbeginns
      * @param text Der anzuzeigende Text
      */
-    public void drawText(double x, double y, String text){
-        if (graphics2D!=null) graphics2D.drawString(text,(int)x,(int)y);
+    public void drawText(String text, double x, double y){
+        if (graphics2D!=null) graphics2D.drawString(text,(float) x, (float) y);
     }
 
     /**
@@ -389,21 +396,48 @@ public class DrawTool {
     }
 
     public void push() {
-        if (graphics2D != null) {
-            GraphicsState currentState = new GraphicsState(
-                (AffineTransform) graphics2D.getTransform().clone(),
-                graphics2D.getRenderingHints()
-            );
-            stack.push(currentState);
+        if (this.graphics2D != null) {
+            GraphicsState currentState = new GraphicsState(this.graphics2D);
+            this.stack.push(currentState);
         }
     }
 
     public void pop() {
-        if (!stack.isEmpty()) {
-            var state = stack.pop();
-            graphics2D.setTransform(state.getTransform());
-            //graphics2D.setRenderingHints(state.getRenderingHints());
+        if (!this.stack.isEmpty()) {
+            this.stack.pop().apply(this.graphics2D);
+
+            /*graphics2D.setRenderingHints(Map.of(
+                RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON
+            ));*/
         }
+    }
+
+    public void drawCenteredText(String text, double x, double y, double width, double height){
+        this.drawCenteredText(graphics2D.getFont(), text, x, y, width, height);
+    }
+
+    public void drawCenteredText(Font font, String text, double x, double y, double width, double height){
+        FontMetrics metrics = graphics2D.getFontMetrics(font);
+        double textX = x + (width - metrics.stringWidth(text)) / 2;
+        double textY = y + ((height - metrics.getHeight()) / 2) + metrics.getAscent();
+        graphics2D.setFont(font);
+        this.drawText(text, textX, textY);
+    }
+
+    public double getFontWidth(String text) {
+        return this.getFontWidth(graphics2D.getFont(), text);
+    }
+
+    public double getFontWidth(Font font, String text) {
+        return graphics2D.getFontMetrics(font).stringWidth(text);
+    }
+
+    public double getFontHeight() {
+        return this.getFontHeight(graphics2D.getFont());
+    }
+
+    public double getFontHeight(Font font) {
+        return graphics2D.getFontMetrics(font).getDescent();
     }
 
     /**
@@ -414,6 +448,8 @@ public class DrawTool {
      */
     public void setGraphics2D(Graphics2D g2d, JComponent parent){
         graphics2D = g2d;
+        graphics2D.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        graphics2D.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
         this.parent = parent;
     }
 
@@ -426,20 +462,53 @@ public class DrawTool {
     }
 
     private class GraphicsState {
-        private final AffineTransform transform;
-        private final RenderingHints renderingHints;
+        private AffineTransform transform;
+        private Color color;
+        private Font font;
+        private Stroke stroke;
+        private Composite composite;
+        private RenderingHints renderingHints;
 
-        public GraphicsState(AffineTransform transform, RenderingHints renderingHints) {
-            this.transform = transform;
-            this.renderingHints = renderingHints;
+        public GraphicsState(Graphics2D g) {
+            this.transform = g.getTransform();
+            this.color = g.getColor();
+            this.font = g.getFont();
+            this.stroke = g.getStroke();
+            this.composite = g.getComposite();
+            this.renderingHints = g.getRenderingHints();
+        }
+
+        public void apply(Graphics2D g) {
+            g.setTransform(transform);
+            g.setColor(color);
+            g.setFont(font);
+            g.setStroke(stroke);
+            g.setComposite(composite);
+            g.setRenderingHints(renderingHints);
         }
 
         public AffineTransform getTransform() {
-            return this.transform;
+            return transform;
+        }
+
+        public Color getColor() {
+            return color;
+        }
+
+        public Font getFont() {
+            return font;
+        }
+
+        public Stroke getStroke() {
+            return stroke;
+        }
+
+        public Composite getComposite() {
+            return composite;
         }
 
         public RenderingHints getRenderingHints() {
-            return this.renderingHints;
+            return renderingHints;
         }
     }
 }

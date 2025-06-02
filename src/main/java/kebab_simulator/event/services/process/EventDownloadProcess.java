@@ -53,7 +53,7 @@ public class EventDownloadProcess extends EventProcess {
                 if (this.callback != null) this.callback.onSuccess(new EventDownloadProcessData(this.output, 100, fileOutputStream, dataBuffer));
             }
         } catch (IOException e) {
-            this.logger.info("Error while Download File: \n{}", e.getMessage());
+            this.logger.info("Error while downloading file:", e.getMessage());
             this.callback.onFailure(e);
         }
     }

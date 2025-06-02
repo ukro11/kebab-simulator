@@ -3,7 +3,7 @@ package kebab_simulator.physics.colliders;
 import kebab_simulator.physics.AABB;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.ColliderForm;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.Vec2;
 
 import java.util.UUID;
 

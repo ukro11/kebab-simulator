@@ -2,16 +2,22 @@ package kebab_simulator.event.events;
 
 import kebab_simulator.event.Event;
 
+import java.awt.event.KeyEvent;
+
 public class KeyPressedEvent extends Event {
 
-    private int keyCode;
+    private final KeyEvent keyEvent;
 
-    public KeyPressedEvent(int keyCode) {
+    public KeyPressedEvent(KeyEvent keyEvent) {
         super("keypressed");
-        this.keyCode = keyCode;
+        this.keyEvent = keyEvent;
     }
 
     public int getKeyCode() {
-        return keyCode;
+        return this.keyEvent.getKeyCode();
+    }
+
+    public KeyEvent getKeyEvent() {
+        return keyEvent;
     }
 }

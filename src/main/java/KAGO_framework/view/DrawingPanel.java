@@ -1,13 +1,5 @@
 package KAGO_framework.view;
 
-import KAGO_framework.control.ViewController;
-import kebab_simulator.animation.Easings;
-import kebab_simulator.control.CameraController;
-import kebab_simulator.control.Wrapper;
-import kebab_simulator.utils.TimerUtils;
-
-import javax.swing.*;
-import java.awt.*;
 /**
  * Stellt eine Zeichenfläche in einem DrawFrame-Fenster dar. Beim DrawingPanel über die Methode "add" registrierte
  * Objekte werden vom Panel gezeichnet. Außerdem kümmert sich das DrawingPanel um das Aufrufen der im framework

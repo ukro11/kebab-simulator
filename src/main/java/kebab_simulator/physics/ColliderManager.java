@@ -12,12 +12,13 @@ public class ColliderManager {
 
     private final Map<String, Collider> colliders = new ConcurrentHashMap<>();
     private final Logger logger = LoggerFactory.getLogger(ColliderManager.class);
-    private static Map<String, Set<String>> classPrevention;
+    private static Map<String, Set<String>> classCollisionPrevention;
 
     static {
-        ColliderManager.classPrevention = Map.of(
+        ColliderManager.classCollisionPrevention = Map.of(
             //"entity_player", Set.of("entity_player"),
-            "map", Set.of("map")
+            "map", Set.of("map"),
+            "entity_item", Set.of("map", "entity_player")
         );
     }
 
@@ -36,12 +37,12 @@ public class ColliderManager {
     }
 
     private boolean canCollide(Collider body1, Collider body2) {
-        Set<String> body1PreventionGroups = ColliderManager.classPrevention.get(body1.getColliderClass());
+        Set<String> body1PreventionGroups = ColliderManager.classCollisionPrevention.get(body1.getColliderClass());
         if (body1PreventionGroups != null && body1PreventionGroups.contains(body2.getColliderClass())) {
             return false;
         }
 
-        Set<String> body2PreventionGroups = ColliderManager.classPrevention.get(body2.getColliderClass());
+        Set<String> body2PreventionGroups = ColliderManager.classCollisionPrevention.get(body2.getColliderClass());
         if (body2PreventionGroups != null && body2PreventionGroups.contains(body1.getColliderClass())) {
             return false;
         }
@@ -55,6 +56,11 @@ public class ColliderManager {
     }
 
     public void createBody(Collider body) {
+        if (this.colliders.containsKey(body.getId())) {
+            this.logger.error("There is already a body with that the id {}", body.getId());
+            return;
+        }
+
         this.colliders.put(body.getId(), body);
         this.logger.debug("Body {} was created", body.getId());
     }

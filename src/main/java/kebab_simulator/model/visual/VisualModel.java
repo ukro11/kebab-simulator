@@ -10,7 +10,6 @@ public abstract class VisualModel implements Comparable<VisualModel> {
     protected ProgramController programController;
     protected String id;
     protected int zIndex;
-    protected boolean pauseGame = false;
 
     public VisualModel(String id) {
         this(id, 0);
@@ -27,16 +26,8 @@ public abstract class VisualModel implements Comparable<VisualModel> {
         return this.id;
     }
 
-    public int getzIndex() {
+    public int zIndex() {
         return zIndex;
-    }
-
-    public void setPauseGame(boolean pauseGame) {
-        this.pauseGame = pauseGame;
-    }
-
-    public boolean shouldPauseGame() {
-        return this.pauseGame;
     }
 
     public abstract void draw(DrawTool drawTool);

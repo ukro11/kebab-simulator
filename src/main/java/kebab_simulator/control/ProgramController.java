@@ -4,14 +4,19 @@ import KAGO_framework.control.ViewController;
 import kebab_simulator.Config;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.event.events.collider.ColliderCollisionEvent;
+import kebab_simulator.event.services.EventProcessCallback;
+import kebab_simulator.event.services.process.EventLoadAssetsProcess;
+import kebab_simulator.graphics.map.MapManager;
 import kebab_simulator.model.entity.impl.EntityPlayer;
 import kebab_simulator.model.scene.GameScene;
-import kebab_simulator.model.visual.impl.component.InfoVisual;
+import kebab_simulator.model.visual.impl.component.InfoComponent;
 import kebab_simulator.test.Test;
+import kebab_simulator.utils.game.CooldownManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.event.KeyEvent;
+import java.util.List;
 
 /**
  * Ein Objekt der Klasse ProgramController dient dazu das Programm zu steuern.
@@ -44,13 +49,22 @@ public class ProgramController {
      * nach Erstellen des Fensters, usw. erst aufgerufen.
      */
     public void preStartProgram() {
+        Wrapper.getProcessManager().queue(new EventLoadAssetsProcess("Loading map", () -> {
+            MapManager map = MapManager.importMap("/map/restaurant.json", List.of("floor", "grass"));
+            GameScene.getInstance().setGameMap(map);
 
+        }, new EventProcessCallback() {
+            @Override
+            public void onSuccess(Object data) {
+                viewController.continueStart();
+            }
+        }));
     }
 
     private void startTest() {
         Test.setup(this.viewController);
-        // ColliderTest.getInstance().test1(40, 0, new Vec2(0, 20));
-        // ColliderTest.getInstance().test2(40, 0, new Vec2(0, 0), new Vec2(0, 20));
+        //ColliderTest.getInstance().test1(100, 0, new Vec2(0, 20));
+        //ColliderTest.getInstance().test2(40, 0, new Vec2(0, 0), new Vec2(0, 20));
         // ColliderTest.getInstance().test3(80, 0, new Vec2(0, 20));
         // ColliderTest.getInstance().test4(80, 0, new Vec2(0, -20), new Vec2(0, 0));
     }
@@ -62,7 +76,7 @@ public class ProgramController {
     public void startProgram() {
         if (Config.RUN_ENV == Config.Environment.DEVELOPMENT) {
             this.startTest();
-            GameScene.getInstance().getVisuals().add(new InfoVisual());
+            GameScene.getInstance().getVisuals().add(new InfoComponent());
         }
 
         Wrapper.getEventManager().addEventListener("keypressed", (KeyPressedEvent event) -> {
@@ -71,11 +85,10 @@ public class ProgramController {
             }
         });
 
-        EntityPlayer dummy = EntityPlayer.createDummy("dummy1", 480, 500);
+        EntityPlayer dummy = Wrapper.getEntityManager().spawnPlayer("dummy1", 480, 640);
         dummy.getBody().setSensor(false);
         dummy.getBody().onCollision((event) -> {
             if (event.isBodyInvolved(player.getBody())) {
-                //logger.info("{}", event.getState());
                 if (event.getState() == ColliderCollisionEvent.CollisionState.COLLISION_BEGIN_CONTACT) {
                     dummy.setShowHitbox(true);
                     player.setShowHitbox(true);
@@ -90,7 +103,7 @@ public class ProgramController {
         dummy.freeze(true);
         Wrapper.getEntityManager().registerEntity(dummy);
 
-        this.player = EntityPlayer.createPlayer("player", 510, 570);
+        this.player = Wrapper.getEntityManager().spawnPlayer("player", 435, 225);
         this.player.setShowHitbox(false);
         Wrapper.getEntityManager().registerEntity(this.player);
         GameScene.getInstance().getCameraController().focusAtEntity(this.player);
@@ -101,7 +114,6 @@ public class ProgramController {
      * @param dt Zeit seit letztem Frame in Sekunden
      */
     public void updateProgram(double dt){
-        // Wird zur Zeit nicht gebraucht bei Bedarf, kann es wieder auskommentiert werden
-        // Wrapper.getEventManager().dispatchEvent(new UpdateEvent(dt));
+        CooldownManager.update(dt);
     }
 }

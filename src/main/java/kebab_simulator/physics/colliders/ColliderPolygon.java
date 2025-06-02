@@ -3,10 +3,9 @@ package kebab_simulator.physics.colliders;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.control.Wrapper;
 import kebab_simulator.physics.*;
-import kebab_simulator.utils.MathUtils;
-import kebab_simulator.utils.Vec2;
+import kebab_simulator.utils.misc.MathUtils;
+import kebab_simulator.utils.misc.Vec2;
 
-import java.awt.*;
 import java.security.InvalidParameterException;
 import java.util.*;
 import java.util.List;
@@ -57,30 +56,6 @@ public class ColliderPolygon extends Collider {
         if (register) Wrapper.getColliderManager().createBody(this);
     }
 
-    public boolean isConvex() {
-        if (vertices.length < 4) return true; // Dreiecke sind immer konvex
-
-        boolean gotNegative = false;
-        boolean gotPositive = false;
-
-        for (int i = 0; i < vertices.length; i++) {
-            Vec2 a = vertices[i];
-            Vec2 b = vertices[(i+1) % vertices.length];
-            Vec2 c = vertices[(i+2) % vertices.length];
-
-            Vec2 ab = b.clone().sub(a);
-            Vec2 bc = c.clone().sub(b);
-            double cross = ab.cross(bc);
-
-            if (cross < 0) gotNegative = true;
-            else if (cross > 0) gotPositive = true;
-
-            if (gotNegative && gotPositive) return false;
-        }
-
-        return true;
-    }
-
     @Override
     public boolean handleCollision(Collider other) {
         if (this.isDestroyed()) {
@@ -88,8 +63,6 @@ public class ColliderPolygon extends Collider {
         }
 
         if (!MathUtils.AABB(this, other)) {
-            this.setHitboxColor(Color.RED);
-            other.setHitboxColor(Color.RED);
             return false;
         }
 

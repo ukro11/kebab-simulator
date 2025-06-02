@@ -1,5 +1,6 @@
 package kebab_simulator.animation;
 
+import kebab_simulator.animation.states.CharacterAnimationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,11 +8,14 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
-public class AnimationRenderer<T extends AnimationState> {
+public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
 
     private Logger logger = LoggerFactory.getLogger(AnimationRenderer.class);
     private final HashMap<T, Animation<T>> animations;
@@ -23,6 +27,46 @@ public class AnimationRenderer<T extends AnimationState> {
     private int currentIndex = 0;
     private double elapsed;
     private boolean running = false;
+
+    public AnimationRenderer(String spriteSheetPath, int rows, int maxColumns, int frameWidth, int frameHeight, T state) {
+        try {
+            BufferedImage spriteSheet = ImageIO.read(AnimationRenderer.class.getResource(spriteSheetPath));
+            HashMap<T, Animation<T>> animations = new HashMap<>();
+            Class<T> enumClass = state.getDeclaringClass();
+            for (int i = 0; i < rows; i++) {
+                List<BufferedImage> frames = new ArrayList<>();
+                for (int j = 0; j < maxColumns; j++) {
+                    List<T> animationStates = IAnimationState.fetch(enumClass, i, j);
+                    if (animationStates == null) break;
+                    BufferedImage animationImage = spriteSheet.getSubimage(j * frameWidth, i * frameHeight, frameWidth, frameHeight);
+                    frames.add(animationImage);
+                    int k = j;
+                    AtomicBoolean clear = new AtomicBoolean(false);
+                    animationStates.forEach(animationState -> {
+                        if (animationState.getColumnRange().upperEndpoint() == k) {
+                            var f = frames.subList(0, frames.size());
+                            if (animationState.isReverse()) Collections.reverse(f);
+                            animations.put(animationState, new Animation<T>(animationState, f, animationState.getDuration(), animationState.isLoop(), animationState.isReverse()));
+                            clear.set(true);
+                        }
+                    });
+                    if (clear.get()) frames.clear();
+                }
+            }
+            this.animations = animations;
+
+            if (this.animations.values().stream().anyMatch(f -> this.animations.values().stream().filter(_f -> f.getState().equals(_f.getState())).count() > 1)) {
+                throw new InvalidParameterException("Atleast 2 framesLists have been found with the same state.");
+            }
+
+            this.currentAnimation = this.animations.values().stream().filter(s -> s.getState().equals(state)).findFirst().orElse(null);
+
+            if (this.currentAnimation == null) throw new NullPointerException(String.format("You did not passed an animation with the state: %s", state.name()));
+
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     public AnimationRenderer(List<Animation<T>> animations, T state) {
         HashMap<T, Animation<T>> map = new HashMap<>();
@@ -40,11 +84,11 @@ public class AnimationRenderer<T extends AnimationState> {
         if (this.currentAnimation == null) throw new NullPointerException(String.format("You did not passed an animation with the state: %s", state.name()));
     }
 
-    public static <S extends AnimationState> Animation<S> createAnimation(S state, double duration, String... paths) {
-        return AnimationRenderer.createAnimation(state, duration, false, paths);
+    public static <S extends CharacterAnimationState> Animation<S> createAnimation(S state, double duration, String... paths) {
+        return AnimationRenderer.createAnimation(state, duration, false, false, paths);
     }
 
-    public static <S extends AnimationState> Animation<S> createAnimation(S state, double duration, boolean loop, String... paths) {
+    public static <S extends CharacterAnimationState> Animation<S> createAnimation(S state, double duration, boolean loop, boolean reverse, String... paths) {
         List<BufferedImage> frames = new java.util.ArrayList<>();
         try {
             for (String path : paths) {
@@ -54,7 +98,7 @@ public class AnimationRenderer<T extends AnimationState> {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new Animation<S>(state, frames, duration, loop);
+        return new Animation<S>(state, frames, duration, loop, reverse);
     }
 
     public void start() {
@@ -88,7 +132,7 @@ public class AnimationRenderer<T extends AnimationState> {
         if (this.currentAnimation == null || this.currentAnimation.getState() != state) {
             if (this.animations.get(state) != null) {
                 this.currentAnimation = this.animations.get(state);
-                this.currentIndex = 0;
+                this.currentIndex = this.currentAnimation.isReverse() ? this.currentAnimation.getFrames().size() - 1 : 0;
                 this.elapsed = 0;
             }
         }
@@ -99,13 +143,22 @@ public class AnimationRenderer<T extends AnimationState> {
         if (this.elapsed == 0 && this.currentIndex == 0 && this.onStart != null) this.onStart.accept(this, this.currentIndex);
         this.elapsed += dt;
         Animation animation = this.currentAnimation;
+        int size = animation.getFrames().size();
         if (this.elapsed >= animation.getDurationPerFrame()) {
-            if (this.currentIndex == animation.getFrames().size() - 1) {
+            boolean lastIndex = animation.isReverse() ? this.currentIndex == 0 : this.currentIndex == size - 1;
+            if (lastIndex) {
+                int max = animation.isReverse() ? size - 1 : 0;
                 if (this.onFinish != null) this.onFinish.accept(this, this.currentIndex);
-                if (animation.isLoop()) this.currentIndex = 0;
+                if (animation.isLoop()) {
+                    this.currentIndex = max;
+                }
             } else {
                 if (this.onCycle != null) this.onCycle.accept(this, this.currentIndex);
-                this.currentIndex++;
+                if (animation.isReverse()) {
+                    this.currentIndex--;
+                } else {
+                    this.currentIndex++;
+                }
             }
             this.elapsed = 0;
         }
@@ -138,7 +191,7 @@ public class AnimationRenderer<T extends AnimationState> {
     }
 
     public boolean isRunning() {
-        return running;
+        return this.running;
     }
 
     public int getCurrentIndex() {

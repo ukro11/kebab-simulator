@@ -2,20 +2,23 @@ package kebab_simulator.animation;
 
 import java.awt.image.BufferedImage;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Animation<T extends AnimationState> {
+public class Animation<T extends IAnimationState> {
 
     private final T state;
-    private final List<BufferedImage> frames;
+    private final CopyOnWriteArrayList<BufferedImage> frames;
     private final double duration;
     private final boolean loop;
+    private final boolean reverse;
     private final double durationPerFrame;
 
-    public Animation(T state, List<BufferedImage> frames, double duration, boolean loop) {
+    public Animation(T state, List<BufferedImage> frames, double duration, boolean loop, boolean reverse) {
         this.state = state;
-        this.frames = frames;
+        this.frames = new CopyOnWriteArrayList<>(frames);
         this.duration = duration;
         this.loop = loop;
+        this.reverse = reverse;
         this.durationPerFrame = duration / frames.size();
     }
 
@@ -23,12 +26,16 @@ public class Animation<T extends AnimationState> {
         return this.state;
     }
 
-    public List<BufferedImage> getFrames() {
+    public CopyOnWriteArrayList<BufferedImage> getFrames() {
         return this.frames;
     }
 
     public double getDuration() {
         return this.duration;
+    }
+
+    public boolean isReverse() {
+        return this.reverse;
     }
 
     public boolean isLoop() {
@@ -37,5 +44,16 @@ public class Animation<T extends AnimationState> {
 
     public double getDurationPerFrame() {
         return this.durationPerFrame;
+    }
+
+    @Override
+    public String toString() {
+        return "Animation{" +
+                "state=" + state +
+                ", duration=" + duration +
+                ", loop=" + loop +
+                ", reverse=" + reverse +
+                ", durationPerFrame=" + durationPerFrame +
+                '}';
     }
 }

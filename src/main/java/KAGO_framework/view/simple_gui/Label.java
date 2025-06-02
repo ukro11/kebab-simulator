@@ -78,7 +78,7 @@ public class Label extends GraphicalObject {
             drawTool.drawImage(getMyImage(),x,y);
         }else {
             drawTool.formatText(font, style, textsize);
-            drawTool.drawText(x + 5, y + height * 0.8, text);
+            //drawTool.drawText(x + 5, y + height * 0.8, text);
         }
         if (hasBorder){
             drawTool.setCurrentColor(0, 0, 0, 255);
