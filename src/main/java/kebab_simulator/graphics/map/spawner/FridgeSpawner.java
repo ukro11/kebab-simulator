@@ -4,13 +4,11 @@ import com.google.common.collect.Range;
 import kebab_simulator.Config;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.IAnimationState;
-import kebab_simulator.animation.states.CharacterAnimationState;
 import kebab_simulator.control.Wrapper;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.event.events.MouseClickedEvent;
 import kebab_simulator.graphics.map.ObjectSpawner;
 import kebab_simulator.model.visual.impl.gui.GuiScreen;
-import kebab_simulator.model.visual.impl.gui.GuiTest;
 import kebab_simulator.physics.Collider;
 import kebab_simulator.utils.game.CooldownManager;
 
@@ -37,7 +35,7 @@ public class FridgeSpawner extends ObjectSpawner<FridgeSpawner.FridgeAnimationSt
 
         Wrapper.getEventManager().addEventListener("keypressed", (KeyPressedEvent event) -> {
             if (event.getKeyCode() == KeyEvent.VK_E && GuiScreen.getCurrentScreen() == null) {
-                var player = this.programController.player;
+                /*var player = this.programController.player;
                 if (this.sensorCollider.collides(player.getBody())) {
                     if (this.cooldown.use()) {
                         this.getRenderer().switchState(FridgeAnimationState.OPEN);
@@ -46,7 +44,7 @@ public class FridgeSpawner extends ObjectSpawner<FridgeSpawner.FridgeAnimationSt
                         testScreen.onClose((screen) -> this.getRenderer().switchState(FridgeAnimationState.CLOSED));
                         GuiScreen.open(testScreen);
                     }
-                }
+                }*/
             }
         });
 

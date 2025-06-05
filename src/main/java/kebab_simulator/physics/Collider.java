@@ -10,10 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class Collider {
@@ -82,6 +80,11 @@ public abstract class Collider {
             Wrapper.getEventManager().dispatchEvent(event);
         }
         return handle;
+    }
+
+    public boolean queueCollision(Collider other) {
+        // TODO
+        return false;
     }
 
     public abstract boolean handleCollision(Collider other);

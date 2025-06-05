@@ -3,6 +3,7 @@ package kebab_simulator.model.scene;
 import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
 import KAGO_framework.view.DrawTool;
+import kebab_simulator.Config;
 import kebab_simulator.animation.Easings;
 import kebab_simulator.control.CameraController;
 import kebab_simulator.control.Wrapper;
@@ -13,6 +14,7 @@ import kebab_simulator.model.visual.impl.component.InfoComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
@@ -75,6 +77,8 @@ public class GameScene extends Scene {
             r.renderHitbox(drawTool);
         });*/
 
+        this.gameMap.drawAfterPlayer(drawTool);
+
         this.cameraController.detach(drawTool);
     }
 
@@ -82,6 +86,9 @@ public class GameScene extends Scene {
     public void draw(DrawTool drawTool) {
         GameScene.getInstance().drawGame(drawTool);
         super.draw(drawTool);
+        drawTool.setCurrentColor(new Color(154, 75, 24), 50);
+        drawTool.drawFilledRectangle(0, 0, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
+        drawTool.resetColor();
     }
 
     @Override

@@ -4,8 +4,6 @@ import KAGO_framework.view.DrawTool;
 import com.google.gson.Gson;
 import kebab_simulator.Config;
 import kebab_simulator.graphics.IOrder;
-import kebab_simulator.graphics.map.spawner.FridgeSpawner;
-import kebab_simulator.graphics.map.spawner.OvenSpawner;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.Collider;
@@ -31,23 +29,30 @@ public class MapManager {
     private Logger logger = LoggerFactory.getLogger(MapManager.class);
 
     private Map map;
+    private String fileName;
     private final HashMap<Map.Tileset, Batch> batches;
     private final List<String> staticLayers;
+    private final List<String> staticLayersAfterPlayer;
     private final List<Quad> staticQuads;
+    private final List<Quad> staticQuadsAfterPlayer;
 
-    private MapManager(String fileName, List<String> staticLayers) {
+    private MapManager(String fileName, List<String> staticLayers, List<String> staticLayersAfterPlayer) {
+        String[] f = fileName.split("/");
+        this.fileName = f[f.length - 1];
         this.staticLayers = staticLayers;
+        this.staticLayersAfterPlayer = staticLayersAfterPlayer;
         InputStream fileStream = getClass().getResourceAsStream("/graphic" + fileName);
         if (fileStream == null) throw new NullPointerException("The map you want to import does not exist");
         Gson gson = new Gson();
         this.map = gson.fromJson(new InputStreamReader(fileStream, StandardCharsets.UTF_8), Map.class);
         this.batches = new HashMap<>();
         this.staticQuads = new ArrayList<>();
+        this.staticQuadsAfterPlayer = new ArrayList<>();
         this.load();
     }
 
-    public static MapManager importMap(String fileName, List<String> staticLayers) {
-        return new MapManager(fileName, staticLayers);
+    public static MapManager importMap(String fileName, List<String> staticLayers, List<String> staticLayersAfterPlayer) {
+        return new MapManager(fileName, staticLayers, staticLayersAfterPlayer);
     }
 
     private void load() {
@@ -69,47 +74,27 @@ public class MapManager {
                             var v = o.getPolygon().get(i);
                             vertices[i] = new Vec2(v.getX(), v.getY());
                         }
-                        collider = new ColliderPolygon(String.format("polygon-%s-%d", layer.getName(), layer.getObjects().indexOf(o)), BodyType.STATIC, o.getX(), o.getY(), vertices);
-                        if (layer.getName().equals("sensors")) collider.setSensor(true);
+                        collider = new ColliderPolygon(String.format("polygon-%s-%d", layer.getName(), layer.getObjects().indexOf(o) + 1), BodyType.STATIC, o.getX(), o.getY(), vertices);
+                        if (layer.getName().equals("sensor")) collider.setSensor(true);
                         collider.setColliderClass("map");
 
                     } else if (o.isEllipse()) {
                         var radius = o.getWidth() / 2;
                         collider = new ColliderCircle(
-                            String.format("circle-%s-%d", layer.getName(), layer.getObjects().indexOf(o)),
+                            String.format("circle-%s-%d", layer.getName(), layer.getObjects().indexOf(o) + 1),
                             BodyType.STATIC, o.getX(), o.getY(), radius
                         );
-                        if (layer.getName().equals("sensors")) collider.setSensor(true);
+                        if (layer.getName().equals("sensor")) collider.setSensor(true);
                         collider.setColliderClass("map");
 
                     } else {
-                        collider = new ColliderRectangle(String.format("rectangle-%s-%d", layer.getName(), layer.getObjects().indexOf(o)), BodyType.STATIC, o.getX(), o.getY(), o.getWidth(), o.getHeight());
-                        if (layer.getName().equals("sensors")) collider.setSensor(true);
+                        collider = new ColliderRectangle(String.format("rectangle-%s-%d", layer.getName(), layer.getObjects().indexOf(o) + 1), BodyType.STATIC, o.getX(), o.getY(), o.getWidth(), o.getHeight());
+                        if (layer.getName().equals("sensor")) collider.setSensor(true);
                         collider.setColliderClass("map");
                     }
 
-                    if (layer.getName().equals("spawner")) {
-                        String[] args = o.getName().split("_");
-                        switch (args[0]) {
-                            case "oven": {
-                                GameScene.getInstance().getRenderer().register(new OvenSpawner(o.getName(), collider));
-                                break;
-                            }
-                            case "fridge": {
-                                var type = args[1].equals("meat") ? FridgeSpawner.FridgeType.MEAT_FRIDGE : FridgeSpawner.FridgeType.VEGETABLES_FRIDGE;
-                                GameScene.getInstance().getRenderer().register(new FridgeSpawner(type, o.getName(), collider));
-                                break;
-                            }
-                        }
-
-                    } else if (layer.getName().equals("sensors")) {
-                        var spawner = ObjectSpawner.fetchById(o.getName());
-                        if (spawner != null) {
-                            spawner.setSensorCollider(collider);
-
-                        } else {
-                            ObjectSpawner.mapSensor(o.getName(), collider);
-                        }
+                    if (this.fileName.equals("kitchen.json")) {
+                        KitchenMap.loadCollider(layer, o, collider);
                     }
                 }
             }
@@ -131,6 +116,25 @@ public class MapManager {
                         try {
                             String path = currentTileset.getImage().replace("sprites", "/graphic/map/sprites").toString();
                             BufferedImage image = ImageIO.read(getClass().getResource(path));
+
+                            if (layer.getName().equals("light")) {
+                                double factor = 1.6d;
+                                for (int imageX = 0; x < image.getWidth(); x++) {
+                                    for (int imageY = 0; y < image.getHeight(); y++) {
+                                        // Hole den Farbwert des aktuellen Pixels
+                                        Color originalColor = new Color(image.getRGB(imageX, imageY));
+
+                                        // Berechne den neuen Farbwert, indem du den Faktor anwendest
+                                        int r = Math.min((int)(originalColor.getRed() * factor), 255);
+                                        int g = Math.min((int)(originalColor.getGreen() * factor), 255);
+                                        int b = Math.min((int)(originalColor.getBlue() * factor), 255);
+
+                                        // Setze den neuen Farbwert in das neue Bild
+                                        image.setRGB(imageX, imageY, new Color(r, g, b).getRGB());
+                                    }
+                                }
+                            }
+
                             currentTileset.setPath(path);
                             this.batches.put(currentTileset, new Batch(
                                     image, currentTileset.getImage(), currentTileset, layer
@@ -146,10 +150,6 @@ public class MapManager {
                     double tileX = Math.floor((chunkX + x) * currentTileset.getTileWidth());
                     double tileY = Math.floor((chunkY + y) * currentTileset.getTileHeight());
 
-                    int localTileId = gid - currentTileset.getFirstGid();
-                    //BufferedImage tileImage = getAnimatedTileImage(currentTileset, image, localTileId, (int) System.currentTimeMillis());
-
-
                     Quad quad = new Quad(
                             this.batches.get(currentTileset),
                             gid,
@@ -163,6 +163,9 @@ public class MapManager {
 
                     if (this.staticLayers.contains(layer.getName())) {
                         this.staticQuads.add(quad);
+
+                    } else if (this.staticLayersAfterPlayer.contains(layer.getName())) {
+                        this.staticQuadsAfterPlayer.add(quad);
 
                     } else {
                         GameScene.getInstance().getRenderer().register(quad);
@@ -234,6 +237,13 @@ public class MapManager {
             gr.drawImage(quad.getQuadImage(), (int) quad.getX(), (int) quad.getY(), (int) quad.getWidth(), (int) quad.getHeight(), null);
         }
         // TODO: OrderRenderer sort render order between quads and entities
+    }
+
+    public void drawAfterPlayer(DrawTool drawTool) {
+        Graphics gr = drawTool.getGraphics2D();
+        for (Quad quad : this.staticQuadsAfterPlayer) {
+            gr.drawImage(quad.getQuadImage(), (int) quad.getX(), (int) quad.getY(), (int) quad.getWidth(), (int) quad.getHeight(), null);
+        }
     }
 
     private boolean inView(Quad quad) {

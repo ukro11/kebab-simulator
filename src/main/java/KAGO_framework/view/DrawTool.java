@@ -31,6 +31,10 @@ public class DrawTool {
         if (graphics2D!= null) graphics2D.drawImage(bI, (int)x, (int)y, null);
     }
 
+    public void drawImage(BufferedImage bI, double x, double y, Color color){
+        if (graphics2D!= null) graphics2D.drawImage(bI, (int)x, (int)y, color, null);
+    }
+
     /**
      * Zeichnet ein Objekt der Klasse BufferedImage.
      * @param bI das BufferedImage, das gezeichnet wird
@@ -56,6 +60,8 @@ public class DrawTool {
             graphics2D.drawImage(bI, transform, null);
         }
     }
+
+    // TODO: DrawTool Origin centered
 
     /**
      * Modifiziert die Breite aller gezeichneten Linien

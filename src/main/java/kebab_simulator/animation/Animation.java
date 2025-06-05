@@ -54,6 +54,7 @@ public class Animation<T extends IAnimationState> {
                 ", loop=" + loop +
                 ", reverse=" + reverse +
                 ", durationPerFrame=" + durationPerFrame +
+                ", frames=" + frames.size() +
                 '}';
     }
 }
