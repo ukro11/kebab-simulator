@@ -3,7 +3,6 @@ package kebab_simulator.graphics.map.spawner;
 import com.google.common.collect.Range;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.IAnimationState;
-import kebab_simulator.animation.states.CharacterAnimationState;
 import kebab_simulator.control.Wrapper;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.graphics.map.ObjectSpawner;
@@ -34,7 +33,7 @@ public class OvenSpawner extends ObjectSpawner<OvenSpawner.OvenAnimationState> {
         Wrapper.getEventManager().addEventListener("keypressed", (KeyPressedEvent event) -> {
             if (event.getKeyCode() == KeyEvent.VK_E) {
                 var player = this.programController.player;
-                if (this.sensorCollider.collides(player.getBody())) {
+                /*if (this.sensorCollider.collides(player.getBody())) {
                     if (this.cooldown.use()) {
                         var state = this.getRenderer().getCurrentAnimation().getState();
                         if (state == OvenAnimationState.OPEN) {
@@ -46,7 +45,7 @@ public class OvenSpawner extends ObjectSpawner<OvenSpawner.OvenAnimationState> {
                             player.switchState(CharacterAnimationState.IDLE_TOP);
                         }
                     }
-                }
+                }*/
             }
         });
     }

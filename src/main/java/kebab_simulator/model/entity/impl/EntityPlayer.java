@@ -8,10 +8,7 @@ import kebab_simulator.control.Wrapper;
 import kebab_simulator.event.services.EventProcessCallback;
 import kebab_simulator.event.services.process.EventLoadAssetsProcess;
 import kebab_simulator.model.entity.Entity;
-import kebab_simulator.model.entity.EntityManager;
-import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.Collider;
-import kebab_simulator.physics.colliders.ColliderPolygon;
 import kebab_simulator.utils.misc.Vec2;
 
 import java.awt.event.KeyEvent;
@@ -51,7 +48,7 @@ public class EntityPlayer extends Entity {
     @Override
     public void update(double dt) {
         super.update(dt);
-        if (!this.body.isDestroyed()) {
+        if (!this.body.isDestroyed() && this.renderer != null) {
             if (this.freeze && EntityPlayer.IDLE_STATES.contains(this.renderer.getCurrentAnimation().getState())) return;
             this.onMove();
             if (this.body.getVelocity().magnitude() == 0) {

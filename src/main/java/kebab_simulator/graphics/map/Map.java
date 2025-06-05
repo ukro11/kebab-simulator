@@ -134,7 +134,7 @@ public class Map {
         public List<Chunk> getChunks() { return this.chunks; }
         public List<Chunk> getData() { return data; }
 
-        @Override
+        /*@Override
         public String toString() {
             return "Layer{" +
                     "name='" + name + '\'' +
@@ -145,7 +145,7 @@ public class Map {
                     ", chunks=" + chunks +
                     ", layers=" + layers +
                     '}';
-        }
+        }*/
     }
 
     public class Chunk {

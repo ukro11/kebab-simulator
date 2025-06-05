@@ -8,21 +8,29 @@ import kebab_simulator.control.ProgramController;
 import kebab_simulator.graphics.IOrder;
 import kebab_simulator.physics.Collider;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public abstract class ObjectSpawner<T extends Enum<T> & IAnimationState> implements IOrder {
 
     public static final CopyOnWriteArrayList<ObjectSpawner<?>> objects = new CopyOnWriteArrayList<>();
-    private static final HashMap<String, Collider> mapper = new HashMap<>();
+    private static final HashMap<String, List<Collider>> mapper = new HashMap<>();
 
     protected ViewController viewController;
     protected ProgramController programController;
 
-    protected final String id;
-    protected final Collider collider;
-    protected Collider sensorCollider;
-    protected final AnimationRenderer<T> renderer;
+    protected String id;
+    protected Collider collider;
+    protected List<Collider> sensorColliders;
+    protected AnimationRenderer<T> renderer;
+    protected BufferedImage image;
+
+    protected Runnable onRegisterSensor;
 
     public ObjectSpawner(String id, Collider collider, AnimationRenderer<T> renderer) {
         this.viewController = ViewController.getInstance();
@@ -30,21 +38,47 @@ public abstract class ObjectSpawner<T extends Enum<T> & IAnimationState> impleme
 
         this.id = id;
         this.collider = collider;
+        this.sensorColliders = new ArrayList<>();
         this.renderer = renderer;
         this.renderer.start();
         if (ObjectSpawner.mapper.containsKey(collider.getId())) {
-            this.sensorCollider = ObjectSpawner.mapper.get(collider.getId());
+            this.sensorColliders = ObjectSpawner.mapper.get(collider.getId());
         }
         ObjectSpawner.objects.add(this);
     }
 
+    public ObjectSpawner(String id, Collider collider, String image) {
+        try {
+            this.viewController = ViewController.getInstance();
+            this.programController = this.viewController.getProgramController();
+
+            this.id = id;
+            this.collider = collider;
+            this.sensorColliders = new ArrayList<>();
+            this.image = ImageIO.read(ObjectSpawner.class.getResourceAsStream("/graphic/map/sprites/" + image));
+            if (ObjectSpawner.mapper.containsKey(collider.getId())) {
+                this.sensorColliders = ObjectSpawner.mapper.get(collider.getId());
+            }
+            ObjectSpawner.objects.add(this);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public void update(double dt) {
-        this.renderer.update(dt);
+        if (this.renderer != null) {
+            this.renderer.update(dt);
+        }
     }
 
     @Override
     public void draw(DrawTool drawTool) {
-        drawTool.drawImage(this.renderer.getCurrentFrame(), this.collider.getX(), this.collider.getY());
+        if (this.renderer != null) {
+            drawTool.drawImage(this.renderer.getCurrentFrame(), this.collider.getX(), this.collider.getY());
+
+        } else {
+            drawTool.drawImage(this.image, this.collider.getX(), this.collider.getY());
+        }
     }
 
     @Override
@@ -60,12 +94,16 @@ public abstract class ObjectSpawner<T extends Enum<T> & IAnimationState> impleme
         return this.collider;
     }
 
-    public Collider getSensorCollider() {
-        return this.sensorCollider;
+    public List<Collider> getSensorColliders() {
+        return this.sensorColliders;
     }
 
-    public void setSensorCollider(Collider sensorCollider) {
-        this.sensorCollider = sensorCollider;
+    public void addSensorCollider(Collider sensor) {
+        if (!this.sensorColliders.contains(sensor)) this.sensorColliders.add(sensor);
+    }
+
+    public void setSensorCollider(List<Collider> sensors) {
+        this.sensorColliders = sensors;
     }
 
     public AnimationRenderer<T> getRenderer() {
@@ -82,6 +120,8 @@ public abstract class ObjectSpawner<T extends Enum<T> & IAnimationState> impleme
     }
 
     public static void mapSensor(String id, Collider collider) {
-        ObjectSpawner.mapper.put(id, collider);
+        var list = ObjectSpawner.mapper.getOrDefault(id, new ArrayList<>());
+        list.add(collider);
+        ObjectSpawner.mapper.put(id, list);
     }
 }

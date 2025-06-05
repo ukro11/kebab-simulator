@@ -29,6 +29,10 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
     private boolean running = false;
 
     public AnimationRenderer(String spriteSheetPath, int rows, int maxColumns, int frameWidth, int frameHeight, T state) {
+        this(spriteSheetPath, rows, maxColumns, frameWidth, frameHeight, 0, 0, state);
+    }
+
+    public AnimationRenderer(String spriteSheetPath, int rows, int maxColumns, int frameWidth, int frameHeight, int marginX, int marginY, T state) {
         try {
             BufferedImage spriteSheet = ImageIO.read(AnimationRenderer.class.getResource(spriteSheetPath));
             HashMap<T, Animation<T>> animations = new HashMap<>();
@@ -38,7 +42,7 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
                 for (int j = 0; j < maxColumns; j++) {
                     List<T> animationStates = IAnimationState.fetch(enumClass, i, j);
                     if (animationStates == null) break;
-                    BufferedImage animationImage = spriteSheet.getSubimage(j * frameWidth, i * frameHeight, frameWidth, frameHeight);
+                    BufferedImage animationImage = spriteSheet.getSubimage(j * (frameWidth + marginX), i * (frameHeight + marginY), frameWidth, frameHeight);
                     frames.add(animationImage);
                     int k = j;
                     AtomicBoolean clear = new AtomicBoolean(false);
@@ -139,7 +143,7 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
     }
 
     public void update(double dt) {
-        if (!this.running || this.currentAnimation == null) return;
+        if (!this.running || this.currentAnimation == null || this.currentAnimation.getFrames().size() <= 1) return;
         if (this.elapsed == 0 && this.currentIndex == 0 && this.onStart != null) this.onStart.accept(this, this.currentIndex);
         this.elapsed += dt;
         Animation animation = this.currentAnimation;

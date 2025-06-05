@@ -2,6 +2,7 @@ package kebab_simulator.control;
 
 import KAGO_framework.control.ViewController;
 import kebab_simulator.Config;
+import kebab_simulator.animation.tween.Tween;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.event.events.collider.ColliderCollisionEvent;
 import kebab_simulator.event.services.EventProcessCallback;
@@ -50,7 +51,7 @@ public class ProgramController {
      */
     public void preStartProgram() {
         Wrapper.getProcessManager().queue(new EventLoadAssetsProcess("Loading map", () -> {
-            MapManager map = MapManager.importMap("/map/restaurant.json", List.of("floor", "grass"));
+            MapManager map = MapManager.importMap("/map/kitchen.json", List.of("ground"), List.of("light"));
             GameScene.getInstance().setGameMap(map);
 
         }, new EventProcessCallback() {
@@ -103,7 +104,8 @@ public class ProgramController {
         dummy.freeze(true);
         Wrapper.getEntityManager().registerEntity(dummy);
 
-        this.player = Wrapper.getEntityManager().spawnPlayer("player", 435, 225);
+        // 310, 586
+        this.player = Wrapper.getEntityManager().spawnPlayer("player", 383, 682);
         this.player.setShowHitbox(false);
         Wrapper.getEntityManager().registerEntity(this.player);
         GameScene.getInstance().getCameraController().focusAtEntity(this.player);
@@ -115,5 +117,6 @@ public class ProgramController {
      */
     public void updateProgram(double dt){
         CooldownManager.update(dt);
+        Tween.updateAll(dt);
     }
 }
