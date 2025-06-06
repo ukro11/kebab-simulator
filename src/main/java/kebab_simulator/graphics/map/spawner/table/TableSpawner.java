@@ -39,6 +39,7 @@ public abstract class TableSpawner extends ObjectSpawner {
                 });
             });
         };
+        System.out.println("TEST");
     }
 
     public TableSpawner(String id, Collider collider, AnimationRenderer<?> renderer) {
