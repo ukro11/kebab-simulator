@@ -2,7 +2,9 @@ package KAGO_framework.view;
 
 import KAGO_framework.control.ViewController;
 import KAGO_framework.model.InteractiveGraphicalObject;
-import kebab_simulator.control.ProgramController;
+import kebab_simulator.ProgramController;
+
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 /**
@@ -37,12 +39,12 @@ public abstract class ProgramView extends InteractiveGraphicalObject {
 
 
     @Override
-    public void keyPressed(int key) {
+    public void keyPressed(KeyEvent key) {
 
     }
 
     @Override
-    public void keyReleased(int key) {
+    public void keyReleased(KeyEvent key) {
 
     }
 

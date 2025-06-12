@@ -41,6 +41,18 @@ public abstract class TweenValue<T extends Number> {
         return this.value;
     }
 
+    public double getValueDouble() {
+        return (double) this.value;
+    }
+
+    public int getValueInt() {
+        return (int) this.value;
+    }
+
+    public void setValue(T value) {
+        this.value = value;
+    }
+
     public T getStart() {
         return this.start;
     }

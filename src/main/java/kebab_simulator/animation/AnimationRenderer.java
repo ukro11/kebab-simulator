@@ -1,6 +1,6 @@
 package kebab_simulator.animation;
 
-import kebab_simulator.animation.states.CharacterAnimationState;
+import kebab_simulator.animation.states.entity.CharacterAnimationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +41,25 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
                 List<BufferedImage> frames = new ArrayList<>();
                 for (int j = 0; j < maxColumns; j++) {
                     List<T> animationStates = IAnimationState.fetch(enumClass, i, j);
-                    if (animationStates == null) break;
-                    BufferedImage animationImage = spriteSheet.getSubimage(j * (frameWidth + marginX), i * (frameHeight + marginY), frameWidth, frameHeight);
+                    if (animationStates == null || animationStates.isEmpty()) break;
+
+                    BufferedImage animationImage = null;
+                    int customFrameWidth = animationStates.get(0).getFrameWidth();
+                    int customFrameHeight = animationStates.get(0).getFrameHeight();
+
+                    if (customFrameWidth == 0 || customFrameHeight == 0) {
+                        animationImage = spriteSheet.getSubimage(j * (frameWidth + marginX), i * (frameHeight + marginY), frameWidth, frameHeight);
+
+                    } else {
+                        animationImage = spriteSheet.getSubimage(j * (customFrameWidth + marginX), i * (customFrameHeight + marginY), customFrameWidth, customFrameHeight);
+                    }
+
                     frames.add(animationImage);
-                    int k = j;
+
+                    int ref = j;
                     AtomicBoolean clear = new AtomicBoolean(false);
                     animationStates.forEach(animationState -> {
-                        if (animationState.getColumnRange().upperEndpoint() == k) {
+                        if (animationState.getColumnRange().upperEndpoint() == ref) {
                             var f = frames.subList(0, frames.size());
                             if (animationState.isReverse()) Collections.reverse(f);
                             animations.put(animationState, new Animation<T>(animationState, f, animationState.getDuration(), animationState.isLoop(), animationState.isReverse()));

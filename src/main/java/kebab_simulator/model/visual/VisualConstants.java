@@ -9,9 +9,7 @@ public class VisualConstants {
 
     private static CopyOnWriteArrayList<Font> fontCache = new CopyOnWriteArrayList<>();
 
-    public final static Color BUTTON_OUTLINE = new Color(190, 219, 255);
-    public final static Color BUTTON_BACKGROUND = new Color(66, 135, 245);
-    public final static Color BUTTON_FOREGROUND = new Color(190, 219, 255);
+    public static final Color TEXT_COLOR = new Color(47, 29, 3);
 
     private static InputStream getPath(Fonts font) {
         return VisualConstants.class.getResourceAsStream("/graphic/font/" + font.getName());

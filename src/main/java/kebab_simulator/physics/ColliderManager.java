@@ -16,9 +16,10 @@ public class ColliderManager {
 
     static {
         ColliderManager.classCollisionPrevention = Map.of(
-            //"entity_player", Set.of("entity_player"),
+            //"entity_player", Set.of("map"),
             "map", Set.of("map"),
-            "entity_item", Set.of("map", "entity_player")
+            "entity_item", Set.of("map", "entity_player", "entity_item"),
+            "entity_plate", Set.of("map")
         );
     }
 
@@ -37,6 +38,10 @@ public class ColliderManager {
     }
 
     private boolean canCollide(Collider body1, Collider body2) {
+        if (body1.getType() == BodyType.STATIC && body2.getType() == BodyType.STATIC) {
+            return false;
+        }
+
         Set<String> body1PreventionGroups = ColliderManager.classCollisionPrevention.get(body1.getColliderClass());
         if (body1PreventionGroups != null && body1PreventionGroups.contains(body2.getColliderClass())) {
             return false;

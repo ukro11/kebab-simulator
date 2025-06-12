@@ -1,7 +1,7 @@
 package KAGO_framework.view.simple_gui;
 
 import KAGO_framework.model.GraphicalObject;
-import KAGO_framework.model.abitur.datenstrukturen.List;
+import KAGO_framework.model.abitur.datenstrukturen.AbiList;
 import KAGO_framework.view.DrawTool;
 
 import javax.swing.*;
@@ -13,7 +13,7 @@ import javax.swing.*;
  */
 public class GIFPainter extends GraphicalObject {
 
-    private List<ImageIcon> images;
+    private AbiList<ImageIcon> images;
     private int amount;
 
     /**
@@ -23,7 +23,7 @@ public class GIFPainter extends GraphicalObject {
      * @param y die y-Koordinate der oberen linken Ecke
      */
     public GIFPainter(String imagePath, double x, double y){
-        images = new List<>();
+        images = new AbiList<>();
         addImage(imagePath);
         images.toFirst();
         this.x = x;

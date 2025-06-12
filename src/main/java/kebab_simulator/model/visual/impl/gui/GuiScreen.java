@@ -3,7 +3,8 @@ package kebab_simulator.model.visual.impl.gui;
 import KAGO_framework.control.ViewController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
-import kebab_simulator.control.ProgramController;
+import kebab_simulator.Wrapper;
+import kebab_simulator.ProgramController;
 import kebab_simulator.model.visual.VisualConstants;
 import kebab_simulator.model.visual.VisualModel;
 
@@ -120,12 +121,12 @@ public abstract class GuiScreen {
 
     protected void onOpen(GuiScreen last) {
         if (this.onOpen != null) this.onOpen.accept(last);
-        if (this.shouldPause) this.programController.player.freeze(true);
+        if (this.shouldPause) Wrapper.getLocalPlayer().freeze(true);
     }
 
     protected void onClose(GuiScreen newScreen) {
         if (this.onClose != null) this.onClose.accept(newScreen);
-        if (this.shouldPause) this.programController.player.freeze(false);
+        if (this.shouldPause) Wrapper.getLocalPlayer().freeze(false);
     }
 
     public void keyPressed(KeyEvent e) {

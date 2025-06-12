@@ -1,7 +1,7 @@
 package kebab_simulator.test;
 
 import KAGO_framework.control.ViewController;
-import kebab_simulator.control.ProgramController;
+import kebab_simulator.ProgramController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

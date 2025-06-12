@@ -1,5 +1,6 @@
 package kebab_simulator.utils.misc;
 
+import com.google.common.collect.Range;
 import kebab_simulator.physics.*;
 import kebab_simulator.physics.colliders.ColliderCircle;
 import kebab_simulator.physics.colliders.ColliderPolygon;
@@ -9,6 +10,15 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 
 public class MathUtils {
+
+    public static Range<Double> RIGHT = Range.closed(-0.463, 0.463);
+    public static Range<Double> RIGHT_BOTTOM = Range.closed(-1.107, -0.463);
+    public static Range<Double> RIGHT_TOP = Range.closed(0.463, 1.107);
+    public static Range<Double> TOP = Range.closed(1.107, 2.034);
+    public static Range<Double> LEFT_TOP = Range.closed(2.034, 2.677);
+    public static Range<Double>[] LEFT = new Range[] { Range.closed(2.677, Math.PI), Range.closed(-Math.PI, -2.677) };
+    public static Range<Double> LEFT_BOTTOM = Range.closed(-2.677, -2.034);
+    public static Range<Double> BOTTOM = Range.closed(-2.034, -1.107);
 
     private static Logger logger = LoggerFactory.getLogger(MathUtils.class);
 

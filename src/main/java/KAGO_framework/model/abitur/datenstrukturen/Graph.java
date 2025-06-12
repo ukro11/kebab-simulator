@@ -1,7 +1,5 @@
 package KAGO_framework.model.abitur.datenstrukturen;
 
-import KAGO_framework.model.abitur.datenstrukturen.Edge;
-
 /**
  * <p>
  * Materialien zu den zentralen NRW-Abiturpruefungen im Fach Informatik ab 2018
@@ -23,8 +21,8 @@ import KAGO_framework.model.abitur.datenstrukturen.Edge;
  * @version Oktober 2015
  */
 public class Graph{
-  private List<Vertex> vertices;
-  private List<Edge> edges;
+  private AbiList<Vertex> vertices;
+  private AbiList<Edge> edges;
 
   /**
    * Ein Objekt vom Typ Graph wird erstellt. Der von diesem Objekt 
@@ -32,16 +30,16 @@ public class Graph{
    */
   public Graph(){
     //Leere Listen fuer Knoten und Kanten erstellen.
-    vertices = new List<Vertex>();
-    edges = new List<Edge>();
+    vertices = new AbiList<Vertex>();
+    edges = new AbiList<Edge>();
   }
 
   /**
    * Die Anfrage liefert eine neue Liste aller Knotenobjekte vom Typ List<Vertex>.
    */
-  public List<Vertex> getVertices(){
+  public AbiList<Vertex> getVertices(){
     //Eine neue Liste mit allen Vertex-Objekten erstellen.
-    List<Vertex> result = new List<Vertex>();
+    AbiList<Vertex> result = new AbiList<Vertex>();
     vertices.toFirst();
     while (vertices.hasAccess()){
       result.append(vertices.getContent());
@@ -56,9 +54,9 @@ public class Graph{
   /**
    * Die Anfrage liefert eine neue Liste aller Kantenobjekte vom Typ List<Edge>.
    */
-  public List<Edge> getEdges(){
+  public AbiList<Edge> getEdges(){
     //Eine neue Liste mit allen Edge-Objekten erstellen.
-    List<Edge> result = new List<Edge>();
+    AbiList<Edge> result = new AbiList<Edge>();
     edges.toFirst();
     while (edges.hasAccess()){
       result.append(edges.getContent());
@@ -234,8 +232,8 @@ public class Graph{
    * pVertex keine Nachbarn in diesem Graphen oder ist gar nicht in diesem Graphen enthalten, so 
    * wird eine leere Liste zurueckgeliefert.
    */
-  public List<Vertex> getNeighbours(Vertex pVertex){
-    List<Vertex> result = new List<Vertex>();
+  public AbiList<Vertex> getNeighbours(Vertex pVertex){
+    AbiList<Vertex> result = new AbiList<Vertex>();
     
     //Alle Kanten durchlaufen.
     edges.toFirst();
@@ -260,8 +258,8 @@ public class Graph{
    * pVertex keine inzidenten Kanten in diesem Graphen oder ist gar nicht in diesem Graphen enthalten, so 
    * wird eine leere Liste zurueckgeliefert.
    */
-  public List<Edge> getEdges(Vertex pVertex){
-    List<Edge> result = new List<Edge>();
+  public AbiList<Edge> getEdges(Vertex pVertex){
+    AbiList<Edge> result = new AbiList<Edge>();
     
     //Alle Kanten durchlaufen.
     edges.toFirst();

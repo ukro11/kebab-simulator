@@ -171,6 +171,7 @@ public class Map {
         private List<Polygon> polygon;
         private boolean ellipse;
         private boolean visible;
+        private List<Property> properties;
 
         public String getName() {
             return this.name;
@@ -203,6 +204,8 @@ public class Map {
         public boolean isVisible() {
             return this.visible;
         }
+
+        public List<Property> getProperties() { return this.properties; }
     }
 
     public class Polygon {
@@ -218,8 +221,21 @@ public class Map {
         }
     }
 
-    public class Property<T> {
+    public class Property {
         private String name;
-        private T value;
+        private String type;
+        private Object value;
+
+        public String getName() {
+            return this.name;
+        }
+
+        public String getType() {
+            return this.type;
+        }
+
+        public Object getValue() {
+            return this.value;
+        }
     }
 }

@@ -11,15 +11,17 @@ public interface IAnimationState {
     double getDuration();
     boolean isLoop();
     boolean isReverse();
+    int getFrameWidth();
+    int getFrameHeight();
 
     static <T extends Enum<T> & IAnimationState> CopyOnWriteArrayList<T> fetch(Class<T> enumClass, int row, int column) {
         if (!enumClass.isEnum()) return new CopyOnWriteArrayList<>();
-        CopyOnWriteArrayList<T> found = new CopyOnWriteArrayList<>();
+        CopyOnWriteArrayList<T> fetch = new CopyOnWriteArrayList<>();
         for (var state : enumClass.getEnumConstants()) {
             if (state.getRowIndex() == row && state.getColumnRange().contains(column)) {
-                found.add(state);
+                fetch.add(state);
             }
         }
-        return found;
+        return fetch;
     }
 }

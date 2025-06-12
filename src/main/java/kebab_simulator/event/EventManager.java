@@ -1,6 +1,6 @@
 package kebab_simulator.event;
 
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.Wrapper;
 
 import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;

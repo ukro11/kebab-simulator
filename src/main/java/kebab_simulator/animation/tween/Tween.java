@@ -178,6 +178,10 @@ public class Tween<T extends Number, Q extends TweenValue> {
         return this;
     }
 
+    public Tween<T, Q> set(T value) {
+        this.value.setValue(value);
+        return this;
+    }
 
     public Tween<T, Q> redo(T value, T target, double duration) {
         this.start = value;
@@ -246,6 +250,18 @@ public class Tween<T extends Number, Q extends TweenValue> {
 
     public TweenValue getTweenValue() {
         return this.value;
+    }
+
+    public T getValue() {
+        return (T) this.value.getValue();
+    }
+
+    public double getValueDouble() {
+        return (double) this.value.getValue();
+    }
+
+    public int getValueInt() {
+        return (int) this.value.getValue();
     }
 
     public boolean isFinished() {

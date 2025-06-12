@@ -2,7 +2,7 @@ package kebab_simulator.model.visual;
 
 import KAGO_framework.control.ViewController;
 import KAGO_framework.view.DrawTool;
-import kebab_simulator.control.ProgramController;
+import kebab_simulator.ProgramController;
 
 public abstract class VisualModel implements Comparable<VisualModel> {
 

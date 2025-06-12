@@ -5,12 +5,14 @@ import KAGO_framework.control.Interactable;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
 import kebab_simulator.animation.Easings;
-import kebab_simulator.control.CameraController;
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.graphics.CameraRenderer;
+import kebab_simulator.Wrapper;
 import kebab_simulator.graphics.OrderRenderer;
 import kebab_simulator.graphics.map.MapManager;
-import kebab_simulator.graphics.map.ObjectSpawner;
-import kebab_simulator.model.visual.impl.component.InfoComponent;
+import kebab_simulator.graphics.spawner.ObjectSpawner;
+import kebab_simulator.graphics.spawner.table.TableSpawner;
+import kebab_simulator.graphics.tooltip.Tooltip;
+import kebab_simulator.model.KeyManagerModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,7 +25,7 @@ import java.util.List;
 public class GameScene extends Scene {
 
     private final Logger logger = LoggerFactory.getLogger(GameScene.class);
-    private CameraController cameraController;
+    private CameraRenderer cameraRenderer;
     private List<Interactable> interactables;
     private List<Drawable> drawables;
     private OrderRenderer renderer;
@@ -39,17 +41,25 @@ public class GameScene extends Scene {
         super("game");
         this.drawables = new ArrayList<>();
         this.interactables = new ArrayList<>();
-        this.cameraController = CameraController
+        this.cameraRenderer = CameraRenderer
                 .create(this.viewController, this.viewController.getProgramController(), 0, 0)
                 .zoom(2)
                 .smooth((x) -> Easings.easeInCubic(x));
         this.renderer = new OrderRenderer();
 
-        this.visuals.add(new InfoComponent());
+        Wrapper.getTooltipManager().register(
+            new Tooltip(
+                KeyManagerModel.KEY_TAKE_ITEM,
+                (keyManager) -> {
+                    if (TableSpawner.isCurrentlyFocused()) return "Gegenstand aufheben";
+                    return null;
+                }
+            )
+        );
     }
 
     public void updatePhysics(double dt) {
-        this.cameraController.update(dt);
+        this.cameraRenderer.update(dt);
         Wrapper.getEntityManager().getEntities().values().forEach(e -> e.update(dt));
     }
 
@@ -59,11 +69,12 @@ public class GameScene extends Scene {
         for (ObjectSpawner<?> spawner : ObjectSpawner.objects) {
             spawner.update(dt);
         }
+        Wrapper.getTooltipManager().update(dt);
         super.update(dt);
     }
 
     public void drawGame(DrawTool drawTool) {
-        this.cameraController.attach(drawTool);
+        this.cameraRenderer.attach(drawTool);
         if (this.gameMap != null) {
             drawTool.push();
             this.gameMap.draw(drawTool);
@@ -74,17 +85,18 @@ public class GameScene extends Scene {
         this.getDrawables().forEach(d -> d.draw(drawTool));
 
         /*Wrapper.getColliderManager().getColliders().values().forEach(r -> {
-            r.renderHitbox(drawTool);
+            r.drawHitbox(drawTool);
         });*/
 
         this.gameMap.drawAfterPlayer(drawTool);
 
-        this.cameraController.detach(drawTool);
+        this.cameraRenderer.detach(drawTool);
     }
 
     @Override
     public void draw(DrawTool drawTool) {
         GameScene.getInstance().drawGame(drawTool);
+        Wrapper.getTooltipManager().draw(drawTool);
         super.draw(drawTool);
         drawTool.setCurrentColor(new Color(154, 75, 24), 50);
         drawTool.drawFilledRectangle(0, 0, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
@@ -106,6 +118,13 @@ public class GameScene extends Scene {
     }
 
     @Override
+    public void mouseMoved(MouseEvent e) {
+        super.mouseMoved(e);
+        Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.mouseMoved(e));
+        this.interactables.forEach(entity -> entity.mouseMoved(e));
+    }
+
+    @Override
     public void mouseDragged(MouseEvent e) {
         super.mouseDragged(e);
         Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.mouseDragged(e));
@@ -113,21 +132,17 @@ public class GameScene extends Scene {
     }
 
     @Override
-    public void keyPressed(KeyEvent key) {
-        super.keyPressed(key);
-        Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.keyPressed(key.getKeyCode()));
-        this.interactables.forEach(entity -> entity.keyPressed(key.getKeyCode()));
-
-        if (key.getKeyCode() == KeyEvent.VK_Z) {
-            this.cameraController.shake(1);
-        }
+    public void keyPressed(KeyEvent e) {
+        super.keyPressed(e);
+        Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.keyPressed(e));
+        this.interactables.forEach(entity -> entity.keyPressed(e));
     }
 
     @Override
-    public void keyReleased(KeyEvent key) {
-        super.keyReleased(key);
-        Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.keyReleased(key.getKeyCode()));
-        this.interactables.forEach(entity -> entity.keyReleased(key.getKeyCode()));
+    public void keyReleased(KeyEvent e) {
+        super.keyReleased(e);
+        Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.keyReleased(e));
+        this.interactables.forEach(entity -> entity.keyReleased(e));
     }
 
     public MapManager getGameMap() {
@@ -138,8 +153,8 @@ public class GameScene extends Scene {
         this.gameMap = gameMap;
     }
 
-    public CameraController getCameraController() {
-        return this.cameraController;
+    public CameraRenderer getCameraRenderer() {
+        return this.cameraRenderer;
     }
 
     public List<Drawable> getDrawables() {

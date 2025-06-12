@@ -1,6 +1,7 @@
 package kebab_simulator.model.visual.impl.component;
 
 import KAGO_framework.view.DrawTool;
+import kebab_simulator.Wrapper;
 import kebab_simulator.model.visual.VisualConstants;
 import kebab_simulator.model.visual.VisualModel;
 import kebab_simulator.utils.misc.TimerUtils;
@@ -25,9 +26,9 @@ public class InfoComponent extends VisualModel {
         drawTool.setCurrentColor(new Color(47, 29, 3));
         drawTool.getGraphics2D().setFont(this.debugFont);
         drawTool.drawText(String.format("FPS: %s", TimerUtils.getFPS()), 20, 20 + this.margin);
-        if (this.programController.player != null) {
-            drawTool.drawText(String.format("X: %.2f", this.programController.player.getBody().getX()), 20, 20 + this.margin * 2);
-            drawTool.drawText(String.format("Y: %.2f", this.programController.player.getBody().getY()), 20, 20 + this.margin * 3);
+        if (Wrapper.getLocalPlayer() != null) {
+            drawTool.drawText(String.format("X: %.2f", Wrapper.getLocalPlayer().getBody().getX()), 20, 20 + this.margin * 2);
+            drawTool.drawText(String.format("Y: %.2f", Wrapper.getLocalPlayer().getBody().getY()), 20, 20 + this.margin * 3);
         }
         drawTool.resetColor();
         drawTool.pop();

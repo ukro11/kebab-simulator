@@ -3,6 +3,7 @@ package KAGO_framework.view.simple_gui;
 import KAGO_framework.control.Interactable;
 import KAGO_framework.view.DrawTool;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 
@@ -78,11 +79,11 @@ public class Button extends Label implements Interactable {
     }
 
     @Override
-    public void keyPressed(int key) {
+    public void keyPressed(KeyEvent key) {
 
     }
     @Override
-    public void keyReleased(int key) {
+    public void keyReleased(KeyEvent key) {
 
     }
 

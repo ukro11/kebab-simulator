@@ -1,6 +1,8 @@
 package kebab_simulator.model.entity;
 
-import kebab_simulator.model.entity.impl.EntityPlayer;
+import kebab_simulator.graphics.spawner.ObjectSpawner;
+import kebab_simulator.model.entity.impl.food.EntityMeat;
+import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderPolygon;
 
@@ -16,7 +18,15 @@ public class EntityManager {
         collider.setColliderClass("entity_player");
         EntityPlayer player = new EntityPlayer(collider, -16, -52, 32, 64);
         collider.setEntity(player);
+        ObjectSpawner.objects.forEach(obj -> obj.onRegisterPlayer(player));
+        this.registerEntity(player);
         return player;
+    }
+
+    public EntityMeat spawnMeat() {
+        EntityMeat meat = new EntityMeat();
+        this.registerEntity(meat);
+        return meat;
     }
 
     public void registerEntity(Entity entity) {

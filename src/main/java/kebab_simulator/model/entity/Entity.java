@@ -4,21 +4,24 @@ import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
 import KAGO_framework.control.ViewController;
 import KAGO_framework.view.DrawTool;
+import kebab_simulator.Wrapper;
 import kebab_simulator.animation.AnimationRenderer;
-import kebab_simulator.animation.states.CharacterAnimationState;
-import kebab_simulator.control.ProgramController;
-import kebab_simulator.graphics.IOrder;
+import kebab_simulator.animation.IAnimationState;
+import kebab_simulator.ProgramController;
+import kebab_simulator.graphics.IOrderRenderer;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.Collider;
 import kebab_simulator.utils.misc.Vec2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
 
-public abstract class Entity implements Drawable, Interactable, IOrder {
+public abstract class Entity<T extends Enum<T> & IAnimationState> implements Drawable, Interactable, IOrderRenderer {
 
     protected ViewController viewController;
     protected ProgramController programController;
@@ -28,35 +31,22 @@ public abstract class Entity implements Drawable, Interactable, IOrder {
     protected final Collider body;
     protected double bodyOffsetX;
     protected double bodyOffsetY;
-    protected double x;
-    protected double y;
+    private double x;
+    private double y;
     protected double width;
     protected double height;
     protected Vec2 highestPoint;
     protected Vec2 highestPointOffset;
-    protected boolean showHitbox = false;
-    protected boolean invertLeft = false;
-    protected double scaleX = 1;
-    protected double scaleY = 1;
+    protected boolean showHitbox;
+    protected Vec2 offset = new Vec2();
 
-    protected AnimationRenderer<CharacterAnimationState> renderer;
+    protected AnimationRenderer<T> renderer;
 
     public Entity(double x, double y, double width, double height) {
         this(null, x, y, width, height);
     }
 
     public Entity(Collider body, double x, double y, double width, double height) {
-        try {
-            StackTraceElement stackTrace1 = Thread.currentThread().getStackTrace()[3];
-            StackTraceElement stackTrace2 = Thread.currentThread().getStackTrace()[4];
-            if (!stackTrace1.getClassName().equals(EntityManager.class.getName()) && !stackTrace2.getClassName().equals(EntityManager.class.getName())) {
-                throw new RuntimeException(String.format("To create an entity (%s) use \"Wrapper.getEntityManager().spawnPlayer(...)\"", this.getClass().getSimpleName()));
-            }
-        } catch (RuntimeException e) {
-            e.printStackTrace();
-            System.exit(-1);
-        }
-
         this.viewController = ViewController.getInstance();
         this.programController = this.viewController.getProgramController();
 
@@ -78,34 +68,52 @@ public abstract class Entity implements Drawable, Interactable, IOrder {
         }
         this.highestPoint = new Vec2(body.getX() + this.bodyOffsetX, body.getY() + this.bodyOffsetY);
         this.highestPointOffset = new Vec2();
+        this.showHitbox = false;
 
         GameScene.getInstance().getRenderer().register(this);
     }
 
     @Override
     public void draw(DrawTool drawTool) {
+        this.drawEntity(drawTool);
+        this.drawHitbox(drawTool);
+    }
+
+    protected void drawEntity(DrawTool drawTool) {
         if (this.renderer != null && this.renderer.getCurrentFrame() != null) {
             drawTool.push();
-            drawTool.getGraphics2D().scale(this.scaleX, this.scaleY);
-            if (this.scaleX == -1 && this.isInvertLeft()) {
-                drawTool.getGraphics2D().translate(-((int) this.x) * 2 - this.width, 0);
-            }
-            drawTool.getGraphics2D().drawImage(this.renderer.getCurrentFrame(), (int) this.x, (int) this.y, (int) this.width, (int) this.height, null);
+            drawTool.getGraphics2D().drawImage(this.renderer.getCurrentFrame(), (int) this.getX(), (int) this.getY(), (int) this.width, (int) this.height, null);
             drawTool.pop();
         }
+    }
+
+    protected void drawHitbox(DrawTool drawTool) {
         if (this.showHitbox && this.body != null) {
             drawTool.setCurrentColor(this.getBody().getHitboxColor());
             drawTool.drawFilledCircle(this.highestPoint.x, this.highestPoint.y, 1);
-            this.body.renderHitbox(drawTool);
+            this.body.drawHitbox(drawTool);
         }
     }
 
     @Override
     public void update(double dt) {
+        if (!Wrapper.getEntityManager().getEntities().containsKey(this.id)) this.logger.warn("Entity with id {} is not registered and important features will not work for the entity", this.id);
         if (this.renderer != null) {
             if (!this.renderer.isRunning()) this.renderer.start();
             this.renderer.update(dt);
-            this.highestPoint.set(this.x + this.highestPointOffset.x, this.y + this.highestPointOffset.y);
+            this.highestPoint.set(this.getX() + this.highestPointOffset.x, this.getY() + this.highestPointOffset.y);
+        }
+    }
+
+    protected void exitOnWrongRegistration() {
+        try {
+            var stacktraces = Thread.currentThread().getStackTrace();
+            if (Arrays.stream(stacktraces).filter(stackTrace -> stackTrace.getClassName().equals(EntityManager.class.getName())).findFirst().orElse(null) == null) {
+                throw new RuntimeException(String.format("To create an entity %s use \"Wrapper.getEntityManager().spawnPlayer(...)\"", this.getClass().getSimpleName()));
+            }
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            System.exit(-1);
         }
     }
 
@@ -122,15 +130,11 @@ public abstract class Entity implements Drawable, Interactable, IOrder {
         return highestPoint;
     }
 
-    public AnimationRenderer<CharacterAnimationState> getRenderer() {
+    public AnimationRenderer<T> getRenderer() {
         return this.renderer;
     }
 
-    public void setInvertLeft(boolean invertLeft) { this.invertLeft = invertLeft; }
-
-    public boolean isInvertLeft() { return this.invertLeft; }
-
-    public void setRenderer(AnimationRenderer<CharacterAnimationState> renderer) {
+    public void setRenderer(AnimationRenderer<T> renderer) {
         this.renderer = renderer;
     }
 
@@ -183,10 +187,10 @@ public abstract class Entity implements Drawable, Interactable, IOrder {
     }
 
     @Override
-    public void keyPressed(int key) {}
+    public void keyPressed(KeyEvent key) {}
 
     @Override
-    public void keyReleased(int key) {}
+    public void keyReleased(KeyEvent key) {}
 
     @Override
     public void mouseReleased(MouseEvent e) {}

@@ -3,9 +3,9 @@ package KAGO_framework.control;
 import KAGO_framework.Config;
 import KAGO_framework.view.DrawTool;
 import com.google.common.util.concurrent.*;
-import kebab_simulator.control.ProgramController;
+import kebab_simulator.ProgramController;
 import KAGO_framework.view.DrawFrame;
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.Wrapper;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.model.scene.Scene;
@@ -106,6 +106,7 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
     private void startGameEngine() throws InterruptedException {
         this.programController.startProgram();
         this.setWatchPhyics(true);
+        Wrapper.getProcessManager().processPostGame();
         while (true) {
             TimerUtils.update();
             this.programController.updateProgram(TimerUtils.getDeltaTime());
@@ -134,7 +135,8 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             public void onSuccess(Object result) {}
             @Override
             public void onFailure(Throwable t) {
-                logger.error("Error", t);
+                logger.error("Exception in thread \"{}\" {}", Thread.currentThread().getName(), t.getClass().getName());
+                t.printStackTrace();
             }
         }, this.physicsExecutor);
     }

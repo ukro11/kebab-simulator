@@ -1,7 +1,7 @@
 package kebab_simulator.physics.colliders;
 
 import KAGO_framework.view.DrawTool;
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.Wrapper;
 import kebab_simulator.physics.*;
 import kebab_simulator.utils.misc.MathUtils;
 import kebab_simulator.utils.misc.Vec2;
@@ -55,16 +55,31 @@ public class ColliderCircle extends Collider {
     }
 
     @Override
-    public void update(double dt) {
-        if (this.type == BodyType.DYNAMIC) {
-            if (this.velocity != null && !this.isDestroyed() && this.velocity.magnitude() > 0) {
-                this.center.add(this.velocity.x * dt, this.velocity.y * dt);
-            }
+    public void move(double dt) {
+        if (this.velocity != null && !this.isDestroyed() && this.velocity.magnitude() > 0) {
+            this.center.add(this.velocity.x * dt, this.velocity.y * dt);
         }
     }
 
     @Override
-    public void renderHitbox(DrawTool drawTool) {
+    protected void moveEntity() {
+        if (this.entity != null) {
+            this.entity.setX(this.center.x + this.entity.getBodyOffsetX());
+            this.entity.setY(this.center.y + this.entity.getBodyOffsetY());
+        }
+    }
+
+    @Override
+    public void setPosition(double x, double y) {
+        this.center.set(x, y);
+        if (this.entity != null) {
+            this.entity.setX(this.center.x + this.entity.getBodyOffsetX());
+            this.entity.setY(this.center.y + this.entity.getBodyOffsetY());
+        }
+    }
+
+    @Override
+    public void drawHitbox(DrawTool drawTool) {
         if (!this.isDestroyed()) {
             drawTool.setCurrentColor(this.hitboxColor);
             drawTool.drawCircle(this.getCenter().x, this.getCenter().y, this.radius);

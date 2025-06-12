@@ -1,7 +1,7 @@
 package kebab_simulator.physics;
 
 import KAGO_framework.view.DrawTool;
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.Wrapper;
 import kebab_simulator.event.events.collider.ColliderCollisionEvent;
 import kebab_simulator.event.events.collider.ColliderDestroyEvent;
 import kebab_simulator.model.entity.Entity;
@@ -32,12 +32,13 @@ public abstract class Collider {
     protected boolean sensor = false;
     protected Color hitboxColor = Color.RED;
     private boolean destroyed = false;
-    private Vec2 lastVelocity = new Vec2();
     protected Collider parent;
-    protected List<Collider> children = new ArrayList<>();
+    protected ChildCollider childInstance = new ChildCollider(this);
+    protected List<ChildCollider> children = new ArrayList<>();
 
-    protected Consumer<ColliderCollisionEvent> onCollision;
-    protected Consumer<ColliderDestroyEvent> onDestroy;
+    protected List<Consumer<ColliderCollisionEvent>> onCollision = new ArrayList<>();
+    protected List<Consumer<ColliderDestroyEvent>> onDestroy = new ArrayList<>();
+    protected List<Consumer<Collider>> onMove = new ArrayList<>();
 
     private HashMap<String, Boolean> wasColliding = new HashMap<>();
 
@@ -65,18 +66,18 @@ public abstract class Collider {
         if (handle && !check) {
             var event = new ColliderCollisionEvent(this, other, ColliderCollisionEvent.CollisionState.COLLISION_BEGIN_CONTACT);
             this.wasColliding.put(other.getId(), true);
-            if (this.onCollision != null) this.onCollision.accept(event);
+            if (this.onCollision != null) this.onCollision.forEach(c -> c.accept(event));
             Wrapper.getEventManager().dispatchEvent(event);
 
         } else if (!handle && check) {
             var event = new ColliderCollisionEvent(this, other, ColliderCollisionEvent.CollisionState.COLLISION_END_CONTACT);
             this.wasColliding.put(other.getId(), false);
-            if (this.onCollision != null) this.onCollision.accept(event);
+            if (this.onCollision != null) this.onCollision.forEach(c -> c.accept(event));
             Wrapper.getEventManager().dispatchEvent(event);
 
         } else if (handle && check) {
             var event = new ColliderCollisionEvent(this, other, ColliderCollisionEvent.CollisionState.COLLISION_NORMAL_CONTACT);
-            if (this.onCollision != null) this.onCollision.accept(event);
+            if (this.onCollision != null) this.onCollision.forEach(c -> c.accept(event));
             Wrapper.getEventManager().dispatchEvent(event);
         }
         return handle;
@@ -88,7 +89,7 @@ public abstract class Collider {
     }
 
     public abstract boolean handleCollision(Collider other);
-    public abstract void renderHitbox(DrawTool drawTool);
+    public abstract void drawHitbox(DrawTool drawTool);
     public abstract Vec2 getCenter();
     public abstract Interval project(Vec2 vector);
     public abstract List<Vec2> getAxes();
@@ -96,15 +97,31 @@ public abstract class Collider {
 
     public void addChild(Collider collider) {
         if (collider.getType() == BodyType.DYNAMIC) {
-            this.children.add(collider);
+            collider.parent = this;
+            this.children.add(collider.getChildInstance());
 
         } else {
             this.logger.info("Collider {} could not be added as child because collider is not dynamic", collider.getId());
         }
     }
 
-    public void removeChild(Collider collider) {
-        this.children.remove(collider);
+    public void removeChild(ChildCollider collider) {
+        if (collider != null) {
+            collider.getCollider().parent = null;
+            this.children.remove(collider);
+        }
+    }
+
+    public ChildCollider getChildInstance() {
+        return this.childInstance;
+    }
+
+    public List<ChildCollider> getChildren() {
+        return this.children;
+    }
+
+    public Collider getParent() {
+        return this.parent;
     }
 
     public boolean isDestroyed() {
@@ -122,30 +139,52 @@ public abstract class Collider {
     public void destroy() {
         Wrapper.getColliderManager().destroyBody(this);
         this.destroyed = true;
-        if (this.onDestroy != null) this.onDestroy.accept(new ColliderDestroyEvent(this));
+        this.onDestroy.forEach(c -> c.accept(new ColliderDestroyEvent(this)));
     }
 
     public void onCollision(Consumer<ColliderCollisionEvent> onCollision) {
-        this.onCollision = onCollision;
+        this.onCollision.add(onCollision);
+    }
+
+    public void onMove(Consumer<Collider> onMove) {
+        this.onMove.add(onMove);
     }
 
     public void onDestroy(Consumer<ColliderDestroyEvent> onDestroy) {
-        this.onDestroy = onDestroy;
+        this.onDestroy.add(onDestroy);
     }
 
     public void update(double dt) {
-        if (this.type == BodyType.DYNAMIC && this.velocity.magnitude() > 0) {
-            this.x += this.velocity.x * dt;
-            this.y += this.velocity.y * dt;
-            this.entity.setX(this.x);
-            this.entity.setY(this.y);
-        }
-        if (!this.lastVelocity.equals(this.velocity)) {
+        if (this.type == BodyType.DYNAMIC && this.velocity.magnitude() > 0 && this.parent == null) {
+            this.move(dt);
+            this.onMove.forEach(c -> c.accept(this));
             this.children.forEach(child -> {
-                child.setLinearVelocity(this.velocity.x, this.velocity.y);
+                child.getCollider().setPosition(this.x + child.getOffsetX(), this.y + child.getOffsetY());
             });
-            this.lastVelocity = this.velocity.clone();
         }
+        this.moveEntity();
+    }
+
+    public void move(double dt) {
+        this.x += this.velocity.x * dt;
+        this.y += this.velocity.y * dt;
+    }
+
+    protected void moveEntity() {
+        if (this.entity != null) {
+            this.entity.setX(this.x + this.entity.getBodyOffsetX());
+            this.entity.setY(this.y + this.entity.getBodyOffsetY());
+        }
+    }
+
+    public void setPosition(double x, double y) {
+        this.x = x;
+        this.y = y;
+        this.moveEntity();
+        this.onMove.forEach(c -> c.accept(this));
+        this.children.forEach(child -> {
+            child.getCollider().setPosition(this.x + child.getOffsetX(), this.y + child.getOffsetY());
+        });
     }
 
     @Override
@@ -178,6 +217,10 @@ public abstract class Collider {
 
     public BodyType getType() {
         return this.type;
+    }
+
+    public void setType(BodyType type) {
+        this.type = type;
     }
 
     public ColliderForm getForm() {

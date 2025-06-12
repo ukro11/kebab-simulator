@@ -1,6 +1,7 @@
 package kebab_simulator.event.services;
 
 import com.google.common.util.concurrent.*;
+import kebab_simulator.event.services.process.EventPostGameLoadingProcess;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,14 +14,29 @@ public class EventProcessingQueue {
 
     private final Logger logger = LoggerFactory.getLogger(EventProcessingQueue.class);
     private final PriorityQueue<PriorityTask> taskQueue = new PriorityQueue<>();
+    private final PriorityQueue<PriorityTask> postGameTaskQueue = new PriorityQueue<>();
     private final ListeningExecutorService servicesExecutor = MoreExecutors.listeningDecorator(Executors.newCachedThreadPool(new ThreadFactoryBuilder().setNameFormat("service-thread-%s").build()));
+    private boolean postGame = false;
 
     public synchronized void queue(EventProcess task) {
         this.queue(task, 0);
     }
 
+    public synchronized void processPostGame() {
+        this.postGame = true;
+        while (!this.postGameTaskQueue.isEmpty()) {
+            this.taskQueue.offer(this.postGameTaskQueue.poll());
+        }
+        processNext();
+    }
+
     public synchronized void queue(EventProcess task, int priority) {
-        this.taskQueue.offer(new PriorityTask(task, priority));
+        PriorityTask t = new PriorityTask(task, priority);
+        if (!postGame && task instanceof EventPostGameLoadingProcess<?>) {
+            postGameTaskQueue.offer(t);
+        } else {
+            taskQueue.offer(t);
+        }
         processNext();
     }
 
@@ -39,7 +55,8 @@ public class EventProcessingQueue {
                 }
                 @Override
                 public void onFailure(Throwable t) {
-                    logger.error("Error while processing", t);
+                    logger.error("Exception in thread \"{}\" {}", Thread.currentThread().getName(), t.getClass().getName());
+                    t.printStackTrace();
                 }
             }, this.servicesExecutor);
         }

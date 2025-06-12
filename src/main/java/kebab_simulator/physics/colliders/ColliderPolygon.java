@@ -1,7 +1,7 @@
 package kebab_simulator.physics.colliders;
 
 import KAGO_framework.view.DrawTool;
-import kebab_simulator.control.Wrapper;
+import kebab_simulator.Wrapper;
 import kebab_simulator.physics.*;
 import kebab_simulator.utils.misc.MathUtils;
 import kebab_simulator.utils.misc.Vec2;
@@ -95,25 +95,33 @@ public class ColliderPolygon extends Collider {
     }
 
     @Override
-    public void update(double dt) {
-        if (this.type == BodyType.DYNAMIC) {
-            if (this.vertices != null && !this.isDestroyed() && this.velocity.magnitude() > 0) {
-                for (int i = 0; i < this.vertices.length; i++) {
-                    this.vertices[i].add(this.velocity.x * dt, this.velocity.y * dt);
-                }
-                this.x += this.velocity.x * dt;
-                this.y += this.velocity.y * dt;
-                this.center.add(this.velocity.x * dt, this.velocity.y * dt);
+    public void move(double dt) {
+        if (this.vertices != null && !this.isDestroyed() && this.velocity.magnitude() > 0) {
+            for (int i = 0; i < this.vertices.length; i++) {
+                this.vertices[i].add(this.velocity.x * dt, this.velocity.y * dt);
             }
-            if (this.entity != null) {
-                this.entity.setX(this.x + this.entity.getBodyOffsetX());
-                this.entity.setY(this.y + this.entity.getBodyOffsetY());
-            }
+            this.x += this.velocity.x * dt;
+            this.y += this.velocity.y * dt;
+            this.center.add(this.velocity.x * dt, this.velocity.y * dt);
         }
     }
 
     @Override
-    public void renderHitbox(DrawTool drawTool) {
+    public void setPosition(double x, double y) {
+        for (int i = 0; i < this.vertices.length; i++) {
+            var v = this.vertices[i];
+            double relX = v.x - this.x;
+            double relY = v.y - this.y;
+            v.set(x + relX, y + relY);
+        }
+        super.setPosition(x, y);
+        double relX = this.center.x - this.x;
+        double relY = this.center.y - this.y;
+        this.center.add(x + relX, y + relY);
+    }
+
+    @Override
+    public void drawHitbox(DrawTool drawTool) {
         if (this.vertices != null && !this.isDestroyed()) {
             drawTool.setCurrentColor(this.hitboxColor);
             drawTool.drawFilledCircle(this.center.x, this.center.y, 1);

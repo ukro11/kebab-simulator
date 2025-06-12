@@ -3,7 +3,8 @@ package kebab_simulator.graphics.map;
 import KAGO_framework.view.DrawTool;
 import com.google.gson.Gson;
 import kebab_simulator.Config;
-import kebab_simulator.graphics.IOrder;
+import kebab_simulator.graphics.IOrderRenderer;
+import kebab_simulator.graphics.map.maps.KitchenMap;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.Collider;
@@ -75,8 +76,6 @@ public class MapManager {
                             vertices[i] = new Vec2(v.getX(), v.getY());
                         }
                         collider = new ColliderPolygon(String.format("polygon-%s-%d", layer.getName(), layer.getObjects().indexOf(o) + 1), BodyType.STATIC, o.getX(), o.getY(), vertices);
-                        if (layer.getName().equals("sensor")) collider.setSensor(true);
-                        collider.setColliderClass("map");
 
                     } else if (o.isEllipse()) {
                         var radius = o.getWidth() / 2;
@@ -84,14 +83,19 @@ public class MapManager {
                             String.format("circle-%s-%d", layer.getName(), layer.getObjects().indexOf(o) + 1),
                             BodyType.STATIC, o.getX(), o.getY(), radius
                         );
-                        if (layer.getName().equals("sensor")) collider.setSensor(true);
-                        collider.setColliderClass("map");
 
                     } else {
                         collider = new ColliderRectangle(String.format("rectangle-%s-%d", layer.getName(), layer.getObjects().indexOf(o) + 1), BodyType.STATIC, o.getX(), o.getY(), o.getWidth(), o.getHeight());
-                        if (layer.getName().equals("sensor")) collider.setSensor(true);
+                    }
+
+                    if (layer.getName().equals("sensor")) {
+                        collider.setSensor(true);
+                        collider.setColliderClass("map_sensor");
+
+                    } else {
                         collider.setColliderClass("map");
                     }
+
 
                     if (this.fileName.equals("kitchen.json")) {
                         KitchenMap.loadCollider(layer, o, collider);
@@ -248,9 +252,9 @@ public class MapManager {
 
     private boolean inView(Quad quad) {
         int quadSize = 32;
-        if (quad.getX() >= GameScene.getInstance().getCameraController().getX() / GameScene.getInstance().getCameraController().getZoom() - quadSize && quad.getY() >= GameScene.getInstance().getCameraController().getY() / GameScene.getInstance().getCameraController().getZoom() - quadSize) {
-            if (quad.getX() + quad.getWidth() <= (GameScene.getInstance().getCameraController().getX() + Config.WINDOW_WIDTH) / GameScene.getInstance().getCameraController().getZoom() + quadSize &&
-                    quad.getY() + quad.getHeight() <= (GameScene.getInstance().getCameraController().getY() + Config.WINDOW_HEIGHT) / GameScene.getInstance().getCameraController().getZoom() + quadSize) {
+        if (quad.getX() >= GameScene.getInstance().getCameraRenderer().getX() / GameScene.getInstance().getCameraRenderer().getZoom() - quadSize && quad.getY() >= GameScene.getInstance().getCameraRenderer().getY() / GameScene.getInstance().getCameraRenderer().getZoom() - quadSize) {
+            if (quad.getX() + quad.getWidth() <= (GameScene.getInstance().getCameraRenderer().getX() + Config.WINDOW_WIDTH) / GameScene.getInstance().getCameraRenderer().getZoom() + quadSize &&
+                    quad.getY() + quad.getHeight() <= (GameScene.getInstance().getCameraRenderer().getY() + Config.WINDOW_HEIGHT) / GameScene.getInstance().getCameraRenderer().getZoom() + quadSize) {
                 return true;
             }
         }
@@ -287,7 +291,7 @@ public class MapManager {
         }
     }
 
-    public class Quad implements IOrder {
+    public class Quad implements IOrderRenderer {
         private Batch batch;
         private BufferedImage quadImage;
         private int tileId;

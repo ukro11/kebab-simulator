@@ -2,17 +2,18 @@ package KAGO_framework.model;
 
 import KAGO_framework.control.Interactable;
 
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 public abstract class InteractiveGraphicalObject extends GraphicalObject implements Interactable {
 
     @Override
-    public void keyPressed(int key){
+    public void keyPressed(KeyEvent key){
 
     }
 
     @Override
-    public void keyReleased(int key){
+    public void keyReleased(KeyEvent key){
 
     }
 

@@ -70,8 +70,8 @@ public class ColliderTest extends Test {
         GameScene.getInstance().getDrawables().add(new Drawable() {
             @Override
             public void draw(DrawTool drawTool) {
-                polygonFirst.renderHitbox(drawTool);
-                polygonSecond.renderHitbox(drawTool);
+                polygonFirst.drawHitbox(drawTool);
+                polygonSecond.drawHitbox(drawTool);
             }
             @Override
             public void update(double dt) {}
@@ -107,8 +107,8 @@ public class ColliderTest extends Test {
         GameScene.getInstance().getDrawables().add(new Drawable() {
             @Override
             public void draw(DrawTool drawTool) {
-                polygon.renderHitbox(drawTool);
-                circle.renderHitbox(drawTool);
+                polygon.drawHitbox(drawTool);
+                circle.drawHitbox(drawTool);
             }
             @Override
             public void update(double dt) {}
@@ -138,8 +138,8 @@ public class ColliderTest extends Test {
         GameScene.getInstance().getDrawables().add(new Drawable() {
             @Override
             public void draw(DrawTool drawTool) {
-                circleFirst.renderHitbox(drawTool);
-                circleSecond.renderHitbox(drawTool);
+                circleFirst.drawHitbox(drawTool);
+                circleSecond.drawHitbox(drawTool);
             }
             @Override
             public void update(double dt) {}
@@ -181,8 +181,8 @@ public class ColliderTest extends Test {
         GameScene.getInstance().getDrawables().add(new Drawable() {
             @Override
             public void draw(DrawTool drawTool) {
-                circle.renderHitbox(drawTool);
-                polygon.renderHitbox(drawTool);
+                circle.drawHitbox(drawTool);
+                polygon.drawHitbox(drawTool);
             }
             @Override
             public void update(double dt) {}
