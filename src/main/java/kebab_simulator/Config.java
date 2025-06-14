@@ -7,7 +7,7 @@ package kebab_simulator;
 public class Config {
 
     // Titel des Programms (steht oben in der Fenstertitelzeile)
-    public final static String WINDOW_TITLE = "Kebab Simulator";
+    public final static String WINDOW_TITLE = "Kebab Simulator v1.0";
 
     // Konfiguration des Standardfensters: Anzeige und Breite des Programmfensters (Width) und Höhe des Programmfensters (Height)
     public final static boolean SHOW_DEFAULT_WINDOW = true;
