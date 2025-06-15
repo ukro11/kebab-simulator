@@ -9,11 +9,14 @@ import kebab_simulator.graphics.spawner.ObjectSpawner;
 import kebab_simulator.model.entity.Entity;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.Collider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.event.KeyEvent;
 
 public abstract class TableSpawner extends ObjectSpawner {
 
+    private static final Logger log = LoggerFactory.getLogger(TableSpawner.class);
     protected static TableSpawner currentCollisionPlayer = null;
     protected Entity.EntityDirection directionToLook;
 
@@ -31,6 +34,8 @@ public abstract class TableSpawner extends ObjectSpawner {
 
     // Wenn der Spieler den Table anklickt
     public void onInteractTable(EntityPlayer player, KeyEvent keyEvent) {}
+    public void onFocus() {}
+    public void onFocusLost() {}
 
     @Override
     public void onRegisterSensor(Collider sensor) {
@@ -40,9 +45,11 @@ public abstract class TableSpawner extends ObjectSpawner {
                 if (c.getState() == ColliderCollisionEvent.CollisionState.COLLISION_NORMAL_CONTACT && TableSpawner.currentCollisionPlayer == null) {
                     if (this.directionToLook != null && player.getDirection() != this.directionToLook) {
                         TableSpawner.currentCollisionPlayer = null;
+                        this.onFocusLost();
 
                     } else {
                         TableSpawner.currentCollisionPlayer = this;
+                        this.onFocus();
                     }
 
                 } else if (c.getState() == ColliderCollisionEvent.CollisionState.COLLISION_END_CONTACT) {
@@ -64,21 +71,8 @@ public abstract class TableSpawner extends ObjectSpawner {
     @Override
     public void keyPressed(KeyEvent event) {
         if (this.renderer != null) {
-            if (this.renderer.getCurrentAnimation().getState() == FocusAnimationState.FOCUS) {
+            if (TableSpawner.isTableFocused(this)) {
                 this.onInteractTable(Wrapper.getLocalPlayer(), event);
-            }
-        }
-    }
-
-    @Override
-    public void update(double dt) {
-        super.update(dt);
-        if (this.renderer != null) {
-            if (TableSpawner.currentCollisionPlayer == this) {
-                this.renderer.switchState(FocusAnimationState.FOCUS);
-
-            } else {
-                this.renderer.switchState(FocusAnimationState.DEFAULT);
             }
         }
     }
@@ -89,5 +83,9 @@ public abstract class TableSpawner extends ObjectSpawner {
 
     public static boolean isCurrentlyFocused() {
         return TableSpawner.currentCollisionPlayer != null;
+    }
+
+    public static TableSpawner getCurrentFocusedTable() {
+        return TableSpawner.currentCollisionPlayer;
     }
 }

@@ -4,7 +4,7 @@ import java.awt.image.BufferedImage;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class Animation<T extends IAnimationState> {
+public class Animation<T extends Enum<T> & IAnimationState> {
 
     private final T state;
     private final CopyOnWriteArrayList<BufferedImage> frames;

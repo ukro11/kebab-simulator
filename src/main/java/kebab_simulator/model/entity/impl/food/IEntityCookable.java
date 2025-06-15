@@ -5,6 +5,8 @@ public interface IEntityCookable {
     double getCookingProgress();
     double getCookingDuration();
     boolean allowCooking();
+    void cook();
+    void stopCook();
 
     enum EntityCookingState {
         IDLE,

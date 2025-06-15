@@ -10,6 +10,8 @@ import kebab_simulator.Wrapper;
 import kebab_simulator.graphics.OrderRenderer;
 import kebab_simulator.graphics.map.MapManager;
 import kebab_simulator.graphics.spawner.ObjectSpawner;
+import kebab_simulator.graphics.spawner.table.TableItemIntegration;
+import kebab_simulator.graphics.spawner.table.TableKnifeSpawner;
 import kebab_simulator.graphics.spawner.table.TableSpawner;
 import kebab_simulator.graphics.tooltip.Tooltip;
 import kebab_simulator.model.KeyManagerModel;
@@ -51,7 +53,15 @@ public class GameScene extends Scene {
             new Tooltip(
                 KeyManagerModel.KEY_TAKE_ITEM,
                 (keyManager) -> {
-                    if (TableSpawner.isCurrentlyFocused()) return "Gegenstand aufheben";
+                    if (TableSpawner.isCurrentlyFocused() && TableSpawner.getCurrentFocusedTable() instanceof TableItemIntegration) {
+                        var t = ((TableItemIntegration) TableSpawner.getCurrentFocusedTable());
+                        if (!t.getItems().isEmpty() && Wrapper.getLocalPlayer().getInventory().getItemInHand() == null)
+                            return "Gegenstand aufheben";
+
+                        else if (t.getItems().isEmpty() && Wrapper.getLocalPlayer().getInventory().getItemInHand() != null)
+                            return "Gegenstand fallen lassen";
+                    }
+
                     return null;
                 }
             )

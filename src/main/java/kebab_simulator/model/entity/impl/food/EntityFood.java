@@ -19,13 +19,15 @@ public abstract class EntityFood<T extends Enum<T> & IAnimationState> extends En
     @Override
     protected void drawEntity(DrawTool drawTool) {
         super.drawEntity(drawTool);
-        if (this instanceof IEntityCookable) {
-            // TODO: Progress bar
+        // TODO: Progress bar
+        if (this instanceof IEntityCuttable) {
+            ((IEntityCuttable) this).drawInteraction(this.body.getX(), this.body.getY() - 10, drawTool);
         }
     }
 
     public void onPickFromPlate(EntityPlayer player) {
         this.player = player;
+        this.rotation = 0;
     }
 
     public void onDropFromPlate() {

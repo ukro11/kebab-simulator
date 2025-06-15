@@ -24,6 +24,19 @@ public abstract class TableStorageSpawner extends TableSpawner {
     }
 
     @Override
+    public void update(double dt) {
+        super.update(dt);
+        if (this.renderer != null) {
+            if (TableSpawner.currentCollisionPlayer == this) {
+                this.renderer.switchState(FocusAnimationState.FOCUS);
+
+            } else {
+                this.renderer.switchState(FocusAnimationState.DEFAULT);
+            }
+        }
+    }
+
+    @Override
     public boolean allowFocus() {
         return Wrapper.getLocalPlayer().getInventory().getItemInHand() == null;
     }

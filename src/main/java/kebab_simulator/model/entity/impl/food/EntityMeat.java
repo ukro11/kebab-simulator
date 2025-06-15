@@ -2,9 +2,12 @@ package kebab_simulator.model.entity.impl.food;
 
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
+import kebab_simulator.animation.Easings;
 import kebab_simulator.animation.states.entity.MeatAnimationState;
+import kebab_simulator.graphics.IOrderRenderer;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.meal.ingredients.IngredientMeat;
+import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderRectangle;
 
@@ -12,9 +15,13 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
 
     private EntityCuttingState cuttingState;
     private double cuttingProgress;
+    private double cuttingElapsed;
 
     private EntityCookingState cookingState;
     private double cookingProgress;
+    private double cookingElapsed;
+
+    private double scale;
 
     public EntityMeat() {
         this(0, 0);
@@ -26,10 +33,22 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
         this.cuttingProgress = 0;
         this.cookingState = EntityCookingState.IDLE;
         this.cookingProgress = 0;
+        this.scale = 0.9;
         this.setRenderer(new AnimationRenderer(
             "/graphic/item/food/meat.png", 2, 1, 32, 32,
             MeatAnimationState.RAW_DEFAULT
         ));
+        EntityMeat meat = this;
+        /*GameScene.getInstance().getRenderer().register(new IOrderRenderer() {
+            @Override
+            public double zIndex() {
+                return meat.zIndex() + 32 + 1;
+            }
+            @Override
+            public void draw(DrawTool drawTool) {
+                meat.drawInteraction(meat.body.getX() + meat.width / 2, meat.body.getY() - 15, drawTool);
+            }
+        });*/
     }
 
     @Override
@@ -46,6 +65,18 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
     @Override
     public void update(double dt) {
         super.update(dt);
+        if (this.cuttingState == EntityCuttingState.CUTTING) {
+            this.cuttingElapsed += dt;
+            this.cuttingProgress = this.cuttingElapsed / this.getCuttingDuration();
+
+            if (this.cuttingProgress >= 1) {
+                this.cuttingProgress = 1;
+                this.cuttingState = EntityCuttingState.CUT;
+            }
+
+        } else if (this.cuttingState == EntityCuttingState.CUT) {
+            this.renderer.switchState(MeatAnimationState.RAW_CUT);
+        }
     }
 
     @Override
@@ -53,7 +84,7 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
         if (this.player == null && this.renderer != null && this.renderer.getCurrentFrame() != null) {
             drawTool.push();
             drawTool.getGraphics2D().translate(this.getX() + this.width / 2, this.getY() + this.height / 2);
-            drawTool.getGraphics2D().scale(0.9, 0.9);
+            drawTool.getGraphics2D().scale(this.scale, this.scale);
             drawTool.getGraphics2D().rotate(Math.toRadians(this.rotation));
             drawTool.getGraphics2D().translate(-(this.getX() + this.width / 2), -(this.getY() + this.height / 2));
             drawTool.getGraphics2D().drawImage(
@@ -65,6 +96,7 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
                 null
             );
             drawTool.pop();
+            this.drawInteraction(this.body.getX() + this.width / 2, this.body.getY() - 15, drawTool);
         }
     }
 
@@ -89,6 +121,16 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
     }
 
     @Override
+    public void cook() {
+
+    }
+
+    @Override
+    public void stopCook() {
+
+    }
+
+    @Override
     public EntityCuttingState getCuttingState() {
         return this.cuttingState;
     }
@@ -106,5 +148,27 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
     @Override
     public boolean allowCutting() {
         return this.cuttingState == EntityCuttingState.IDLE || this.cuttingState == EntityCuttingState.CUTTING;
+    }
+
+    @Override
+    public void cut() {
+        if (this.cuttingState != EntityCuttingState.CUT) {
+            this.cuttingState = EntityCuttingState.CUTTING;
+        }
+    }
+
+    @Override
+    public void stopCut() {
+        if (this.cuttingState != EntityCuttingState.CUT) {
+            this.cuttingState = EntityCuttingState.IDLE;
+        }
+    }
+
+    public double getScale() {
+        return this.scale;
+    }
+
+    public void setScale(double scale) {
+        this.scale = scale;
     }
 }

@@ -4,9 +4,12 @@ import com.google.common.collect.Range;
 import kebab_simulator.animation.IAnimationState;
 
 public enum TableKnifeAnimationState implements IAnimationState {
-    DEFAULT(0, Range.closed(0, 0), 1, 0.1, true),
-    FOCUS(1, Range.closed(0, 0), 1, 0.1, true),
-    CUT(2, Range.closed(0, 5), 6, 0.1, true);
+    DEFAULT(0, Range.closed(0, 0), 1, 0.1),
+    KNIFE_DEFAULT(0, Range.closed(1, 1), 1, 0.1),
+    FOCUS(1, Range.closed(0, 0), 1, 0.1),
+    KNIFE_FOCUS(1, Range.closed(1, 1), 1, 0.1),
+    CUT(2, Range.closed(0, 11), 12, 1.0),
+    KNIFE_CUT(3, Range.closed(0, 11), 12, 1);
 
     private final int rowIndex;
     private final Range<Integer> columnRange;

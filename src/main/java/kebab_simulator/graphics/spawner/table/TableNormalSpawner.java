@@ -9,10 +9,9 @@ import kebab_simulator.model.entity.Entity;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.physics.Collider;
 
-public class TableNormalSpawner extends TableItemIntegration {
+public class TableNormalSpawner extends TableItemIntegration implements ITableSide {
 
     private final TableNormalType type;
-    private boolean isLeft = false;
 
     public TableNormalSpawner(ObjectIdResolver id, Collider collider) {
         super(id, collider, new AnimationRenderer<FocusAnimationState>(
@@ -25,13 +24,9 @@ public class TableNormalSpawner extends TableItemIntegration {
         ));
         this.type = TableNormalType.parse(id);
 
-        if (collider.getX() < 620) {
-            this.isLeft = true;
-        }
-
         switch (this.type) {
             case NORMAL: {
-                if (this.isLeft) {
+                if (this.isLeft()) {
                     this.directionToLook = Entity.EntityDirection.LEFT;
 
                 } else {
@@ -67,6 +62,19 @@ public class TableNormalSpawner extends TableItemIntegration {
     }
 
     @Override
+    public void update(double dt) {
+        super.update(dt);
+        if (this.renderer != null) {
+            if (TableSpawner.currentCollisionPlayer == this) {
+                this.renderer.switchState(FocusAnimationState.FOCUS);
+
+            } else {
+                this.renderer.switchState(FocusAnimationState.DEFAULT);
+            }
+        }
+    }
+
+    @Override
     public void draw(DrawTool drawTool) {
         super.draw(drawTool);
         switch (this.type) {
@@ -87,8 +95,9 @@ public class TableNormalSpawner extends TableItemIntegration {
         return this.type;
     }
 
+    @Override
     public boolean isLeft() {
-        return this.isLeft;
+        return this.collider.getX() < 620;
     }
 
     public enum TableNormalType {

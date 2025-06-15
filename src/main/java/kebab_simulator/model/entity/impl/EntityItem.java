@@ -1,6 +1,7 @@
 package kebab_simulator.model.entity.impl;
 
 import kebab_simulator.animation.IAnimationState;
+import kebab_simulator.graphics.spawner.table.TableKnifeSpawner;
 import kebab_simulator.graphics.spawner.table.TableNormalSpawner;
 import kebab_simulator.model.entity.Entity;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
@@ -67,6 +68,15 @@ public abstract class EntityItem<T extends Enum<T> & IAnimationState> extends En
                     this.rotation = 0;
                 }
                 default -> this.rotation = 0;
+            }
+
+        } else if (location instanceof TableKnifeSpawner) {
+            var knife = (TableKnifeSpawner) location;
+            if (knife.isLeft()) {
+                this.rotation = 270;
+
+            } else {
+                this.rotation = 90;
             }
 
         } else if (location == null) {

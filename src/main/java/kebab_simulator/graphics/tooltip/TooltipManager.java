@@ -13,9 +13,7 @@ public class TooltipManager {
     private double TOOLTIP_MARGIN_X = 40;
 
     public void register(Tooltip tooltip) {
-        if (this.tooltips.stream().filter(t -> t.getKeyModel().getDescription().equals(tooltip.getKeyModel().getDescription())).findFirst().isEmpty()) {
-            this.tooltips.add(tooltip);
-        }
+        this.tooltips.add(tooltip);
     }
 
     public void update(double dt) {
@@ -28,9 +26,10 @@ public class TooltipManager {
         drawTool.push();
         for (int i = this.tooltips.size() - 1; i >= 0; i--) {
             var tooltip = this.tooltips.get(i);
-            tooltip.draw(drawTool, lastX + this.TOOLTIP_MARGIN_X * ((this.tooltips.size() - 1) - i), this.TOOLTIP_START_Y);
+            // ((this.tooltips.size() - 1) - i)
+            tooltip.draw(drawTool, lastX, this.TOOLTIP_START_Y);
             if (tooltip.showTooltip()) {
-                lastX += tooltip.getTooltipWidth(drawTool);
+                lastX += tooltip.getTooltipWidth(drawTool) + this.TOOLTIP_MARGIN_X;
             }
         }
         drawTool.pop();

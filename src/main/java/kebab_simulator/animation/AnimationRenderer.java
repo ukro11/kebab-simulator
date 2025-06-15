@@ -20,9 +20,9 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
     private Logger logger = LoggerFactory.getLogger(AnimationRenderer.class);
     private final HashMap<T, Animation<T>> animations;
 
-    private BiConsumer<AnimationRenderer<T>, Integer> onStart;
-    private BiConsumer<AnimationRenderer<T>, Integer> onCycle;
-    private BiConsumer<AnimationRenderer<T>, Integer> onFinish;
+    private HashMap<T, Runnable> onStart;
+    private HashMap<T, Runnable> onCycle;
+    private HashMap<T, Runnable> onFinish;
     private Animation<T> currentAnimation;
     private int currentIndex = 0;
     private double elapsed;
@@ -70,6 +70,9 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
                 }
             }
             this.animations = animations;
+            this.onStart = new HashMap<>();
+            this.onCycle = new HashMap<>();
+            this.onFinish = new HashMap<>();
 
             if (this.animations.values().stream().anyMatch(f -> this.animations.values().stream().filter(_f -> f.getState().equals(_f.getState())).count() > 1)) {
                 throw new InvalidParameterException("Atleast 2 framesLists have been found with the same state.");
@@ -98,23 +101,6 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
         this.currentAnimation = this.animations.values().stream().filter(s -> s.getState().equals(state)).findFirst().get();
 
         if (this.currentAnimation == null) throw new NullPointerException(String.format("You did not passed an animation with the state: %s", state.name()));
-    }
-
-    public static <S extends CharacterAnimationState> Animation<S> createAnimation(S state, double duration, String... paths) {
-        return AnimationRenderer.createAnimation(state, duration, false, false, paths);
-    }
-
-    public static <S extends CharacterAnimationState> Animation<S> createAnimation(S state, double duration, boolean loop, boolean reverse, String... paths) {
-        List<BufferedImage> frames = new java.util.ArrayList<>();
-        try {
-            for (String path : paths) {
-                var image = ImageIO.read(AnimationRenderer.class.getResource(path));
-                frames.add(image);
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return new Animation<S>(state, frames, duration, loop, reverse);
     }
 
     public void start() {
@@ -156,7 +142,7 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
 
     public void update(double dt) {
         if (!this.running || this.currentAnimation == null || this.currentAnimation.getFrames().size() <= 1) return;
-        if (this.elapsed == 0 && this.currentIndex == 0 && this.onStart != null) this.onStart.accept(this, this.currentIndex);
+        if (this.elapsed == 0 && this.currentIndex == 0 && this.getStartRunnable() != null) this.getStartRunnable().run();
         this.elapsed += dt;
         Animation animation = this.currentAnimation;
         int size = animation.getFrames().size();
@@ -164,12 +150,12 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
             boolean lastIndex = animation.isReverse() ? this.currentIndex == 0 : this.currentIndex == size - 1;
             if (lastIndex) {
                 int max = animation.isReverse() ? size - 1 : 0;
-                if (this.onFinish != null) this.onFinish.accept(this, this.currentIndex);
+                if (this.getFinishRunnable() != null) this.getFinishRunnable().run();
                 if (animation.isLoop()) {
                     this.currentIndex = max;
                 }
             } else {
-                if (this.onCycle != null) this.onCycle.accept(this, this.currentIndex);
+                if (this.getCycleRunnable() != null) this.getCycleRunnable().run();
                 if (animation.isReverse()) {
                     this.currentIndex--;
                 } else {
@@ -180,16 +166,28 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
         }
     }
 
-    public void onStart(BiConsumer<AnimationRenderer<T>, Integer> onStart) {
-        this.onStart = onStart;
+    public void onStart(Runnable onStart) {
+        this.onStart.put(this.currentAnimation.getState(), onStart);
     }
 
-    public void onCycle(BiConsumer<AnimationRenderer<T>, Integer> onCycle) {
-        this.onCycle = onCycle;
+    public void onStart(T state, Runnable onStart) {
+        this.onStart.put(state, onStart);
     }
 
-    public void onFinish(BiConsumer<AnimationRenderer<T>, Integer> onFinish) {
-        this.onFinish = onFinish;
+    public void onCycle(Runnable onCycle) {
+        this.onCycle.put(this.currentAnimation.getState(), onCycle);
+    }
+
+    public void onCycle(T state, Runnable onCycle) {
+        this.onCycle.put(state, onCycle);
+    }
+
+    public void onFinish(Runnable onFinish) {
+        this.onFinish.put(this.currentAnimation.getState(), onFinish);
+    }
+
+    public void onFinish(T state, Runnable onFinish) {
+        this.onFinish.put(state, onFinish);
     }
 
     public double getDuration() {
@@ -214,6 +212,10 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
         return this.currentIndex;
     }
 
+    public HashMap<T, Animation<T>> getAnimations() {
+        return this.animations;
+    }
+
     public Animation<T> getCurrentAnimation() {
         return this.currentAnimation;
     }
@@ -223,5 +225,17 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
             return null;
         }
         return this.currentAnimation.getFrames().get(this.currentIndex);
+    }
+
+    private Runnable getStartRunnable() {
+        return this.onStart.get(this.currentAnimation.getState());
+    }
+
+    private Runnable getCycleRunnable() {
+        return this.onCycle.get(this.currentAnimation.getState());
+    }
+
+    private Runnable getFinishRunnable() {
+        return this.onFinish.get(this.currentAnimation.getState());
     }
 }

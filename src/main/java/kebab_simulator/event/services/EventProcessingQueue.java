@@ -27,17 +27,17 @@ public class EventProcessingQueue {
         while (!this.postGameTaskQueue.isEmpty()) {
             this.taskQueue.offer(this.postGameTaskQueue.poll());
         }
-        processNext();
+        this.processNext();
     }
 
     public synchronized void queue(EventProcess task, int priority) {
         PriorityTask t = new PriorityTask(task, priority);
-        if (!postGame && task instanceof EventPostGameLoadingProcess<?>) {
-            postGameTaskQueue.offer(t);
+        if (!this.postGame && task instanceof EventPostGameLoadingProcess<?>) {
+            this.postGameTaskQueue.offer(t);
         } else {
-            taskQueue.offer(t);
+            this.taskQueue.offer(t);
         }
-        processNext();
+        this.processNext();
     }
 
     public PriorityQueue<PriorityTask> getTaskQueue() {

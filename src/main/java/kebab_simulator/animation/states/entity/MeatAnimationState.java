@@ -6,6 +6,7 @@ import kebab_simulator.animation.IAnimationState;
 public enum MeatAnimationState implements IAnimationState {
     RAW_DEFAULT(0, Range.closed(0, 0), 1, 0.1),
     RAW_CUT(1, Range.closed(0, 0), 1, 0.1),
+    RAW_CUT_SMALL(1, Range.closed(1, 1), 1, 0.1),
     COOKING(2, Range.closed(0, 5), 6, 20, false),
     COOKED(2, Range.closed(0, 1), 1, 0.1);
 
