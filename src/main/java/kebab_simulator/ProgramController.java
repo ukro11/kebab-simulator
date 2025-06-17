@@ -9,6 +9,7 @@ import kebab_simulator.event.services.process.EventLoadAssetsProcess;
 import kebab_simulator.graphics.map.MapManager;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.model.scene.GameScene;
+import kebab_simulator.model.visual.impl.component.InfoComponent;
 import kebab_simulator.test.Test;
 import kebab_simulator.utils.game.CooldownManager;
 import org.slf4j.Logger;
@@ -75,7 +76,7 @@ public class ProgramController {
     public void startProgram() {
         if (Config.RUN_ENV == Config.Environment.DEVELOPMENT) {
             this.startTest();
-            //GameScene.getInstance().getVisuals().add(new InfoComponent());
+            GameScene.getInstance().getVisuals().add(new InfoComponent());
         }
 
         Wrapper.getEventManager().addEventListener("keypressed", (KeyPressedEvent event) -> {

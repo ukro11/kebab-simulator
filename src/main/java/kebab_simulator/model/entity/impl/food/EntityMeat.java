@@ -2,12 +2,9 @@ package kebab_simulator.model.entity.impl.food;
 
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
-import kebab_simulator.animation.Easings;
 import kebab_simulator.animation.states.entity.MeatAnimationState;
-import kebab_simulator.graphics.IOrderRenderer;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.meal.ingredients.IngredientMeat;
-import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderRectangle;
 
@@ -38,17 +35,6 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
             "/graphic/item/food/meat.png", 2, 1, 32, 32,
             MeatAnimationState.RAW_DEFAULT
         ));
-        EntityMeat meat = this;
-        /*GameScene.getInstance().getRenderer().register(new IOrderRenderer() {
-            @Override
-            public double zIndex() {
-                return meat.zIndex() + 32 + 1;
-            }
-            @Override
-            public void draw(DrawTool drawTool) {
-                meat.drawInteraction(meat.body.getX() + meat.width / 2, meat.body.getY() - 15, drawTool);
-            }
-        });*/
     }
 
     @Override

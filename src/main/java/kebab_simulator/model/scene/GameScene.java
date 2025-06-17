@@ -11,8 +11,8 @@ import kebab_simulator.graphics.OrderRenderer;
 import kebab_simulator.graphics.map.MapManager;
 import kebab_simulator.graphics.spawner.ObjectSpawner;
 import kebab_simulator.graphics.spawner.table.TableItemIntegration;
-import kebab_simulator.graphics.spawner.table.TableKnifeSpawner;
 import kebab_simulator.graphics.spawner.table.TableSpawner;
+import kebab_simulator.graphics.spawner.table.TableStorageSpawner;
 import kebab_simulator.graphics.tooltip.Tooltip;
 import kebab_simulator.model.KeyManagerModel;
 import org.slf4j.Logger;
@@ -53,13 +53,19 @@ public class GameScene extends Scene {
             new Tooltip(
                 KeyManagerModel.KEY_TAKE_ITEM,
                 (keyManager) -> {
-                    if (TableSpawner.isCurrentlyFocused() && TableSpawner.getCurrentFocusedTable() instanceof TableItemIntegration) {
-                        var t = ((TableItemIntegration) TableSpawner.getCurrentFocusedTable());
-                        if (!t.getItems().isEmpty() && Wrapper.getLocalPlayer().getInventory().getItemInHand() == null)
-                            return "Gegenstand aufheben";
+                    if (TableSpawner.isCurrentlyFocused()) {
+                        if (TableSpawner.getCurrentFocusedTable() instanceof TableItemIntegration) {
+                            var t = ((TableItemIntegration) TableSpawner.getCurrentFocusedTable());
+                            if (!t.getItems().isEmpty() && Wrapper.getLocalPlayer().getInventory().getItemInHand() == null)
+                                return "Gegenstand aufheben";
 
-                        else if (t.getItems().isEmpty() && Wrapper.getLocalPlayer().getInventory().getItemInHand() != null)
-                            return "Gegenstand fallen lassen";
+                            else if (t.getItems().isEmpty() && Wrapper.getLocalPlayer().getInventory().getItemInHand() != null)
+                                return "Gegenstand fallen lassen";
+
+                        } else if (TableSpawner.getCurrentFocusedTable() instanceof TableStorageSpawner) {
+                            if (Wrapper.getLocalPlayer().getInventory().getItemInHand() != null) return null;
+                            return "Gegenstand aufheben";
+                        }
                     }
 
                     return null;

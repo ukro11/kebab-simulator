@@ -6,6 +6,7 @@ import kebab_simulator.graphics.spawner.ObjectIdResolver;
 import kebab_simulator.model.KeyManagerModel;
 import kebab_simulator.model.entity.impl.EntityItem;
 import kebab_simulator.model.entity.impl.EntityItemLocation;
+import kebab_simulator.model.entity.impl.food.EntityFood;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.Collider;
@@ -92,7 +93,8 @@ public abstract class TableItemIntegration extends TableSpawner implements Entit
             return Wrapper.getLocalPlayer().getInventory().hasItemInventory();
 
         } else {
-            return !Wrapper.getLocalPlayer().getInventory().hasItemInventory() || Wrapper.getLocalPlayer().getInventory().isFood();
+            if (!Wrapper.getLocalPlayer().getInventory().hasItemInventory()) return true;
+            else return Wrapper.getLocalPlayer().getInventory().isFood() && !(this.items.get(0) instanceof EntityFood<?>);
         }
     }
 
