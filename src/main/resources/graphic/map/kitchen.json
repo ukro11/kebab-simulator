@@ -1,4 +1,12 @@
 { "compressionlevel":-1,
+ "editorsettings":
+    {
+     "export":
+        {
+         "format":"json",
+         "target":"kitchen.json"
+        }
+    },
  "height":32,
  "infinite":true,
  "layers":[
@@ -863,7 +871,7 @@
                 {
                  "height":32,
                  "id":58,
-                 "name":"table_normal_14",
+                 "name":"table_storage-bread_14",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1247,7 +1255,7 @@
                 {
                  "height":32,
                  "id":90,
-                 "name":"table_normal_14",
+                 "name":"table_storage-bread_14",
                  "rotation":0,
                  "type":"",
                  "visible":true,
