@@ -33,8 +33,10 @@ public class KitchenMap {
                         GameScene.getInstance().getRenderer().register(new TableServingSpawner(id, collider));
                         break;
                     }
-                    case "storage-meat": {
-                        GameScene.getInstance().getRenderer().register(TableStorageSpawner.fetchStorageSpawner(id, collider));
+                    default: {
+                        if (id.getSpawnerType().startsWith("storage-")) {
+                            GameScene.getInstance().getRenderer().register(TableStorageSpawner.fetchStorageSpawner(id, collider));
+                        }
                         break;
                     }
                 }
