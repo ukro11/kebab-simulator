@@ -5,6 +5,7 @@ import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.FocusAnimationState;
 import kebab_simulator.graphics.spawner.ObjectIdResolver;
 import kebab_simulator.graphics.spawner.table.storage.TableStorageBread;
+import kebab_simulator.graphics.spawner.table.storage.TableStorageCabbage;
 import kebab_simulator.graphics.spawner.table.storage.TableStorageMeat;
 import kebab_simulator.physics.Collider;
 
@@ -48,6 +49,8 @@ public abstract class TableStorageSpawner extends TableSpawner {
                 return new TableStorageMeat(id, collider);
             case "bread":
                 return new TableStorageBread(id, collider);
+            case "cabbage":
+                return new TableStorageCabbage(id, collider);
         }
         return null;
     }
@@ -59,5 +62,6 @@ public abstract class TableStorageSpawner extends TableSpawner {
     public enum TableStorageType {
         MEAT,
         BREAD,
+        CABBAGE,
     }
 }

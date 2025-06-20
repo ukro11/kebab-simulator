@@ -5,7 +5,7 @@ import com.google.common.collect.Range;
 import kebab_simulator.animation.IAnimationState;
 
 
-public enum BreadAnimationState implements IAnimationState {
+public enum CabbageAnimationState implements IAnimationState {
     DEFAULT(0, Range.closed(0, 0), 1, 0.1),
     CUT_SMALL(1, Range.closed(0, 0), 1, 0.1);
 
@@ -20,22 +20,22 @@ public enum BreadAnimationState implements IAnimationState {
     private final int frameHeight;
 
 
-    BreadAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration) {
+    CabbageAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration) {
         this(rowIndex, columnRange, frames, duration, true);
     }
 
 
-    BreadAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop) {
+    CabbageAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop) {
         this(rowIndex, columnRange, frames, duration, loop, false);
     }
 
 
-    BreadAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse) {
+    CabbageAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse) {
         this(rowIndex, columnRange, frames, duration, loop, reverse, 0, 0);
     }
 
 
-    BreadAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse, int frameWidth, int frameHeight) {
+    CabbageAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse, int frameWidth, int frameHeight) {
         this.rowIndex = rowIndex;
         this.columnRange = columnRange;
         this.frames = frames;
