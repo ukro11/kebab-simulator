@@ -3,14 +3,14 @@ package kebab_simulator.model.entity.impl.food;
 
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
-import kebab_simulator.animation.states.entity.BreadAnimationState;
+import kebab_simulator.animation.states.entity.CabbageAnimationState;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
-import kebab_simulator.model.meal.ingredients.IngredientBread;
+import kebab_simulator.model.meal.ingredients.IngredientCabbage;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderRectangle;
 
 
-public class EntityBread extends EntityFood implements IEntityCuttable {
+public class EntityCabbage extends EntityFood implements IEntityCuttable {
 
 
     private EntityCuttingState cuttingState;
@@ -20,19 +20,19 @@ public class EntityBread extends EntityFood implements IEntityCuttable {
     private double scale;
 
 
-    public EntityBread() {
+    public EntityCabbage() {
         this(0, 0);
     }
 
 
-    public EntityBread(double x, double y) {
+    public EntityCabbage(double x, double y) {
         super(new ColliderRectangle(BodyType.DYNAMIC, x, y, 32, 32), 0, 0, 32, 32);
         this.cuttingState = EntityCuttingState.IDLE;
         this.cuttingProgress = 0;
         this.scale = 0.9;
         this.setRenderer(new AnimationRenderer(
-                "/graphic/item/food/bread.png", 2, 2, 32, 32,
-                BreadAnimationState.DEFAULT
+                "/graphic/item/food/cabbage.png", 2, 2, 32, 32,
+                CabbageAnimationState.DEFAULT
         ));
     }
 
@@ -65,7 +65,7 @@ public class EntityBread extends EntityFood implements IEntityCuttable {
 
 
         } else if (this.cuttingState == EntityCuttingState.CUT) {
-            this.renderer.switchState(BreadAnimationState.CUT_SMALL);
+            this.renderer.switchState(CabbageAnimationState.CUT_SMALL);
         }
     }
 
@@ -106,7 +106,7 @@ public class EntityBread extends EntityFood implements IEntityCuttable {
 
     @Override
     public double getCuttingDuration() {
-        return IngredientBread.getInstance().getTargetState().getCutDuration();
+        return IngredientCabbage.getInstance().getTargetState().getCutDuration();
     }
 
 
