@@ -1,10 +1,7 @@
 package kebab_simulator.model.entity;
 
 import kebab_simulator.graphics.spawner.ObjectSpawner;
-import kebab_simulator.model.entity.impl.food.EntityBread;
-import kebab_simulator.model.entity.impl.food.EntityCabbage;
-import kebab_simulator.model.entity.impl.food.EntityMeat;
-import kebab_simulator.model.entity.impl.food.EntityTomato;
+import kebab_simulator.model.entity.impl.food.*;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderPolygon;
@@ -45,6 +42,11 @@ public class EntityManager {
         EntityTomato tomato = new EntityTomato();
         this.registerEntity(tomato);
         return tomato;
+    }
+    public EntityOnion spawnOnion() {
+        EntityOnion onion = new EntityOnion();
+        this.registerEntity(onion);
+        return onion;
     }
 
     public void registerEntity(Entity entity) {
