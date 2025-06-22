@@ -9,6 +9,7 @@ public class KeyManagerModel {
 
     public static KeyManagerModel KEY_TAKE_ITEM = new KeyManagerModel(KeyEvent.VK_SPACE, "Gegenstände und Essen aufheben/fallen lassen");
     public static KeyManagerModel KEY_CUT_FOOD = new KeyManagerModel(KeyEvent.VK_CONTROL, "Lebensmittel schneiden");
+    public static KeyManagerModel KEY_COOK_FOOD = new KeyManagerModel(KeyEvent.VK_E, "Lebensmittel braten");
 
     private final int key;
     private final String description;
@@ -22,6 +23,7 @@ public class KeyManagerModel {
             switch (this.key) {
                 case KeyEvent.VK_SPACE -> filename = "SPACE";
                 case KeyEvent.VK_CONTROL -> filename = "CTRL";
+                case KeyEvent.VK_E -> filename = "E";
             }
             this.icon = ImageIO.read(KeyManagerModel.class.getResourceAsStream(String.format("/graphic/keys/%s.png", filename)));
 
