@@ -14,8 +14,8 @@ public abstract class TableStorageSpawner extends TableSpawner {
     protected TableStorageSpawner(TableStorageType type, ObjectIdResolver id, Collider collider) {
         super(id, collider, new AnimationRenderer<FocusAnimationState>(
             "/graphic/map/sprites/table/" +  String.format("%s_%s.png", id.getType().getName(), id.getSpawnerType()),
-            2,
-            1,
+            3,
+            3,
             32,
             32,
             FocusAnimationState.DEFAULT

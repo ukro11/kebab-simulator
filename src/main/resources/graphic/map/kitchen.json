@@ -739,7 +739,7 @@
                 {
                  "height":32,
                  "id":5,
-                 "name":"table_normal_3",
+                 "name":"table_pan_3",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -761,7 +761,7 @@
                 {
                  "height":32,
                  "id":7,
-                 "name":"table_normal_5",
+                 "name":"table_pan_5",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1122,7 +1122,7 @@
                 {
                  "height":32,
                  "id":79,
-                 "name":"table_normal_3",
+                 "name":"table_pan_3",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1144,7 +1144,7 @@
                 {
                  "height":32,
                  "id":81,
-                 "name":"table_normal_5",
+                 "name":"table_pan_5",
                  "rotation":0,
                  "type":"",
                  "visible":true,

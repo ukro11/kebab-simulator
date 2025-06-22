@@ -10,7 +10,7 @@ public interface IEntityCookable {
 
     enum EntityCookingState {
         IDLE,
-        COOKING,
+        COOK,
         COOKED,
         BURNING,
         BURNT

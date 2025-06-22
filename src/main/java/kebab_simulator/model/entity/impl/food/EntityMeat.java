@@ -103,7 +103,7 @@ public class EntityMeat extends EntityFood implements IEntityCookable, IEntityCu
 
     @Override
     public boolean allowCooking() {
-        return this.cookingState == EntityCookingState.IDLE || this.cookingState == EntityCookingState.COOKING;
+        return this.cookingState == EntityCookingState.IDLE || this.cookingState == EntityCookingState.COOK;
     }
 
     @Override
