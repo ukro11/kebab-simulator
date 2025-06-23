@@ -13,7 +13,7 @@ public class IngredientBread extends IngredientModel {
 
 
     public IngredientBread() {
-        super(new IngredientState(false, 0, true, 5.0), EntityBread.class);
+        super(new IngredientState(false, 0, true, 4.0), EntityBread.class);
     }
 
 

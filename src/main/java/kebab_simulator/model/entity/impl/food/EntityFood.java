@@ -1,5 +1,6 @@
 package kebab_simulator.model.entity.impl.food;
 
+import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.IAnimationState;
 import kebab_simulator.model.entity.impl.EntityItem;

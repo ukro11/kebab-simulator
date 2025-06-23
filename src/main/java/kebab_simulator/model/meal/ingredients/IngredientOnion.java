@@ -13,7 +13,7 @@ public class IngredientOnion extends IngredientModel {
 
 
     public IngredientOnion() {
-        super(new IngredientState(false, 0, true, 5.0), EntityOnion.class);
+        super(new IngredientState(false, 0, true, 4.0), EntityOnion.class);
     }
 
 

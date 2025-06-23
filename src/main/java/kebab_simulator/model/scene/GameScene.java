@@ -121,6 +121,17 @@ public class GameScene extends Scene {
     }
 
     @Override
+    public void onOpen(Scene scene) {
+        SoundController.playSound("background");
+        SoundController.setVolume("background",60);
+    }
+
+    @Override
+    public void onClose(Scene scene) {
+        SoundController.stopSound("background");
+    }
+
+    @Override
     public void mouseClicked(MouseEvent e) {
         super.mouseClicked(e);
         Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.mouseClicked(e));
