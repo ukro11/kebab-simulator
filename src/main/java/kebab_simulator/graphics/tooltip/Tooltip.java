@@ -7,13 +7,16 @@ import kebab_simulator.animation.Easings;
 import kebab_simulator.animation.tween.Tween;
 import kebab_simulator.model.KeyManagerModel;
 import kebab_simulator.model.visual.VisualConstants;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.function.Function;
 
 public class Tooltip {
-    
+
+    private static final Logger log = LoggerFactory.getLogger(Tooltip.class);
     private final KeyManagerModel keyModel;
     private final Function<KeyManagerModel, String> function;
     private final double iconRatio;
@@ -77,8 +80,13 @@ public class Tooltip {
     }
 
     public void update(double dt) {
-        if (this.getCurrentDescription() != null && !this.getCurrentDescription().equals(this.textCache)) {
-            this.textCache = this.getCurrentDescription().toUpperCase().replace(" ", "  ");
+        try {
+            if (this.getCurrentDescription() != null && !this.getCurrentDescription().equals(this.textCache)) {
+                this.textCache = this.getCurrentDescription().toUpperCase().replace(" ", "  ");
+            }
+
+        } catch (NullPointerException e) {
+            log.error("Ignore error, java bug", e);
         }
 
         if (this.showTooltip() && (double) this.TOOLTIP_TWEEN_POSITION_Y.getTweenValue().getTarget() == this.TOOLTIP_TWEEN_POSITION_START) {

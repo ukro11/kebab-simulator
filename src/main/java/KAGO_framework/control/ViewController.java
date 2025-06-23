@@ -75,6 +75,8 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
 
         if(kebab_simulator.Config.USE_SOUND || kebab_simulator.Config.RUN_ENV == kebab_simulator.Config.Environment.PRODUCTION) {
             this.soundController = new SoundController();
+            Wrapper.loadSounds();
+
         } else {
             if ( Config.INFO_MESSAGES) System.out.println("** Achtung! Sound deaktiviert => soundController ist NULL (kann in Config geändert werden). **");
         }
@@ -113,7 +115,7 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             this.programController.updateProgram(TimerUtils.getDeltaTime());
             if (Scene.getCurrentScene() != null) Scene.getCurrentScene().update(TimerUtils.getDeltaTime());
             if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().update(TimerUtils.getDeltaTime());
-            if (this.soundController != null) this.soundController.update(TimerUtils.getDeltaTime());
+            // if (this.soundController != null) this.soundController.update(TimerUtils.getDeltaTime());
             repaint();
             Thread.sleep(this.threadSleep);
         }
@@ -385,5 +387,9 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
 
     public ProgramController getProgramController() {
         return this.programController;
+    }
+
+    public SoundController getSoundController() {
+        return this.soundController;
     }
 }

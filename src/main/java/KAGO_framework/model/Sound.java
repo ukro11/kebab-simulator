@@ -1,11 +1,12 @@
 package KAGO_framework.model;
 
+import KAGO_framework.Config;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.util.Duration;
-import KAGO_framework.Config;
 
-import java.io.File;
+import java.net.URISyntaxException;
+import java.net.URL;
 
 /**
  * Ein Objekt dieser Klasse repräsentiert die Daten für einen speziellen Sound.
@@ -49,10 +50,15 @@ public class Sound {
     public Sound(String filename, String name) {
         this.filename = filename;
         this.name = name;
-        File f = new File(System.getProperty("user.dir")+"/"+filename);
-        sound = new Media(f.toURI().toString());
-        path = f.toURI().toString();
-        mediaPlayer = new MediaPlayer(sound);
+        try {
+            URL resource = Sound.class.getResource(filename);
+            sound = new Media(resource.toURI().toString());
+            path = resource.toURI().toString();
+            mediaPlayer = new MediaPlayer(sound);
+
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
 
     /**

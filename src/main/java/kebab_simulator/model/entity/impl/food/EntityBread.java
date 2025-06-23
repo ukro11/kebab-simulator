@@ -1,6 +1,5 @@
 package kebab_simulator.model.entity.impl.food;
 
-
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.entity.BreadAnimationState;
@@ -9,9 +8,7 @@ import kebab_simulator.model.meal.ingredients.IngredientBread;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderRectangle;
 
-
 public class EntityBread extends EntityFood implements IEntityCuttable {
-
 
     private EntityCuttingState cuttingState;
     private double cuttingProgress;
@@ -19,11 +16,9 @@ public class EntityBread extends EntityFood implements IEntityCuttable {
 
     private double scale;
 
-
     public EntityBread() {
         this(0, 0);
     }
-
 
     public EntityBread(double x, double y) {
         super(new ColliderRectangle(BodyType.DYNAMIC, x, y, 32, 32), 0, 0, 32, 32);
@@ -87,7 +82,7 @@ public class EntityBread extends EntityFood implements IEntityCuttable {
                     null
             );
             drawTool.pop();
-            this.drawInteraction(this.body.getX() + this.width / 2, this.body.getY() - 15, drawTool);
+            this.drawCuttingProgress(this.body.getX() + this.width / 2, this.body.getY() - 15, drawTool);
         }
     }
 

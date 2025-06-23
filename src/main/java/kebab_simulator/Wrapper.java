@@ -1,5 +1,6 @@
 package kebab_simulator;
 
+import KAGO_framework.control.SoundController;
 import KAGO_framework.control.ViewController;
 import kebab_simulator.event.EventManager;
 import kebab_simulator.event.services.EventProcessingQueue;
@@ -38,6 +39,12 @@ public class Wrapper {
     public static TooltipManager getTooltipManager() { return tooltipManager; }
 
     public static EntityPlayer getLocalPlayer() { return ViewController.getInstance().getProgramController().player; }
+
+    public static SoundController getSoundController() { return ViewController.getInstance().getSoundController(); }
+
+    public static void loadSounds() {
+        Wrapper.getSoundController().loadSound("/sound/whoosh.mp3", "whoosh", false);
+    }
 
     public static BufferedImage getImage(String src) {
         try {

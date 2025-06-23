@@ -1,6 +1,5 @@
 package kebab_simulator.model.entity.impl.food;
 
-
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.entity.CabbageAnimationState;
@@ -9,9 +8,7 @@ import kebab_simulator.model.meal.ingredients.IngredientCabbage;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderRectangle;
 
-
 public class EntityCabbage extends EntityFood implements IEntityCuttable {
-
 
     private EntityCuttingState cuttingState;
     private double cuttingProgress;
@@ -19,36 +16,31 @@ public class EntityCabbage extends EntityFood implements IEntityCuttable {
 
     private double scale;
 
-
     public EntityCabbage() {
         this(0, 0);
     }
-
 
     public EntityCabbage(double x, double y) {
         super(new ColliderRectangle(BodyType.DYNAMIC, x, y, 32, 32), 0, 0, 32, 32);
         this.cuttingState = EntityCuttingState.IDLE;
         this.cuttingProgress = 0;
-        this.scale = 0.9;
+        this.scale = 0.6;
         this.setRenderer(new AnimationRenderer(
                 "/graphic/item/food/cabbage.png", 2, 2, 32, 32,
                 CabbageAnimationState.DEFAULT
         ));
     }
 
-
     @Override
     public boolean allowPlaceOnPlate() {
         return this.cuttingState == EntityCuttingState.CUT;
     }
-
 
     @Override
     public double zIndex() {
         if (this.location instanceof EntityPlate) return super.zIndex() + 32 + (this.location.getItems().indexOf(this) + 1);
         return super.zIndex() + 32;
     }
-
 
     @Override
     public void update(double dt) {
@@ -57,18 +49,15 @@ public class EntityCabbage extends EntityFood implements IEntityCuttable {
             this.cuttingElapsed += dt;
             this.cuttingProgress = this.cuttingElapsed / this.getCuttingDuration();
 
-
             if (this.cuttingProgress >= 1) {
                 this.cuttingProgress = 1;
                 this.cuttingState = EntityCuttingState.CUT;
             }
 
-
         } else if (this.cuttingState == EntityCuttingState.CUT) {
             this.renderer.switchState(CabbageAnimationState.CUT_SMALL);
         }
     }
-
 
     @Override
     protected void drawEntity(DrawTool drawTool) {
@@ -87,10 +76,9 @@ public class EntityCabbage extends EntityFood implements IEntityCuttable {
                     null
             );
             drawTool.pop();
-            this.drawInteraction(this.body.getX() + this.width / 2, this.body.getY() - 15, drawTool);
+            this.drawCuttingProgress(this.body.getX() + this.width / 2, this.body.getY() - 15, drawTool);
         }
     }
-
 
     @Override
     public EntityCuttingState getCuttingState() {
@@ -115,14 +103,12 @@ public class EntityCabbage extends EntityFood implements IEntityCuttable {
         return this.cuttingState == EntityCuttingState.IDLE || this.cuttingState == EntityCuttingState.CUTTING;
     }
 
-
     @Override
     public void cut() {
         if (this.cuttingState != EntityCuttingState.CUT) {
             this.cuttingState = EntityCuttingState.CUTTING;
         }
     }
-
 
     @Override
     public void stopCut() {
@@ -131,11 +117,9 @@ public class EntityCabbage extends EntityFood implements IEntityCuttable {
         }
     }
 
-
     public double getScale() {
         return this.scale;
     }
-
 
     public void setScale(double scale) {
         this.scale = scale;

@@ -1,12 +1,4 @@
 { "compressionlevel":-1,
- "editorsettings":
-    {
-     "export":
-        {
-         "format":"json",
-         "target":"kitchen.json"
-        }
-    },
  "height":32,
  "infinite":true,
  "layers":[
@@ -783,7 +775,7 @@
                 {
                  "height":32,
                  "id":10,
-                 "name":"table_normal_8",
+                 "name":"table_garbage_8",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -816,7 +808,7 @@
                 {
                  "height":32,
                  "id":13,
-                 "name":"table_storage-onion_11",
+                 "name":"table_storage-tomato_11",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -827,7 +819,7 @@
                 {
                  "height":32,
                  "id":15,
-                 "name":"table_storage-tomato_12",
+                 "name":"table_storage-onion_12",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1189,7 +1181,7 @@
                 {
                  "height":32,
                  "id":84,
-                 "name":"table_normal_8",
+                 "name":"table_garbage_8",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1222,7 +1214,7 @@
                 {
                  "height":32,
                  "id":87,
-                 "name":"table_storage-onion_11",
+                 "name":"table_storage-tomato_11",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1233,7 +1225,7 @@
                 {
                  "height":32,
                  "id":88,
-                 "name":"table_storage-tomato_12",
+                 "name":"table_storage-onion_12",
                  "rotation":0,
                  "type":"",
                  "visible":true,

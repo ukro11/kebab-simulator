@@ -28,21 +28,25 @@ public class EntityManager {
         this.registerEntity(meat);
         return meat;
     }
+
     public EntityCabbage spawnCabbage() {
         EntityCabbage cabbage = new EntityCabbage();
         this.registerEntity(cabbage);
         return cabbage;
     }
+
     public EntityBread spawnBread() {
         EntityBread bread = new EntityBread();
         this.registerEntity(bread);
         return bread;
     }
+
     public EntityTomato spawnTomato() {
         EntityTomato tomato = new EntityTomato();
         this.registerEntity(tomato);
         return tomato;
     }
+
     public EntityOnion spawnOnion() {
         EntityOnion onion = new EntityOnion();
         this.registerEntity(onion);

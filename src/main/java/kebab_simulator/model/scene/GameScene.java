@@ -2,6 +2,7 @@ package kebab_simulator.model.scene;
 
 import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
+import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
 import kebab_simulator.animation.Easings;
@@ -124,6 +125,10 @@ public class GameScene extends Scene {
         super.mouseClicked(e);
         Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.mouseClicked(e));
         this.interactables.forEach(entity -> entity.mouseClicked(e));
+
+        if (e.getButton() == 1) {
+            SoundController.playSound("whoosh");
+        }
     }
 
     @Override

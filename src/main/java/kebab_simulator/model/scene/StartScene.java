@@ -36,21 +36,18 @@ public class StartScene extends Scene {
         // Titel (zentriert)
         drawTool.setCurrentColor(VisualConstants.TEXT_COLOR);
         drawTool.getGraphics2D().setFont(VisualConstants.getFont(VisualConstants.Fonts.PIXEL_FONT, 100));
-        String title = "Kebab      Simulator";
-        int titleX = Config.WINDOW_WIDTH / 2 - 270;
-        int titleY = Config.WINDOW_HEIGHT / 2 - 100;
 
-        drawTool.drawText("          Kebab", titleX, titleY);
-        drawTool.drawText("Simulator", titleX, titleY + 80);
+        drawTool.drawCenteredText("Kebab".toUpperCase(), 0, -130, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
+        drawTool.drawCenteredText("Simulator".toUpperCase(), 0, -50, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
 
-        int keyX = Config.WINDOW_WIDTH / 2 - 150;
-        int keyY = Config.WINDOW_HEIGHT - 200;
+        int keyX = Config.WINDOW_WIDTH / 2 - 210 + KeyManagerModel.KEY_START_GAME.getIcon().getWidth() / 2;
+        int keyY = Config.WINDOW_HEIGHT - 210;
 
         drawTool.getGraphics2D().drawImage(KeyManagerModel.KEY_START_GAME.getIcon(), keyX, keyY, 40, 40, null);
 
         drawTool.setCurrentColor(Color.BLACK);
         drawTool.getGraphics2D().setFont(VisualConstants.getFont(VisualConstants.Fonts.PIXEL_FONT, 18));
-        drawTool.drawText(KeyManagerModel.KEY_START_GAME.getDescription(), keyX + 50, keyY + 28);
+        drawTool.drawCenteredText(KeyManagerModel.KEY_START_GAME.getDescription().toUpperCase(), KeyManagerModel.KEY_START_GAME.getIcon().getWidth() / 2, (keyY - Config.WINDOW_HEIGHT / 2) + 20, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
     }
     @Override
     public void keyPressed(KeyEvent e) {

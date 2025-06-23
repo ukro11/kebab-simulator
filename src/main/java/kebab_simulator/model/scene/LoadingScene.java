@@ -4,11 +4,9 @@ import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
-import kebab_simulator.Wrapper;
 import kebab_simulator.model.visual.VisualConstants;
 
 import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,11 +50,9 @@ public class LoadingScene extends Scene {
         drawTool.setCurrentColor(VisualConstants.TEXT_COLOR);
         drawTool.getGraphics2D().setFont(VisualConstants.getFont(VisualConstants.Fonts.PIXEL_FONT, 100));
         String title = "Kebab      Simulator";
-        int titleX = Config.WINDOW_WIDTH / 2 - 270;
-        int titleY = Config.WINDOW_HEIGHT / 2 - 100;
 
-        drawTool.drawText("          Kebab", titleX, titleY);
-        drawTool.drawText("Simulator", titleX, titleY + 80);
+        drawTool.drawCenteredText("Kebab".toUpperCase(), 0, -130, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
+        drawTool.drawCenteredText("Simulator".toUpperCase(), 0, -50, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
 
         // Ladebalken
         int barWidth = 400;
