@@ -9,6 +9,7 @@ import kebab_simulator.Wrapper;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.model.scene.LoadingScene;
+import kebab_simulator.model.scene.LoseScene;
 import kebab_simulator.model.scene.Scene;
 import kebab_simulator.model.visual.impl.gui.GuiScreen;
 import kebab_simulator.utils.misc.TimerUtils;
@@ -185,6 +186,7 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         int height = gd.getDisplayMode().getHeight();
         int x = width / 2 - kebab_simulator.Config.WINDOW_WIDTH / 2;
         int y = height / 2 - kebab_simulator.Config.WINDOW_HEIGHT / 2;
+        //Scene.open(new LoseScene());
         Scene.open(new LoadingScene());
         //Scene.open(new StartScene());
         //Scene.open(GameScene.getInstance());

@@ -47,7 +47,11 @@ public class Wrapper {
     public static GameHandlerModel getGameHandler() { return gameHandlerModel; }
 
     public static void loadSounds() {
-
+        Wrapper.getSoundController().loadSound("/sound/whoosh.mp3", "whoosh", false);
+        Wrapper.getSoundController().loadSound("/sound/plop.mp3", "pick-up", false);
+        Wrapper.getSoundController().loadSound("/sound/cutting.mp3", "cutting", false);
+        Wrapper.getSoundController().loadSound("/sound/frying.mp3", "frying", false);
+        Wrapper.getSoundController().loadSound("/sound/Lobby Time.mp3", "background", true);
     }
 
     public static BufferedImage getImage(String src) {

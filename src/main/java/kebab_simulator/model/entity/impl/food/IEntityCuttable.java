@@ -1,5 +1,6 @@
 package kebab_simulator.model.entity.impl.food;
 
+import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.Easings;
 import kebab_simulator.animation.tween.Tween;
@@ -30,21 +31,23 @@ public interface IEntityCuttable {
             float stroke = 2.0f;
             double progress = Easings.easeOutQuad(this.getCuttingProgress());
             double timeLeft = this.getCuttingDuration() - (this.getCuttingDuration() * this.getCuttingProgress());
-
             if (scalingTween.isFinished()) {
                 if ((double) scalingTween.getTweenValue().getTarget() == 1.0) {
                     scalingTween.redo(target, start, duration);
                     scalingTween.animate();
+                    SoundController.playSound("cutting");
 
                 } else {
                     scalingTween.redo(start, target, duration);
                     scalingTween.animate();
+                    SoundController.stopSound("cutting");
                 }
             }
 
             if (!scalingTween.isRunning()) {
                 scalingTween.animate();
             }
+
 
             drawTool.push();
 
@@ -73,6 +76,8 @@ public interface IEntityCuttable {
             drawTool.drawCenteredText(String.format("%dS", (int) timeLeft), x - width / 2, y - stroke / 2 - 1, width, height + (stroke * 2) / 2);
 
             drawTool.pop();
+
+
         }
     }
 
