@@ -59,4 +59,8 @@ public class PlayerInventory {
         this.item.onDrop(location);
         this.item = null;
     }
+    public void removeItem(EntityItemLocation location) {
+        this.item.onDrop(location);
+        this.item = null;
+    }
 }

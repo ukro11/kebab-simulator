@@ -4,7 +4,7 @@ import kebab_simulator.Wrapper;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.FocusAnimationState;
 import kebab_simulator.graphics.spawner.ObjectIdResolver;
-import kebab_simulator.graphics.spawner.table.storage.TableStorageMeat;
+import kebab_simulator.graphics.spawner.table.storage.*;
 import kebab_simulator.physics.Collider;
 
 public abstract class TableStorageSpawner extends TableSpawner {
@@ -14,8 +14,8 @@ public abstract class TableStorageSpawner extends TableSpawner {
     protected TableStorageSpawner(TableStorageType type, ObjectIdResolver id, Collider collider) {
         super(id, collider, new AnimationRenderer<FocusAnimationState>(
             "/graphic/map/sprites/table/" +  String.format("%s_%s.png", id.getType().getName(), id.getSpawnerType()),
-            2,
-            1,
+            3,
+            3,
             32,
             32,
             FocusAnimationState.DEFAULT
@@ -43,10 +43,18 @@ public abstract class TableStorageSpawner extends TableSpawner {
 
     public static TableStorageSpawner fetchStorageSpawner(ObjectIdResolver id, Collider collider) {
         switch (id.getSpawnerType().split("-")[1].toLowerCase()) {
-            case "meat": {
+            case "meat":
                 return new TableStorageMeat(id, collider);
-            }
+            case "bread":
+                return new TableStorageBread(id, collider);
+            case "cabbage":
+                return new TableStorageCabbage(id, collider);
+            case "tomato":
+                return new TableStorageTomato(id, collider);
+            case "onion":
+                return new TableStorageOnion(id, collider);
         }
+
         return null;
     }
 
@@ -56,5 +64,9 @@ public abstract class TableStorageSpawner extends TableSpawner {
 
     public enum TableStorageType {
         MEAT,
+        BREAD,
+        CABBAGE,
+        TOMATO,
+        ONION,
     }
 }
