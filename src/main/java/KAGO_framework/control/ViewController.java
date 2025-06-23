@@ -8,6 +8,7 @@ import KAGO_framework.view.DrawFrame;
 import kebab_simulator.Wrapper;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.model.scene.GameScene;
+import kebab_simulator.model.scene.LoadingScene;
 import kebab_simulator.model.scene.Scene;
 import kebab_simulator.model.visual.impl.gui.GuiScreen;
 import kebab_simulator.utils.misc.TimerUtils;
@@ -181,8 +182,9 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         int height = gd.getDisplayMode().getHeight();
         int x = width / 2 - kebab_simulator.Config.WINDOW_WIDTH / 2;
         int y = height / 2 - kebab_simulator.Config.WINDOW_HEIGHT / 2;
-
-        Scene.open(GameScene.getInstance());
+        Scene.open(new LoadingScene());
+        //Scene.open(new StartScene());
+        //Scene.open(GameScene.getInstance());
         this.drawFrame = new DrawFrame(kebab_simulator.Config.WINDOW_TITLE, x, y, kebab_simulator.Config.WINDOW_WIDTH, kebab_simulator.Config.WINDOW_HEIGHT, this);
         this.drawFrame.setResizable(false);
 

@@ -55,11 +55,13 @@ public class EntityManager {
         }
     }
 
-    public void unregister(Entity entity) {
+    public EntityFood unregister(Entity entity) {
         if (entity != null) {
             this.entities.remove(entity.getId());
         }
+        return null;
     }
+
 
     public Map<String, Entity> getEntities() {
         return this.entities;
