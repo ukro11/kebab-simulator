@@ -15,15 +15,19 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class EntityPlate extends EntityItem<FocusAnimationState> implements EntityItemLocation<EntityFood> {
 
-    private CopyOnWriteArrayList<EntityFood> ingredients;
+    protected CopyOnWriteArrayList<EntityFood> ingredients;
 
     public EntityPlate(Collider collider) {
-        super(collider, 0, 0, 32, 32);
-        collider.setType(BodyType.DYNAMIC);
+        this(collider, 0, 0, 32, 32);
         this.setRenderer(new AnimationRenderer(
-            "/graphic/item/plate.png", 2, 1, 32, 32,
-            FocusAnimationState.DEFAULT
+                "/graphic/item/plate.png", 2, 1, 32, 32,
+                FocusAnimationState.DEFAULT
         ));
+    }
+
+    protected EntityPlate(Collider collider, double x, double y, double width, double height) {
+        super(collider, x, y, width, height);
+        collider.setType(BodyType.DYNAMIC);
         this.ingredients = new CopyOnWriteArrayList<>();
         this.rotation = 0;
         this.showHitbox = false;
@@ -32,6 +36,10 @@ public class EntityPlate extends EntityItem<FocusAnimationState> implements Enti
     @Override
     public void update(double dt) {
         super.update(dt);
+        this.updatePlate(dt);
+    }
+
+    protected void updatePlate(double dt) {
         if (this.renderer != null) {
             if (this.location != null && this.location instanceof TableSpawner && TableSpawner.isTableFocused((TableSpawner) this.location)) {
                 this.renderer.switchState(FocusAnimationState.FOCUS);
@@ -103,11 +111,12 @@ public class EntityPlate extends EntityItem<FocusAnimationState> implements Enti
     }
 
     @Override
-    public double zIndex() {
-        return super.zIndex() + 32;
+    public double getRotation() {
+        return this.rotation;
     }
 
-    public CopyOnWriteArrayList<EntityFood> getIngredients() {
-        return this.ingredients;
+    @Override
+    public double zIndex() {
+        return super.zIndex() + 32;
     }
 }

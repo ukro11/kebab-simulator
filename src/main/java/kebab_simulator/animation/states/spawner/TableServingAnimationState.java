@@ -81,15 +81,6 @@ public enum TableServingAnimationState implements IAnimationState {
 
     @Override
     public String toString() {
-        return getClass().getTypeName() + " {" +
-                "\n   rowIndex=" + this.rowIndex +
-                "\n   , columnRange=" + this.columnRange +
-                "\n   , frames=" + this.frames +
-                "\n   , duration=" + this.duration +
-                "\n   , loop=" + this.loop +
-                "\n   , reverse=" + this.reverse +
-                "\n   , frameWidth=" + this.frameWidth +
-                "\n   , frameHeight=" + this.frameHeight +
-                '}';
+        return this.name();
     }
 }

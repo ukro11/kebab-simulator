@@ -7,6 +7,8 @@ import kebab_simulator.model.KeyManagerModel;
 import kebab_simulator.model.entity.impl.EntityItem;
 import kebab_simulator.model.entity.impl.EntityItemLocation;
 import kebab_simulator.model.entity.impl.food.EntityFood;
+import kebab_simulator.model.entity.impl.food.IEntityCookable;
+import kebab_simulator.model.entity.impl.item.EntityPan;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.Collider;
@@ -29,7 +31,9 @@ public abstract class TableItemIntegration extends TableSpawner implements Entit
         if (event.getKeyCode() == KeyManagerModel.KEY_TAKE_ITEM.getKey()) {
             if (!this.items.isEmpty()) {
                 var firstItem = this.items.get(0);
-                if (firstItem instanceof EntityPlate && Wrapper.getLocalPlayer().getInventory().isFood()) {
+                boolean validPan = Wrapper.getLocalPlayer().getInventory().getItemInHand() instanceof EntityPan
+                        && !((EntityPan) Wrapper.getLocalPlayer().getInventory().getItemInHand()).getItems().isEmpty();
+                if (firstItem instanceof EntityPlate && (Wrapper.getLocalPlayer().getInventory().isFood() || validPan)) {
                     this.onDropItem(TableItemDropEvent.ITEM_PLATE_DROP);
 
                 } else {
@@ -48,14 +52,28 @@ public abstract class TableItemIntegration extends TableSpawner implements Entit
 
     public void onDropItem(TableItemDropEvent event) {
         if (event == TableItemDropEvent.ITEM_PLATE_DROP) {
-            Wrapper.getLocalPlayer().getInventory().dropItem(((EntityPlate) this.items.get(0)));
+            EntityItem<?> item = Wrapper.getLocalPlayer().getInventory().getItemInHand();
+            if (item instanceof EntityPlate) {
+                item = ((EntityPlate) item).getItems().get(0);
+                if (!this.filterItem(event, item)) return;
+                item.getLocation().removeItem(item);
+                item.onDrop(((EntityPlate) this.items.get(0)));
+
+            } else {
+                Wrapper.getLocalPlayer().getInventory().dropItem(((EntityPlate) this.items.get(0)));
+            }
 
         } else if (event == TableItemDropEvent.ITEM_TABLE_DROP) {
+            if (!this.filterItem(event, Wrapper.getLocalPlayer().getInventory().getItemInHand())) return;
             Wrapper.getLocalPlayer().getInventory().dropItem(this);
         }
     }
 
-    public boolean filterItem(EntityItem item) {
+    public boolean filterItem(TableItemDropEvent event, EntityItem item) {
+        if (item instanceof IEntityCookable) {
+            if (((IEntityCookable) item).getCookingState() == IEntityCookable.EntityCookingState.BURNT) return false;
+        }
+
         return true;
     }
 

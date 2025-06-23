@@ -4,6 +4,9 @@ import kebab_simulator.animation.IAnimationState;
 import kebab_simulator.graphics.spawner.table.TableKnifeSpawner;
 import kebab_simulator.graphics.spawner.table.TableNormalSpawner;
 import kebab_simulator.model.entity.Entity;
+import kebab_simulator.model.entity.impl.food.EntityMeat;
+import kebab_simulator.model.entity.impl.item.EntityPan;
+import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.Collider;
 import kebab_simulator.utils.misc.Vec2;
@@ -49,9 +52,14 @@ public abstract class EntityItem<T extends Enum<T> & IAnimationState> extends En
     public void setLocation(EntityItemLocation location) {
         this.location = location;
         this.positionItem(location);
+        System.out.println("SET LOCATION " + location);
     }
 
     public void positionItem(EntityItemLocation location) {
+        if (this instanceof EntityMeat) {
+            System.out.println(location);
+        }
+
         if (location instanceof TableNormalSpawner) {
             var normal = (TableNormalSpawner) location;
             switch (normal.getType()) {
@@ -79,8 +87,18 @@ public abstract class EntityItem<T extends Enum<T> & IAnimationState> extends En
                 this.rotation = 90;
             }
 
-        } else if (location == null) {
+        } else if (location instanceof EntityPan) {
+            if (this instanceof EntityMeat) {
+                ((EntityMeat) this).setScale(0.7);
+            }
+            //this.body.setY(this.body.getY() - 2);
+
+        } else {
             this.rotation = 0;
+        }
+
+        if (location instanceof EntityPlate) {
+            this.rotation = location.getRotation();
         }
     }
 }

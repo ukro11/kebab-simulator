@@ -1,6 +1,5 @@
 package kebab_simulator.animation;
 
-import kebab_simulator.animation.states.entity.CharacterAnimationState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,7 +12,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 
 public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
 
@@ -27,6 +25,7 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
     private int currentIndex = 0;
     private double elapsed;
     private boolean running = false;
+    private boolean paused = false;
 
     public AnimationRenderer(String spriteSheetPath, int rows, int maxColumns, int frameWidth, int frameHeight, T state) {
         this(spriteSheetPath, rows, maxColumns, frameWidth, frameHeight, 0, 0, state);
@@ -107,10 +106,11 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
         this.currentIndex = 0;
         this.elapsed = 0;
         this.running = true;
+        this.paused = false;
     }
 
     public void pause() {
-        this.running = false;
+        this.paused = true;
     }
 
     public void pauseAtEnd() {
@@ -122,7 +122,7 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
     }
 
     public void resume() {
-        this.running = true;
+        this.paused = false;
     }
 
     public void gotoFrame(int index) {
@@ -136,12 +136,13 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
                 this.currentAnimation = this.animations.get(state);
                 this.currentIndex = this.currentAnimation.isReverse() ? this.currentAnimation.getFrames().size() - 1 : 0;
                 this.elapsed = 0;
+                this.paused = false;
             }
         }
     }
 
     public void update(double dt) {
-        if (!this.running || this.currentAnimation == null || this.currentAnimation.getFrames().size() <= 1) return;
+        if (!this.running || this.paused || this.currentAnimation == null || this.currentAnimation.getFrames().size() <= 1) return;
         if (this.elapsed == 0 && this.currentIndex == 0 && this.getStartRunnable() != null) this.getStartRunnable().run();
         this.elapsed += dt;
         Animation animation = this.currentAnimation;
@@ -206,6 +207,10 @@ public class AnimationRenderer<T extends Enum<T> & IAnimationState> {
 
     public boolean isRunning() {
         return this.running;
+    }
+
+    public boolean isPaused() {
+        return this.paused;
     }
 
     public int getCurrentIndex() {

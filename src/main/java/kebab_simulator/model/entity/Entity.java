@@ -155,11 +155,11 @@ public abstract class Entity<T extends Enum<T> & IAnimationState> implements Dra
     }
 
     public double getX() {
-        return this.x;
+        return this.x + this.offset.x;
     }
 
     public double getY() {
-        return this.y;
+        return this.y + this.offset.y;
     }
 
     public void setX(double x) {

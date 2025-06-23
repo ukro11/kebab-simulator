@@ -5,6 +5,7 @@ import kebab_simulator.graphics.spawner.ObjectIdResolver;
 import kebab_simulator.graphics.spawner.ObjectSpawner;
 import kebab_simulator.graphics.map.Map;
 import kebab_simulator.graphics.spawner.table.*;
+import kebab_simulator.model.entity.impl.item.EntityPan;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.physics.Collider;
@@ -21,10 +22,6 @@ public class KitchenMap {
             //boolean onlyOneTable = GameScene.getInstance().getRenderer().getDrawables().stream().filter(t -> t instanceof TableSpawner).collect(Collectors.toSet()).size() < 1;
             if (layer.getName().equals("table")) {
                 switch (id.getSpawnerType()) {
-                    case "normal", "normal-top", "normal-left-top", "normal-right-top", "normal-end", "normal-left-end", "normal-right-end": {
-                        GameScene.getInstance().getRenderer().register(new TableNormalSpawner(id, collider));
-                        break;
-                    }
                     case "knife": {
                         GameScene.getInstance().getRenderer().register(new TableKnifeSpawner(id, collider));
                         break;
@@ -33,19 +30,40 @@ public class KitchenMap {
                         GameScene.getInstance().getRenderer().register(new TableServingSpawner(id, collider));
                         break;
                     }
-                    case "storage-meat": {
-                        GameScene.getInstance().getRenderer().register(TableStorageSpawner.fetchStorageSpawner(id, collider));
+                    case "cooker": {
+                        GameScene.getInstance().getRenderer().register(new TableCookerSpawner(id, collider));
+                        break;
+                    }
+                    default: {
+                        if (id.getSpawnerType().startsWith("storage-")) {
+                            GameScene.getInstance().getRenderer().register(TableStorageSpawner.fetchStorageSpawner(id, collider));
+
+                        } else if (id.getSpawnerType().startsWith("normal")) {
+                            GameScene.getInstance().getRenderer().register(new TableNormalSpawner(id, collider));
+                        }
                         break;
                     }
                 }
-
             }
 
             if (layer.getName().equals("plate")) {
-                EntityPlate plate = new EntityPlate(collider);
-                String tableId = (String) objectCollider.getProperties().stream().filter(p -> p.getName().equals("table")).findFirst().orElse(null).getValue();
-                ((TableItemIntegration) ObjectSpawner.fetchById(tableId)).addItem(plate);
-                Wrapper.getEntityManager().registerEntity(plate);
+                switch (id.getSpawnerType()) {
+                    case "normal": {
+                        EntityPlate plate = new EntityPlate(collider);
+                        String tableId = (String) objectCollider.getProperties().stream().filter(p -> p.getName().equals("table")).findFirst().orElse(null).getValue();
+                        ((TableItemIntegration) ObjectSpawner.fetchById(tableId)).addItem(plate);
+                        Wrapper.getEntityManager().registerEntity(plate);
+                        break;
+                    }
+                    case "pan": {
+                        EntityPan pan = new EntityPan(collider);
+                        String tableId = (String) objectCollider.getProperties().stream().filter(p -> p.getName().equals("table")).findFirst().orElse(null).getValue();
+                        TableItemIntegration table = ((TableItemIntegration) ObjectSpawner.fetchById(tableId));
+                        table.addItem(pan);
+                        Wrapper.getEntityManager().registerEntity(pan);
+                        break;
+                    }
+                }
             }
 
             if (layer.getName().equals("sensor")) {

@@ -5,8 +5,13 @@ import kebab_simulator.event.EventManager;
 import kebab_simulator.event.services.EventProcessingQueue;
 import kebab_simulator.graphics.tooltip.TooltipManager;
 import kebab_simulator.model.entity.EntityManager;
+import kebab_simulator.model.entity.impl.food.IEntityCookable;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.ColliderManager;
+
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
 public class Wrapper {
 
@@ -33,4 +38,14 @@ public class Wrapper {
     public static TooltipManager getTooltipManager() { return tooltipManager; }
 
     public static EntityPlayer getLocalPlayer() { return ViewController.getInstance().getProgramController().player; }
+
+    public static BufferedImage getImage(String src) {
+        try {
+            return ImageIO.read(IEntityCookable.class.getResourceAsStream(src));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }

@@ -5,10 +5,17 @@ import kebab_simulator.animation.IAnimationState;
 
 public enum MeatAnimationState implements IAnimationState {
     RAW_DEFAULT(0, Range.closed(0, 0), 1, 0.1),
+
     RAW_CUT(1, Range.closed(0, 0), 1, 0.1),
     RAW_CUT_SMALL(1, Range.closed(1, 1), 1, 0.1),
-    COOKING(2, Range.closed(0, 5), 6, 20, false),
-    COOKED(2, Range.closed(0, 1), 1, 0.1);
+
+    COOKED(2, Range.closed(0, 0), 1, 0.1),
+    COOKED_SMALL(2, Range.closed(1, 1), 1, 0.1),
+
+    COOKING(3, Range.closed(0, 3), 4, 20.0, false),
+
+    BURNT(4, Range.closed(0, 0), 1, 0.1),
+    BURNT_SMALL(4, Range.closed(1, 1), 1, 0.1);
 
     private final int rowIndex;
     private final Range<Integer> columnRange;
@@ -84,16 +91,7 @@ public enum MeatAnimationState implements IAnimationState {
 
     @Override
     public String toString() {
-        return getClass().getTypeName() + " {" +
-                "\n   rowIndex=" + this.rowIndex +
-                "\n   , columnRange=" + this.columnRange +
-                "\n   , frames=" + this.frames +
-                "\n   , duration=" + this.duration +
-                "\n   , loop=" + this.loop +
-                "\n   , reverse=" + this.reverse +
-                "\n   , frameWidth=" + this.frameWidth +
-                "\n   , frameHeight=" + this.frameHeight +
-                '}';
+        return this.name();
     }
 }
 

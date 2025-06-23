@@ -929,28 +929,6 @@
                 }, 
                 {
                  "height":20,
-                 "id":102,
-                 "name":"table_normal-end_20",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":512,
-                 "y":704
-                }, 
-                {
-                 "height":20,
-                 "id":103,
-                 "name":"table_normal-end_21",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":544,
-                 "y":704
-                }, 
-                {
-                 "height":20,
                  "id":104,
                  "name":"table_normal-right-end_22",
                  "rotation":0,
@@ -1016,25 +994,14 @@
                  "y":677
                 }, 
                 {
-                 "height":27,
+                 "height":47,
                  "id":113,
-                 "name":"table_normal-top_20",
+                 "name":"table_cooker_20",
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":32,
                  "x":512,
-                 "y":677
-                }, 
-                {
-                 "height":27,
-                 "id":114,
-                 "name":"table_normal-top_21",
-                 "rotation":0,
-                 "type":"",
-                 "visible":true,
-                 "width":32,
-                 "x":544,
                  "y":677
                 }, 
                 {
@@ -1046,6 +1013,17 @@
                  "visible":true,
                  "width":32,
                  "x":576,
+                 "y":677
+                }, 
+                {
+                 "height":47,
+                 "id":127,
+                 "name":"table_cooker_21",
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":544,
                  "y":677
                 }],
          "opacity":1,
@@ -1076,6 +1054,40 @@
                  "width":32,
                  "x":256,
                  "y":736
+                }, 
+                {
+                 "height":32,
+                 "id":129,
+                 "name":"plate_pan_2",
+                 "properties":[
+                        {
+                         "name":"table",
+                         "type":"string",
+                         "value":"table_cooker_20"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":512,
+                 "y":677
+                }, 
+                {
+                 "height":32,
+                 "id":130,
+                 "name":"plate_pan_2",
+                 "properties":[
+                        {
+                         "name":"table",
+                         "type":"string",
+                         "value":"table_cooker_21"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":544,
+                 "y":677
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1313,7 +1325,7 @@
                 {
                  "height":32,
                  "id":123,
-                 "name":"table_normal-top_20",
+                 "name":"table_cooker_20",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1324,7 +1336,7 @@
                 {
                  "height":32,
                  "id":124,
-                 "name":"table_normal-top_21",
+                 "name":"table_cooker_21",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1350,7 +1362,7 @@
          "y":0
         }],
  "nextlayerid":13,
- "nextobjectid":127,
+ "nextobjectid":131,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

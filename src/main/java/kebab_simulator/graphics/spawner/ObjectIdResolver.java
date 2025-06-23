@@ -44,6 +44,11 @@ public class ObjectIdResolver {
         return this.index;
     }
 
+    @Override
+    public String toString() {
+        return this.getRawId();
+    }
+
     public enum MapSpawner {
         TABLE("table");
 

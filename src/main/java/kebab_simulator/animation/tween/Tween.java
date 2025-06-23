@@ -30,6 +30,7 @@ public class Tween<T extends Number, Q extends TweenValue> {
     protected double elapsed;
     protected double delayElapsed;
     protected boolean running;
+    protected boolean paused;
     private boolean delayFinished;
 
     protected Consumer<Tween<T, Q>> onStart;
@@ -70,7 +71,7 @@ public class Tween<T extends Number, Q extends TweenValue> {
     public void update(double dt) {
         if (this.value == null) return;
 
-        if (this.isRunning()) {
+        if (this.isRunning() && !this.isPaused()) {
             if (!this.delayFinished) {
                 this.delayElapsed += dt;
                 this.delayElapsed = Math.min(this.delayElapsed, this.delay);
@@ -156,13 +157,13 @@ public class Tween<T extends Number, Q extends TweenValue> {
     }
 
     public Tween<T, Q> resume() {
-        this.running = true;
+        this.paused = false;
         if (this.onResume != null) this.onResume.accept(this);
         return this;
     }
 
     public Tween<T, Q> pause() {
-        this.running = false;
+        this.paused = true;
         if (this.onPause != null) this.onPause.accept(this);
         return this;
     }
@@ -266,6 +267,10 @@ public class Tween<T extends Number, Q extends TweenValue> {
 
     public boolean isFinished() {
         return this.elapsed >= this.duration;
+    }
+
+    public boolean isPaused() {
+        return this.paused;
     }
 
     public static void updateAll(double dt) {

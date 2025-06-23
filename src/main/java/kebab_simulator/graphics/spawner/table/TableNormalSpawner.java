@@ -49,6 +49,11 @@ public class TableNormalSpawner extends TableItemIntegration implements ITableSi
                 if (Wrapper.getLocalPlayer().getInventory().isFood() && Wrapper.getLocalPlayer().getInventory().getItemAsFood().allowPlaceOnPlate()) {
                     return true;
 
+                } else if (Wrapper.getLocalPlayer().getInventory().isPlate()
+                        && !Wrapper.getLocalPlayer().getInventory().getItemAsPlate().getItems().isEmpty()
+                        && Wrapper.getLocalPlayer().getInventory().getItemAsPlate().getItems().get(0).allowPlaceOnPlate()) {
+                     return true;
+
                 } else if (Wrapper.getLocalPlayer().getInventory().getItemInHand() == null) {
                     return true;
 

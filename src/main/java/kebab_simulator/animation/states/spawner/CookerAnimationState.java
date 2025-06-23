@@ -3,9 +3,11 @@ package kebab_simulator.animation.states.spawner;
 import com.google.common.collect.Range;
 import kebab_simulator.animation.IAnimationState;
 
-public enum FridgeAnimationState implements IAnimationState {
-    OPEN(0, Range.closed(0, 5), 6, 0.2, false, true),
-    CLOSED(0, Range.closed(0, 5), 6, 0.2, false);
+public enum CookerAnimationState implements IAnimationState {
+    ON(0, Range.closed(1, 1), 1, 0.2),
+    OFF(0, Range.closed(0, 0), 1, 0.2),
+    ON_FOCUS(1, Range.closed(1, 1), 1, 0.2),
+    OFF_FOCUS(1, Range.closed(0, 0), 1, 0.2);
 
     private final int rowIndex;
     private final Range<Integer> columnRange;
@@ -16,19 +18,19 @@ public enum FridgeAnimationState implements IAnimationState {
     private final int frameWidth;
     private final int frameHeight;
 
-    FridgeAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration) {
+    CookerAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration) {
         this(rowIndex, columnRange, frames, duration, true);
     }
 
-    FridgeAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop) {
+    CookerAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop) {
         this(rowIndex, columnRange, frames, duration, loop, false);
     }
 
-    FridgeAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse) {
+    CookerAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse) {
         this(rowIndex, columnRange, frames, duration, loop, reverse, 0, 0);
     }
 
-    FridgeAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse, int frameWidth, int frameHeight) {
+    CookerAnimationState(int rowIndex, Range<Integer> columnRange, int frames, double duration, boolean loop, boolean reverse, int frameWidth, int frameHeight) {
         this.rowIndex = rowIndex;
         this.columnRange = columnRange;
         this.frames = frames;
@@ -81,15 +83,6 @@ public enum FridgeAnimationState implements IAnimationState {
 
     @Override
     public String toString() {
-        return getClass().getTypeName() + " {" +
-                "\n   rowIndex=" + this.rowIndex +
-                "\n   , columnRange=" + this.columnRange +
-                "\n   , frames=" + this.frames +
-                "\n   , duration=" + this.duration +
-                "\n   , loop=" + this.loop +
-                "\n   , reverse=" + this.reverse +
-                "\n   , frameWidth=" + this.frameWidth +
-                "\n   , frameHeight=" + this.frameHeight +
-                '}';
+        return this.name();
     }
 }
