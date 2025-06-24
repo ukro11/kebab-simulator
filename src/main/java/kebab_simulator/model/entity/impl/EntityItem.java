@@ -1,5 +1,6 @@
 package kebab_simulator.model.entity.impl;
 
+import KAGO_framework.control.SoundController;
 import kebab_simulator.animation.IAnimationState;
 import kebab_simulator.graphics.spawner.table.TableKnifeSpawner;
 import kebab_simulator.graphics.spawner.table.TableNormalSpawner;
@@ -29,6 +30,7 @@ public abstract class EntityItem<T extends Enum<T> & IAnimationState> extends En
         this.player = player;
         this.player.getBody().addChild(this.body);
         this.body.setPosition(this.player.getBody().getX() + this.body.getChildInstance().getOffsetX(), this.player.getBody().getY() + this.body.getChildInstance().getOffsetY());
+        SoundController.playSound("pick-up");
     }
 
     public void onDrop(EntityItemLocation location) {
@@ -43,6 +45,7 @@ public abstract class EntityItem<T extends Enum<T> & IAnimationState> extends En
         this.location = location;
         this.body.setPosition(location.getCollider().getX(), location.getCollider().getY());
         location.addItem(this);
+        SoundController.playSound("pick-up");
     }
 
     public EntityItemLocation getLocation() {

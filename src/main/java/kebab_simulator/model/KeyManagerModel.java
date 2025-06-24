@@ -10,7 +10,7 @@ public class KeyManagerModel {
     public static KeyManagerModel KEY_TAKE_ITEM = new KeyManagerModel(KeyEvent.VK_SPACE, "Gegenstände und Essen aufheben/fallen lassen");
     public static KeyManagerModel KEY_CUT_FOOD = new KeyManagerModel(KeyEvent.VK_CONTROL, "Lebensmittel schneiden");
     public static KeyManagerModel KEY_START_GAME = new KeyManagerModel(KeyEvent.VK_ENTER, "Enter drücken zum Starten");
-    public static KeyManagerModel KEY_SERVE_MEAL = new KeyManagerModel(KeyEvent.VK_ENTER, "Gericht servieren");
+    public static KeyManagerModel KEY_RESTART_GAME = new KeyManagerModel(KeyEvent.VK_ENTER, "Enter   drücken   zum   Neustarten");
 
     private final int key;
     private final String description;
