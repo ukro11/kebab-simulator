@@ -2,6 +2,7 @@ package kebab_simulator.model.scene;
 
 import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
+import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
 import kebab_simulator.Wrapper;

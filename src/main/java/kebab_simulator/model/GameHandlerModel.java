@@ -9,6 +9,9 @@ import kebab_simulator.model.meal.meals.MealKebabMeat;
 import kebab_simulator.model.meal.meals.MealSalatTasche;
 import kebab_simulator.model.order.OrderingModelCard;
 import kebab_simulator.model.order.OrderingSystemModel;
+import kebab_simulator.model.scene.LoseScene;
+import kebab_simulator.model.scene.Scene;
+import kebab_simulator.model.scene.WinScene;
 import kebab_simulator.model.visual.VisualConstants;
 import kebab_simulator.utils.misc.MathUtils;
 
@@ -74,6 +77,15 @@ public class GameHandlerModel {
             this.orderingSystem.update(dt);
 
             if (this.timer < 0) this.timer = 0;
+
+        } else if (this.timer == 0) {
+            this.state = GameState.END;
+            if (this.score >= 250) {
+                Scene.open(new WinScene());
+
+            } else {
+                Scene.open(new LoseScene());
+            }
         }
     }
 

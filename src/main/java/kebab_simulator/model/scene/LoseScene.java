@@ -4,7 +4,6 @@ import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
-import kebab_simulator.model.KeyManagerModel;
 import kebab_simulator.model.visual.VisualConstants;
 
 import java.awt.*;
@@ -37,18 +36,10 @@ public class LoseScene extends Scene {
         drawTool.setCurrentColor(new Color(104, 17, 17));
         drawTool.getGraphics2D().setFont(VisualConstants.getFont(VisualConstants.Fonts.PIXEL_FONT, 100));
 
-        drawTool.drawCenteredText("Game".toUpperCase(), 0, -130, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
-        drawTool.drawCenteredText("Over".toUpperCase(), 0, -50, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
-
-        int keyX = Config.WINDOW_WIDTH / 2 - 210 + KeyManagerModel.KEY_RESTART_GAME.getIcon().getWidth() / 2;
-        int keyY = Config.WINDOW_HEIGHT - 210;
-
-        drawTool.getGraphics2D().drawImage(KeyManagerModel.KEY_RESTART_GAME.getIcon(), keyX, keyY, 40, 40, null);
-
-        drawTool.setCurrentColor(Color.BLACK);
-        drawTool.getGraphics2D().setFont(VisualConstants.getFont(VisualConstants.Fonts.PIXEL_FONT, 18));
-        drawTool.drawCenteredText(KeyManagerModel.KEY_RESTART_GAME.getDescription().toUpperCase(), KeyManagerModel.KEY_RESTART_GAME.getIcon().getWidth() / 2 + 20, (keyY - Config.WINDOW_HEIGHT / 2) + 20, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
+        drawTool.drawCenteredText("Game".toUpperCase(), 0, -80, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
+        drawTool.drawCenteredText("Over".toUpperCase(), 0, 0, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
     }
+
     @Override
     public void keyPressed(KeyEvent e) {
         if(e.getKeyCode() == KeyEvent.VK_ENTER) {
