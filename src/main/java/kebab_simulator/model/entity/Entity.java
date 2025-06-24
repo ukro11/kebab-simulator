@@ -117,6 +117,12 @@ public abstract class Entity<T extends Enum<T> & IAnimationState> implements Dra
         }
     }
 
+    public void destroy() {
+        GameScene.getInstance().getRenderer().unregister(this);
+        Wrapper.getEntityManager().unregister(this);
+        this.body.destroy();
+    }
+
     @Override
     public double zIndex() {
         return this.highestPoint.y;

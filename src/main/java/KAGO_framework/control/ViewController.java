@@ -19,6 +19,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -223,8 +224,8 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         });
 
         if (kebab_simulator.Config.WINDOW_FULLSCREEN) {
+            this.drawFrame.setResizable(false);
             this.drawFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            gd.setFullScreenWindow(Window.getWindows()[0]);
         }
         this.drawFrame.setActiveDrawingPanel(this);
     }
@@ -245,6 +246,7 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         if (this.soundController != null) this.soundController.update(TimerUtils.getDeltaTime());
         if (Scene.getCurrentScene() != null) Scene.getCurrentScene().draw(this.drawTool);
         if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().draw(this.drawTool);
+        if (kebab_simulator.Config.WINDOW_FULLSCREEN) Toolkit.getDefaultToolkit().sync();
     }
 
     /**

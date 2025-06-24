@@ -47,7 +47,7 @@ public class StartScene extends Scene {
 
         drawTool.setCurrentColor(Color.BLACK);
         drawTool.getGraphics2D().setFont(VisualConstants.getFont(VisualConstants.Fonts.PIXEL_FONT, 18));
-        drawTool.drawCenteredText(KeyManagerModel.KEY_START_GAME.getDescription().toUpperCase(), KeyManagerModel.KEY_START_GAME.getIcon().getWidth() / 2, (keyY - Config.WINDOW_HEIGHT / 2) + 20, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
+        drawTool.drawCenteredText(KeyManagerModel.KEY_START_GAME.getDescription().replace(" ", "  ").toUpperCase(), KeyManagerModel.KEY_START_GAME.getIcon().getWidth() / 2, (keyY - Config.WINDOW_HEIGHT / 2) + 20, Config.WINDOW_WIDTH, Config.WINDOW_HEIGHT);
     }
     @Override
     public void keyPressed(KeyEvent e) {

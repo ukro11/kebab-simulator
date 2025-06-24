@@ -2,12 +2,11 @@ package kebab_simulator.model.scene;
 
 import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
-import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
+import kebab_simulator.Wrapper;
 import kebab_simulator.animation.Easings;
 import kebab_simulator.graphics.CameraRenderer;
-import kebab_simulator.Wrapper;
 import kebab_simulator.graphics.OrderRenderer;
 import kebab_simulator.graphics.map.MapManager;
 import kebab_simulator.graphics.spawner.ObjectSpawner;
@@ -57,6 +56,8 @@ public class GameScene extends Scene {
                     if (TableSpawner.isCurrentlyFocused()) {
                         if (TableSpawner.getCurrentFocusedTable() instanceof TableItemIntegration) {
                             var t = ((TableItemIntegration) TableSpawner.getCurrentFocusedTable());
+                            if (t == null) return null;
+
                             if (!t.getItems().isEmpty() && Wrapper.getLocalPlayer().getInventory().getItemInHand() == null)
                                 return "Gegenstand aufheben";
 
@@ -87,6 +88,7 @@ public class GameScene extends Scene {
             spawner.update(dt);
         }
         Wrapper.getTooltipManager().update(dt);
+        Wrapper.getGameHandler().update(dt);
         super.update(dt);
     }
 
@@ -113,6 +115,7 @@ public class GameScene extends Scene {
     @Override
     public void draw(DrawTool drawTool) {
         GameScene.getInstance().drawGame(drawTool);
+        Wrapper.getGameHandler().draw(drawTool);
         Wrapper.getTooltipManager().draw(drawTool);
         super.draw(drawTool);
         drawTool.setCurrentColor(new Color(154, 75, 24), 50);
@@ -125,10 +128,6 @@ public class GameScene extends Scene {
         super.mouseClicked(e);
         Wrapper.getEntityManager().getEntities().values().forEach(entity -> entity.mouseClicked(e));
         this.interactables.forEach(entity -> entity.mouseClicked(e));
-
-        if (e.getButton() == 1) {
-            SoundController.playSound("whoosh");
-        }
     }
 
     @Override

@@ -5,6 +5,7 @@ import KAGO_framework.control.ViewController;
 import kebab_simulator.event.EventManager;
 import kebab_simulator.event.services.EventProcessingQueue;
 import kebab_simulator.graphics.tooltip.TooltipManager;
+import kebab_simulator.model.GameHandlerModel;
 import kebab_simulator.model.entity.EntityManager;
 import kebab_simulator.model.entity.impl.food.IEntityCookable;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
@@ -21,6 +22,7 @@ public class Wrapper {
     private final static EntityManager entityManager = new EntityManager();
     private final static EventProcessingQueue processManager = new EventProcessingQueue();
     private final static TooltipManager tooltipManager = new TooltipManager();
+    private final static GameHandlerModel gameHandlerModel = new GameHandlerModel();
 
     public static EventManager getEventManager() {
         return eventManager;
@@ -42,8 +44,10 @@ public class Wrapper {
 
     public static SoundController getSoundController() { return ViewController.getInstance().getSoundController(); }
 
+    public static GameHandlerModel getGameHandler() { return gameHandlerModel; }
+
     public static void loadSounds() {
-        Wrapper.getSoundController().loadSound("/sound/whoosh.mp3", "whoosh", false);
+
     }
 
     public static BufferedImage getImage(String src) {

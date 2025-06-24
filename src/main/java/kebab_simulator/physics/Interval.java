@@ -75,16 +75,4 @@ public class Interval {
     public boolean containsExclusive(Interval interval) {
         return interval.min > this.min && interval.max < this.max;
     }
-
-    public boolean containsInclusive(Interval interval) {
-        return interval.min >= this.min && interval.max <= this.max;
-    }
-
-    public boolean containsInclusiveMax(Interval interval) {
-        return interval.min > this.min && interval.max <= this.max;
-    }
-
-    public boolean containsInclusiveMin(Interval interval) {
-        return interval.min >= this.min && interval.max < this.max;
-    }
 }

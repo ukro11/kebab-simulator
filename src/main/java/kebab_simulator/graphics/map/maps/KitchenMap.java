@@ -34,6 +34,10 @@ public class KitchenMap {
                         GameScene.getInstance().getRenderer().register(new TableCookerSpawner(id, collider));
                         break;
                     }
+                    case "garbage": {
+                        GameScene.getInstance().getRenderer().register(new TableGarbageSpawner(id, collider));
+                        break;
+                    }
                     default: {
                         if (id.getSpawnerType().startsWith("storage-")) {
                             GameScene.getInstance().getRenderer().register(TableStorageSpawner.fetchStorageSpawner(id, collider));

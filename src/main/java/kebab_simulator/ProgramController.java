@@ -3,14 +3,13 @@ package kebab_simulator;
 import KAGO_framework.control.ViewController;
 import kebab_simulator.animation.tween.Tween;
 import kebab_simulator.event.events.KeyPressedEvent;
-import kebab_simulator.event.events.collider.ColliderCollisionEvent;
 import kebab_simulator.event.services.EventProcessCallback;
 import kebab_simulator.event.services.process.EventLoadAssetsProcess;
 import kebab_simulator.graphics.map.MapManager;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
+import kebab_simulator.model.meal.MealModel;
 import kebab_simulator.model.scene.GameScene;
 import kebab_simulator.model.visual.impl.component.InfoComponent;
-import kebab_simulator.test.Test;
 import kebab_simulator.utils.game.CooldownManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -61,51 +60,26 @@ public class ProgramController {
         }));
     }
 
-    private void startTest() {
-        Test.setup(this.viewController);
-        //ColliderTest.getInstance().test1(100, 0, new Vec2(0, 20));
-        //ColliderTest.getInstance().test2(40, 0, new Vec2(0, 0), new Vec2(0, 20));
-        // ColliderTest.getInstance().test3(80, 0, new Vec2(0, 20));
-        // ColliderTest.getInstance().test4(80, 0, new Vec2(0, -20), new Vec2(0, 0));
-    }
-
     /**
      * Diese Methode wird genau ein mal nach Programmstart aufgerufen. Hier sollte also alles geregelt werden,
      * was zu diesem Zeipunkt passieren muss.
      */
     public void startProgram() {
         if (Config.RUN_ENV == Config.Environment.DEVELOPMENT) {
-            this.startTest();
             GameScene.getInstance().getVisuals().add(new InfoComponent());
+
+            Wrapper.getEventManager().addEventListener("keypressed", (KeyPressedEvent event) -> {
+                if (event.getKeyCode() == KeyEvent.VK_F9) {
+                    this.viewController.setWatchPhyics(!this.viewController.watchPhysics());
+                }
+            });
         }
 
-        Wrapper.getEventManager().addEventListener("keypressed", (KeyPressedEvent event) -> {
-            if (event.getKeyCode() == KeyEvent.VK_F9) {
-                viewController.setWatchPhyics(!viewController.watchPhysics());
-            }
-        });
-
-        EntityPlayer dummy = Wrapper.getEntityManager().spawnPlayer("dummy1", 480, 640);
-        dummy.getBody().setSensor(false);
-        dummy.getBody().onCollision((event) -> {
-            if (event.isBodyInvolved(player.getBody())) {
-                if (event.getState() == ColliderCollisionEvent.CollisionState.COLLISION_BEGIN_CONTACT) {
-                    dummy.setShowHitbox(true);
-                    player.setShowHitbox(true);
-
-                } else if (event.getState() == ColliderCollisionEvent.CollisionState.COLLISION_END_CONTACT) {
-                    dummy.setShowHitbox(false);
-                    player.setShowHitbox(false);
-                }
-            }
-        });
-        dummy.setShowHitbox(false);
-        dummy.freeze(true);
-
-        // 310, 586
         this.player = Wrapper.getEntityManager().spawnPlayer("player", 383, 682);
         this.player.setShowHitbox(false);
         GameScene.getInstance().getCameraRenderer().focusAtEntity(this.player);
+
+        MealModel.init();
     }
 
     /**

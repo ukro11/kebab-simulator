@@ -11,9 +11,9 @@ public class Config {
 
     // Konfiguration des Standardfensters: Anzeige und Breite des Programmfensters (Width) und Höhe des Programmfensters (Height)
     public final static boolean SHOW_DEFAULT_WINDOW = true;
-    public final static int WINDOW_WIDTH = 1280;
-    public final static int WINDOW_HEIGHT = 720;   // Effektive Höhe ist etwa 29 Pixel geringer (Titelleiste wird mitgezählt)
-    public final static boolean WINDOW_FULLSCREEN = false;
+    public final static int WINDOW_WIDTH = 1920;
+    public final static int WINDOW_HEIGHT = 1080;   // Effektive Höhe ist etwa 29 Pixel geringer (Titelleiste wird mitgezählt)
+    public final static boolean WINDOW_FULLSCREEN = true;
 
     public final static Environment RUN_ENV = Environment.DEVELOPMENT;
 

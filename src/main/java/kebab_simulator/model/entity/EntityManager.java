@@ -1,10 +1,15 @@
 package kebab_simulator.model.entity;
 
+import kebab_simulator.Wrapper;
 import kebab_simulator.graphics.spawner.ObjectSpawner;
+import kebab_simulator.graphics.spawner.table.TableItemIntegration;
 import kebab_simulator.model.entity.impl.food.*;
+import kebab_simulator.model.entity.impl.item.EntityPan;
+import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.colliders.ColliderPolygon;
+import kebab_simulator.physics.colliders.ColliderRectangle;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +56,44 @@ public class EntityManager {
         EntityOnion onion = new EntityOnion();
         this.registerEntity(onion);
         return onion;
+    }
+
+    public void spawnPlate() {
+        EntityPlate plate = new EntityPlate(new ColliderRectangle(BodyType.DYNAMIC, 0, 0, 32, 32));
+        var tablePlate1 = ((TableItemIntegration) ObjectSpawner.fetchById("table_normal_9"));
+        var tablePlate2 = ((TableItemIntegration) ObjectSpawner.fetchById("table_normal_10"));
+
+        if (((TableItemIntegration) tablePlate1).getItems().isEmpty()) {
+            plate.getBody().setX(tablePlate1.getCollider().getX());
+            plate.getBody().setY(tablePlate1.getCollider().getY());
+            tablePlate1.addItem(plate);
+            Wrapper.getEntityManager().registerEntity(plate);
+
+        } else if (((TableItemIntegration) tablePlate2).getItems().isEmpty()) {
+            plate.getBody().setX(tablePlate2.getCollider().getX());
+            plate.getBody().setY(tablePlate2.getCollider().getY());
+            tablePlate2.addItem(plate);
+            Wrapper.getEntityManager().registerEntity(plate);
+        }
+    }
+
+    public void spawnPan() {
+        EntityPan plate = new EntityPan(new ColliderRectangle(BodyType.DYNAMIC, 0, 0, 32, 32));
+        var tablePlate1 = ((TableItemIntegration) ObjectSpawner.fetchById("table_cooker_20"));
+        var tablePlate2 = ((TableItemIntegration) ObjectSpawner.fetchById("table_cooker_21"));
+
+        if (((TableItemIntegration) tablePlate1).getItems().isEmpty()) {
+            plate.getBody().setX(tablePlate1.getCollider().getX());
+            plate.getBody().setY(tablePlate1.getCollider().getY());
+            tablePlate1.addItem(plate);
+            Wrapper.getEntityManager().registerEntity(plate);
+
+        } else if (((TableItemIntegration) tablePlate2).getItems().isEmpty()) {
+            plate.getBody().setX(tablePlate2.getCollider().getX());
+            plate.getBody().setY(tablePlate2.getCollider().getY());
+            tablePlate2.addItem(plate);
+            Wrapper.getEntityManager().registerEntity(plate);
+        }
     }
 
     public void registerEntity(Entity entity) {

@@ -6,6 +6,7 @@ import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.spawner.TableServingAnimationState;
 import kebab_simulator.graphics.spawner.ObjectIdResolver;
 import kebab_simulator.model.entity.Entity;
+import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.Collider;
 
@@ -27,14 +28,23 @@ public class TableServingSpawner extends TableItemIntegration {
 
     @Override
     public void onInteractTable(EntityPlayer player, KeyEvent event) {
+        super.onInteractTable(player, event);
+    }
 
+    @Override
+    public void onDropItem(TableItemDropEvent event) {
+        if (event == TableItemDropEvent.ITEM_TABLE_DROP) {
+            if (!this.filterItem(event, Wrapper.getLocalPlayer().getInventory().getItemInHand())) return;
+            Wrapper.getLocalPlayer().getInventory().dropItem(this);
+            Wrapper.getGameHandler().scorePoints(((EntityPlate) this.items.get(0)).getMealModel());
+            ((EntityPlate) this.items.get(0)).destroy();
+            this.items.clear();
+        }
     }
 
     @Override
     public boolean allowFocus() {
-        // && Wrapper.getLocalPlayer().getInventory().getItemAsPlate().getMeal()
-        // TODO: check if there is a meal on plate
-        return Wrapper.getLocalPlayer().getInventory().isPlate();
+        return Wrapper.getLocalPlayer().getInventory().isPlate() && ((EntityPlate) Wrapper.getLocalPlayer().getInventory().getItemInHand()).getMealModel() != null;
     }
 
     @Override

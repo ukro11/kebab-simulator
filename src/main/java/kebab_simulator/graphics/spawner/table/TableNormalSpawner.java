@@ -6,6 +6,8 @@ import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.FocusAnimationState;
 import kebab_simulator.graphics.spawner.ObjectIdResolver;
 import kebab_simulator.model.entity.Entity;
+import kebab_simulator.model.entity.impl.EntityItem;
+import kebab_simulator.model.entity.impl.item.EntityPan;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.physics.Collider;
 
@@ -37,6 +39,34 @@ public class TableNormalSpawner extends TableItemIntegration implements ITableSi
             case NORMAL_TOP, NORMAL_LEFT_TOP, NORMAL_RIGHT_TOP: {
                 this.directionToLook = Entity.EntityDirection.TOP;
                 break;
+            }
+        }
+    }
+
+    @Override
+    public void onDropItem(TableItemDropEvent event) {
+        if (event == TableItemDropEvent.ITEM_PLATE_DROP) {
+            EntityItem<?> item = Wrapper.getLocalPlayer().getInventory().getItemInHand();
+            if (item instanceof EntityPlate) {
+                item = ((EntityPlate) item).getItems().get(0);
+                if (!this.filterItem(event, item)) return;
+                item.getLocation().removeItem(item);
+                item.onDrop(((EntityPlate) this.items.get(0)));
+
+            } else {
+                Wrapper.getLocalPlayer().getInventory().dropItem(((EntityPlate) this.items.get(0)));
+            }
+
+        } else if (event == TableItemDropEvent.ITEM_TABLE_DROP) {
+            if (this.getId().getRawId().equals("table_normal_9") || this.getId().getRawId().equals("table_normal_10")) {
+                if (Wrapper.getLocalPlayer().getInventory().isPlate() && !(Wrapper.getLocalPlayer().getInventory().getItemInHand() instanceof EntityPan)) {
+                    if (!this.filterItem(event, Wrapper.getLocalPlayer().getInventory().getItemInHand())) return;
+                    Wrapper.getLocalPlayer().getInventory().dropItem(this);
+                }
+
+            } else {
+                if (!this.filterItem(event, Wrapper.getLocalPlayer().getInventory().getItemInHand())) return;
+                Wrapper.getLocalPlayer().getInventory().dropItem(this);
             }
         }
     }

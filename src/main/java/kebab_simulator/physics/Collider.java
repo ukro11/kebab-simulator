@@ -83,11 +83,6 @@ public abstract class Collider {
         return handle;
     }
 
-    public boolean queueCollision(Collider other) {
-        // TODO
-        return false;
-    }
-
     public abstract boolean handleCollision(Collider other);
     public abstract void drawHitbox(DrawTool drawTool);
     public abstract Vec2 getCenter();

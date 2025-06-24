@@ -1046,14 +1046,14 @@
                         {
                          "name":"table",
                          "type":"string",
-                         "value":"table_normal_6"
+                         "value":"table_normal_9"
                         }],
                  "rotation":0,
                  "type":"",
                  "visible":true,
                  "width":32,
-                 "x":256,
-                 "y":736
+                 "x":672,
+                 "y":608
                 }, 
                 {
                  "height":32,
@@ -1088,6 +1088,23 @@
                  "width":32,
                  "x":544,
                  "y":677
+                }, 
+                {
+                 "height":32,
+                 "id":131,
+                 "name":"plate_normal_2",
+                 "properties":[
+                        {
+                         "name":"table",
+                         "type":"string",
+                         "value":"table_normal_10"
+                        }],
+                 "rotation":0,
+                 "type":"",
+                 "visible":true,
+                 "width":32,
+                 "x":672,
+                 "y":640
                 }],
          "opacity":1,
          "type":"objectgroup",
@@ -1362,7 +1379,7 @@
          "y":0
         }],
  "nextlayerid":13,
- "nextobjectid":131,
+ "nextobjectid":132,
  "orientation":"orthogonal",
  "renderorder":"right-down",
  "tiledversion":"1.11.2",

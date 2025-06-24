@@ -3,11 +3,12 @@ package kebab_simulator.model.entity.impl.item;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.FocusAnimationState;
+import kebab_simulator.graphics.spawner.table.TableSpawner;
 import kebab_simulator.model.entity.impl.EntityItem;
 import kebab_simulator.model.entity.impl.EntityItemLocation;
 import kebab_simulator.model.entity.impl.food.EntityFood;
-import kebab_simulator.graphics.spawner.table.TableSpawner;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
+import kebab_simulator.model.meal.MealModel;
 import kebab_simulator.physics.BodyType;
 import kebab_simulator.physics.Collider;
 
@@ -16,6 +17,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class EntityPlate extends EntityItem<FocusAnimationState> implements EntityItemLocation<EntityFood> {
 
     protected CopyOnWriteArrayList<EntityFood> ingredients;
+    protected MealModel mealModel;
 
     public EntityPlate(Collider collider) {
         this(collider, 0, 0, 32, 32);
@@ -57,6 +59,9 @@ public class EntityPlate extends EntityItem<FocusAnimationState> implements Enti
                 drawTool.push();
                 drawTool.getGraphics2D().rotate(Math.toRadians(this.rotation), this.getX() + this.width / 2, this.getY() + this.height / 2);
                 drawTool.getGraphics2D().drawImage(this.renderer.getCurrentFrame(), (int) this.getX(), (int) this.getY(), (int) this.width, (int) this.height, null);
+                if (this.mealModel != null) {
+                    drawTool.getGraphics2D().drawImage(this.mealModel.getIcon(), (int) this.getX(), (int) this.getY(), (int) this.mealModel.getIcon().getWidth(), (int) this.mealModel.getIcon().getHeight(), null);
+                }
                 drawTool.pop();
             }
         }
@@ -76,6 +81,17 @@ public class EntityPlate extends EntityItem<FocusAnimationState> implements Enti
     }
 
     @Override
+    public void destroy() {
+        super.destroy();
+        this.ingredients.forEach(ing -> ing.destroy());
+        this.ingredients.clear();
+    }
+
+    public void convertToMeal() {
+        this.mealModel = MealModel.findMeal(this);
+    }
+
+    @Override
     public Collider getCollider() {
         return this.body;
     }
@@ -92,17 +108,21 @@ public class EntityPlate extends EntityItem<FocusAnimationState> implements Enti
 
     @Override
     public void addItem(EntityFood item) {
+        if (this.ingredients.stream().filter(ing -> ing.getClass().equals(item.getClass())).findFirst().orElse(null) != null) return;
+
         this.ingredients.add(item);
         item.getBody().setType(BodyType.DYNAMIC);
         this.getCollider().getChildren().add(item.getBody().getChildInstance());
         item.setLocation(this);
         item.positionItem(this.getLocation());
+        this.convertToMeal();
     }
 
     @Override
     public void removeItem(EntityFood item) {
         this.ingredients.remove(item);
         this.getCollider().getChildren().remove(item.getBody().getChildInstance());
+        this.convertToMeal();
     }
 
     @Override
@@ -113,6 +133,10 @@ public class EntityPlate extends EntityItem<FocusAnimationState> implements Enti
     @Override
     public double getRotation() {
         return this.rotation;
+    }
+
+    public MealModel getMealModel() {
+        return this.mealModel;
     }
 
     @Override

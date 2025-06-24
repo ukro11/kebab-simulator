@@ -28,7 +28,13 @@ public class OrderRenderer {
             this.logger.warn("Registered renderer is null");
             return;
         }
-        this.drawables.add(renderer);
+        if (!this.drawables.contains(renderer)) {
+            this.drawables.add(renderer);
+        }
+    }
+
+    public void unregister(IOrderRenderer renderer) {
+        this.drawables.remove(renderer);
     }
 
     public void registerAll(List<IOrderRenderer> integration) {

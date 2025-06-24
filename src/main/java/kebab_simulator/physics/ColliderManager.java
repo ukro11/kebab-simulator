@@ -16,7 +16,6 @@ public class ColliderManager {
 
     static {
         ColliderManager.classCollisionPrevention = Map.of(
-            //"entity_player", Set.of("map"),
             "map", Set.of("map"),
             "entity_item", Set.of("map", "entity_player", "entity_item"),
             "entity_plate", Set.of("map")

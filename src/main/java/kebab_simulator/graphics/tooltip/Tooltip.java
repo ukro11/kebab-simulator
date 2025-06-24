@@ -27,7 +27,7 @@ public class Tooltip {
     private double lastX;
 
     private final Font TOOLTIP_FONT;
-    private double TOOLTIP_TWEEN_DURATION = 0.6;
+    private double TOOLTIP_TWEEN_DURATION = 1.6;
     private double TOOLTIP_TWEEN_POSITION_START = Config.WINDOW_HEIGHT + 20 - Wrapper.getTooltipManager().getStartY();
     private Color TOOLTIP_TEXT_COLOR = Color.decode("#b29f99");
     private Color TOOLTIP_OUTLINE_COLOR = Color.decode("#554544");
@@ -45,13 +45,13 @@ public class Tooltip {
 
         this.TOOLTIP_FONT = VisualConstants.getFont(20);
         this.TOOLTIP_TWEEN_POSITION_X =
-                Tween.to(20.0, 20.0, this.TOOLTIP_TWEEN_DURATION)
+                Tween.to(20.0, 20.0, this.TOOLTIP_TWEEN_DURATION / 4)
                         .ease((x) -> Easings.easeOutCubic(x))
                         .delay(Wrapper.getTooltipManager().getTooltips().size() * 0.3)
                         .loop(false);
         this.TOOLTIP_TWEEN_POSITION_Y =
                 Tween.to(this.TOOLTIP_TWEEN_POSITION_START, 0.0, this.TOOLTIP_TWEEN_DURATION)
-                        .ease((x) -> Easings.easeOutCubic(x))
+                        .ease((x) -> Easings.easeOutElastic(x))
                         .delay(Wrapper.getTooltipManager().getTooltips().size() * 0.3 + this.TOOLTIP_TWEEN_DURATION)
                         .loop(false);
 
@@ -107,7 +107,7 @@ public class Tooltip {
         BufferedImage icon = this.keyModel.getIcon();
 
         if (this.lastX != x) {
-            this.TOOLTIP_TWEEN_POSITION_X.redo(this.TOOLTIP_TWEEN_POSITION_X.getValueDouble(), x, this.TOOLTIP_TWEEN_DURATION);
+            this.TOOLTIP_TWEEN_POSITION_X.redo(this.TOOLTIP_TWEEN_POSITION_X.getValueDouble(), x, this.TOOLTIP_TWEEN_DURATION / 4);
             this.TOOLTIP_TWEEN_POSITION_X.animate();
             this.lastX = x;
         }

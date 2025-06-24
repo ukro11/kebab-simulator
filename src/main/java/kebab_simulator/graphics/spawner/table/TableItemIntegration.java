@@ -19,7 +19,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class TableItemIntegration extends TableSpawner implements EntityItemLocation<EntityItem> {
 
     protected CopyOnWriteArrayList<EntityItem> items;
-    protected final int maxItems = 1;
+    protected int maxItems = 1;
 
     public TableItemIntegration(ObjectIdResolver id, Collider collider, AnimationRenderer<?> renderer) {
         super(id, collider, renderer);
@@ -34,7 +34,13 @@ public abstract class TableItemIntegration extends TableSpawner implements Entit
                 boolean validPan = Wrapper.getLocalPlayer().getInventory().getItemInHand() instanceof EntityPan
                         && !((EntityPan) Wrapper.getLocalPlayer().getInventory().getItemInHand()).getItems().isEmpty();
                 if (firstItem instanceof EntityPlate && (Wrapper.getLocalPlayer().getInventory().isFood() || validPan)) {
-                    this.onDropItem(TableItemDropEvent.ITEM_PLATE_DROP);
+                    boolean plateNotHaveItem =
+                            ((EntityPlate) firstItem).getItems()
+                                    .stream()
+                                    .noneMatch(ing -> ing.getClass().equals(Wrapper.getLocalPlayer().getInventory().getItemInHand().getClass()));
+                    if (plateNotHaveItem) {
+                        this.onDropItem(TableItemDropEvent.ITEM_PLATE_DROP);
+                    }
 
                 } else {
                     this.onPickItem();

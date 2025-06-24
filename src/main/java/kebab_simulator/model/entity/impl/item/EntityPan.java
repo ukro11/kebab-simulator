@@ -3,6 +3,7 @@ package kebab_simulator.model.entity.impl.item;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.FocusAnimationState;
+import kebab_simulator.model.entity.impl.food.EntityFood;
 import kebab_simulator.physics.Collider;
 
 public class EntityPan extends EntityPlate {
@@ -24,6 +25,13 @@ public class EntityPan extends EntityPlate {
                 drawTool.getGraphics2D().drawImage(this.renderer.getCurrentFrame(), (int) this.getX(), (int) this.getY(), (int) this.width, (int) this.height, null);
                 drawTool.pop();
             }
+        }
+    }
+
+    @Override
+    public void addItem(EntityFood item) {
+        if (this.getItems().size() < 1) {
+            super.addItem(item);
         }
     }
 }

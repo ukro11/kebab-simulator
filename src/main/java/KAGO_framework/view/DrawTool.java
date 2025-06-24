@@ -423,6 +423,46 @@ public class DrawTool {
         }
     }
 
+    public void drawCenteredTextOutline(String text, double x, double y, double width, double height, Color color, double outlineWidth, Color outline) {
+        this.drawCenteredTextOutline(text, x, y, width, height, color, outlineWidth, outline, true);
+    }
+
+    public void drawCenteredTextOutline(String text, double x, double y, double width, double height, Color color, double outlineWidth, Color outline, boolean pixelated){
+        if (this.kebabGraphics != null) {
+            var font = kebabGraphics.getGraphics2D().getFont();
+            AttributedString as = new AttributedString(text.replace(" ", "  "));
+            as.addAttribute(TextAttribute.FONT, font);
+            as.addAttribute(TextAttribute.TRACKING, outlineWidth + 2.0);
+            as.addAttribute(TextAttribute.KERNING, TextAttribute.KERNING_ON);
+            this.push();
+            if (pixelated) {
+                kebabGraphics.getGraphics2D().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+
+            } else {
+                kebabGraphics.getGraphics2D().setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            }
+
+            // 2. Font und FontRenderContext holen
+            kebabGraphics.getGraphics2D().setFont(font);
+            FontRenderContext frc = kebabGraphics.getGraphics2D().getFontRenderContext();
+
+            // 3. Text in ein Shape umwandeln
+            GlyphVector gv = font.createGlyphVector(frc, as.getIterator());
+            FontMetrics metrics = kebabGraphics.getGraphics2D().getFontMetrics(font);
+            double textX = x + (width - metrics.stringWidth(text)) / 2;
+            double textY = y + ((height - metrics.getHeight()) / 2) + metrics.getAscent();
+            Shape textShape = gv.getOutline((float) textX, (float) textY);
+
+            kebabGraphics.getGraphics2D().setColor(outline);
+            kebabGraphics.getGraphics2D().setStroke(new BasicStroke((float) outlineWidth)); // Dicke der Kontur
+            kebabGraphics.getGraphics2D().draw(textShape);
+
+            kebabGraphics.getGraphics2D().setColor(color);
+            kebabGraphics.getGraphics2D().fill(textShape);
+            this.pop();
+        }
+    }
+
     /**
      * Passt die Schriftart und Größe der gezeichneten Texte an.
      * @param fontName Der Name der Schriftart, z.B. "Arial"
