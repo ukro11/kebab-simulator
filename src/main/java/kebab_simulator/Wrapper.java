@@ -58,6 +58,8 @@ public class Wrapper {
         Wrapper.getSoundController().loadSound("/sound/plop.mp3", "pick-up", false);
         Wrapper.getSoundController().loadSound("/sound/cutting.mp3", "cutting", false);
         Wrapper.getSoundController().loadSound("/sound/frying.mp3", "frying", false);
+        Wrapper.getSoundController().loadSound("/sound/reward.mp3", "reward", false);
+        Wrapper.getSoundController().loadSound("/sound/trash.mp3", "trash", false);
         Wrapper.getSoundController().loadSound("/sound/Lobby Time.mp3", "background", true);
     }
 

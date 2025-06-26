@@ -127,7 +127,6 @@ public class GameScene extends Scene {
     @Override
     public void onOpen(Scene scene) {
         SoundController.playSound("background");
-        SoundController.setVolume("background",60);
     }
 
     @Override

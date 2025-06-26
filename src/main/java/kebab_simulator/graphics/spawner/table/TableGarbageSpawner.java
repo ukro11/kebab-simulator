@@ -1,5 +1,6 @@
 package kebab_simulator.graphics.spawner.table;
 
+import KAGO_framework.control.SoundController;
 import kebab_simulator.Wrapper;
 import kebab_simulator.animation.AnimationRenderer;
 import kebab_simulator.animation.states.FocusAnimationState;
@@ -45,6 +46,7 @@ public class TableGarbageSpawner extends TableItemIntegration {
             Wrapper.getEntityManager().spawnPlate();
         }
         this.items.clear();
+        SoundController.playSound("trash");
     }
 
     @Override

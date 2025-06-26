@@ -1,5 +1,6 @@
 package kebab_simulator.graphics.spawner.table;
 
+import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Wrapper;
 import kebab_simulator.animation.AnimationRenderer;
@@ -39,6 +40,7 @@ public class TableServingSpawner extends TableItemIntegration {
             Wrapper.getGameHandler().scorePoints(((EntityPlate) this.items.get(0)).getMealModel());
             ((EntityPlate) this.items.get(0)).destroy();
             this.items.clear();
+            SoundController.playSound("reward");
         }
     }
 
