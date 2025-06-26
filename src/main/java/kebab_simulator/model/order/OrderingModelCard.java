@@ -48,13 +48,31 @@ public class OrderingModelCard {
             this.cardWidth,
             this.cardHeight
         );
+
+        drawTool.setCurrentColor(this.CARD_TEXT_COLOR);
+        drawTool.drawFilledRectangle(
+                x,
+                y,
+                this.cardWidth,
+                this.iconHeight + 10
+        );
+
         drawTool.setCurrentColor(Color.decode("#3a3a50"));
         drawTool.getGraphics2D().setStroke(new BasicStroke(3.0f));
         drawTool.drawRectangle(
-            x,
-            y,
-            this.cardWidth,
-            this.cardHeight
+                x,
+                y,
+                this.cardWidth,
+                this.iconHeight + 10
+        );
+
+        drawTool.setCurrentColor(Color.decode("#3a3a50"));
+        drawTool.getGraphics2D().setStroke(new BasicStroke(3.0f));
+        drawTool.drawRectangle(
+                x,
+                y,
+                this.cardWidth,
+                this.cardHeight
         );
 
         drawTool.getGraphics2D().setFont(this.CARD_FONT);
@@ -78,7 +96,7 @@ public class OrderingModelCard {
             drawTool.getGraphics2D().drawImage(
                 ing.getIcon(),
                 (i % 2 == 0) ? (int) (x + 30) : (int) (x + this.cardWidth - ingWidth - 30),
-                (int) (y + 64 + 10) + ingHeight * row,
+                (int) (y + 64 + 16) + ingHeight * row,
                 ingWidth,
                 ingHeight,
                 null

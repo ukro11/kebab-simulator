@@ -2,6 +2,8 @@ package kebab_simulator.model.scene;
 
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
+import kebab_simulator.Wrapper;
+import kebab_simulator.model.sound.SoundManager;
 import kebab_simulator.model.visual.VisualConstants;
 
 import java.awt.*;
@@ -73,6 +75,12 @@ public class LoadingScene extends Scene {
         if (loadingComplete) {
             Scene.open(new StartScene());
         }
+    }
+
+    @Override
+    public void onOpen(Scene last) {
+        Wrapper.getSoundConstants().SOUND_BACKGROUND.setVolume(0.5);
+        SoundManager.playSound(Wrapper.getSoundConstants().SOUND_BACKGROUND, true);
     }
 
     public boolean isLoadingComplete() {

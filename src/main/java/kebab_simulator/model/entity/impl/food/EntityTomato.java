@@ -52,6 +52,7 @@ public class EntityTomato extends EntityFood implements IEntityCuttable {
             if (this.cuttingProgress >= 1) {
                 this.cuttingProgress = 1;
                 this.cuttingState = EntityCuttingState.CUT;
+                this.stopCut();
             }
 
         } else if (this.cuttingState == EntityCuttingState.CUT) {
@@ -102,6 +103,7 @@ public class EntityTomato extends EntityFood implements IEntityCuttable {
 
     @Override
     public void cut() {
+        IEntityCuttable.super.cut();
         if (this.cuttingState != EntityCuttingState.CUT) {
             this.cuttingState = EntityCuttingState.CUTTING;
         }
@@ -109,6 +111,7 @@ public class EntityTomato extends EntityFood implements IEntityCuttable {
 
     @Override
     public void stopCut() {
+        IEntityCuttable.super.stopCut();
         if (this.cuttingState != EntityCuttingState.CUT) {
             this.cuttingState = EntityCuttingState.IDLE;
         }

@@ -79,8 +79,8 @@ public class EntityManager {
 
     public void spawnPan() {
         EntityPan plate = new EntityPan(new ColliderRectangle(BodyType.DYNAMIC, 0, 0, 32, 32));
-        var tablePlate1 = ((TableItemIntegration) ObjectSpawner.fetchById("table_cooker_20"));
-        var tablePlate2 = ((TableItemIntegration) ObjectSpawner.fetchById("table_cooker_21"));
+        var tablePlate1 = ((TableItemIntegration) ObjectSpawner.fetchById("table_cooker_1"));
+        var tablePlate2 = ((TableItemIntegration) ObjectSpawner.fetchById("table_cooker_2"));
 
         if (((TableItemIntegration) tablePlate1).getItems().isEmpty()) {
             plate.getBody().setX(tablePlate1.getCollider().getX());

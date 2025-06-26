@@ -1,6 +1,5 @@
 package kebab_simulator.model.entity.impl.food;
 
-import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Wrapper;
 import kebab_simulator.animation.Easings;
@@ -44,12 +43,8 @@ public interface IEntityCookable {
                     scalingTween.animate();
                 }
             }
-            if (this.getCookingState() == EntityCookingState.COOKED) {
-                SoundController.stopSound("frying");
-            }
             if (!scalingTween.isRunning()) {
                 scalingTween.animate();
-                SoundController.playSound("frying");
             }
 
             drawTool.push();

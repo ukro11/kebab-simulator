@@ -720,7 +720,7 @@
                 {
                  "height":32,
                  "id":4,
-                 "name":"table_knife_2",
+                 "name":"table_knife_1",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -742,7 +742,7 @@
                 {
                  "height":32,
                  "id":6,
-                 "name":"table_knife_4",
+                 "name":"table_knife_2",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -996,7 +996,7 @@
                 {
                  "height":47,
                  "id":113,
-                 "name":"table_cooker_20",
+                 "name":"table_cooker_1",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1018,7 +1018,7 @@
                 {
                  "height":47,
                  "id":127,
-                 "name":"table_cooker_21",
+                 "name":"table_cooker_2",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1063,7 +1063,7 @@
                         {
                          "name":"table",
                          "type":"string",
-                         "value":"table_cooker_20"
+                         "value":"table_cooker_1"
                         }],
                  "rotation":0,
                  "type":"",
@@ -1080,7 +1080,7 @@
                         {
                          "name":"table",
                          "type":"string",
-                         "value":"table_cooker_21"
+                         "value":"table_cooker_2"
                         }],
                  "rotation":0,
                  "type":"",
@@ -1132,7 +1132,7 @@
                 {
                  "height":32,
                  "id":78,
-                 "name":"table_knife_2",
+                 "name":"table_knife_1",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1154,7 +1154,7 @@
                 {
                  "height":32,
                  "id":80,
-                 "name":"table_knife_4",
+                 "name":"table_knife_2",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1342,7 +1342,7 @@
                 {
                  "height":32,
                  "id":123,
-                 "name":"table_cooker_20",
+                 "name":"table_cooker_1",
                  "rotation":0,
                  "type":"",
                  "visible":true,
@@ -1353,7 +1353,7 @@
                 {
                  "height":32,
                  "id":124,
-                 "name":"table_cooker_21",
+                 "name":"table_cooker_2",
                  "rotation":0,
                  "type":"",
                  "visible":true,

@@ -29,7 +29,6 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
 
     private static final Logger logger = LoggerFactory.getLogger(ViewController.class);
     private final ProgramController programController;
-    private final SoundController soundController;
     private final DrawTool drawTool;
     private final ListeningScheduledExecutorService physicsExecutor;
 
@@ -69,13 +68,6 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
 
         SwingUtilities.invokeLater(() -> this.createWindow());
 
-        if(kebab_simulator.Config.USE_SOUND || kebab_simulator.Config.RUN_ENV == kebab_simulator.Config.Environment.PRODUCTION) {
-            this.soundController = new SoundController();
-            Wrapper.loadSounds();
-
-        } else {
-            if ( Config.INFO_MESSAGES) System.out.println("** Achtung! Sound deaktiviert => soundController ist NULL (kann in Config geändert werden). **");
-        }
         if (!kebab_simulator.Config.SHOW_DEFAULT_WINDOW) {
             this.setDrawFrameVisible(false);
             if(Config.INFO_MESSAGES) System.out.println("** Achtung! Standardfenster deaktiviert => wird nicht angezeigt.). **");
@@ -106,14 +98,11 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         this.programController.startProgram();
         this.setWatchPhyics(true);
         Wrapper.getProcessManager().processPostGame();
-        Timer swingTimer = new Timer(1000 / Wrapper.getTimer().getFPSCap(), new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                startGameLoop();
-                repaint();
-            }
-        });
-        swingTimer.start();
+        while (true) {
+            startGameLoop();
+            repaint();
+            Wrapper.getTimer().update(true);
+        }
     }
 
     private void startGameLoop() {
@@ -248,14 +237,16 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             this.requestFocusInWindow();
             requested = !requested;
         }
-        Wrapper.getTimer().update();
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         this.drawTool.setGraphics2D(g2d,this);
-        if (this.soundController != null) this.soundController.update(Wrapper.getTimer().getDeltaTime());
         if (Scene.getCurrentScene() != null) Scene.getCurrentScene().draw(this.drawTool);
         if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().draw(this.drawTool);
         if (kebab_simulator.Config.WINDOW_FULLSCREEN) Toolkit.getDefaultToolkit().sync();
+
+        /*for (int i = 0; i < 10000; i++) {
+            System.out.println(i);
+        }*/
     }
 
     /**
@@ -398,9 +389,5 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
 
     public ProgramController getProgramController() {
         return this.programController;
-    }
-
-    public SoundController getSoundController() {
-        return this.soundController;
     }
 }

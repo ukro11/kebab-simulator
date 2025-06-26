@@ -2,7 +2,6 @@ package kebab_simulator.model.scene;
 
 import KAGO_framework.control.Drawable;
 import KAGO_framework.control.Interactable;
-import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
 import kebab_simulator.Wrapper;
@@ -16,6 +15,7 @@ import kebab_simulator.graphics.spawner.table.TableSpawner;
 import kebab_simulator.graphics.spawner.table.TableStorageSpawner;
 import kebab_simulator.graphics.tooltip.Tooltip;
 import kebab_simulator.model.KeyManagerModel;
+import kebab_simulator.model.sound.SoundManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -126,13 +126,12 @@ public class GameScene extends Scene {
 
     @Override
     public void onOpen(Scene scene) {
-        SoundController.playSound("background");
-        SoundController.setVolume("background",60);
+        Wrapper.getSoundConstants().SOUND_BACKGROUND.setVolume(0.6);
     }
 
     @Override
     public void onClose(Scene scene) {
-        SoundController.stopSound("background");
+        SoundManager.stopSound(Wrapper.getSoundConstants().SOUND_BACKGROUND);
     }
 
     @Override

@@ -1,9 +1,12 @@
 package kebab_simulator.model.entity.impl.food;
 
-import KAGO_framework.control.SoundController;
 import KAGO_framework.view.DrawTool;
+import kebab_simulator.Wrapper;
 import kebab_simulator.animation.Easings;
 import kebab_simulator.animation.tween.Tween;
+import kebab_simulator.graphics.spawner.table.TableKnifeSpawner;
+import kebab_simulator.model.entity.impl.EntityItem;
+import kebab_simulator.model.sound.SoundManager;
 import kebab_simulator.model.visual.VisualConstants;
 
 import java.awt.*;
@@ -21,8 +24,14 @@ public interface IEntityCuttable {
     double getCuttingProgress();
     double getCuttingDuration();
     boolean allowCutting();
-    void cut();
-    void stopCut();
+    default void cut() {
+        int tableIndex = ((TableKnifeSpawner) ((EntityItem) this).getLocation()).getId().getIndex() - 1;
+        SoundManager.playSound(Wrapper.getSoundConstants().SOUND_CUTTING[tableIndex], true);
+    }
+    default void stopCut() {
+        int tableIndex = ((TableKnifeSpawner) ((EntityItem) this).getLocation()).getId().getIndex() - 1;
+        SoundManager.stopSound(Wrapper.getSoundConstants().SOUND_CUTTING[tableIndex]);
+    }
     default void drawCuttingProgress(double x, double y, DrawTool drawTool) {
         boolean b = (this.getCuttingState() == EntityCuttingState.IDLE && this.getCuttingProgress() > 0);
         if (this.getCuttingState() == EntityCuttingState.CUTTING || b) {
@@ -35,12 +44,10 @@ public interface IEntityCuttable {
                 if ((double) scalingTween.getTweenValue().getTarget() == 1.0) {
                     scalingTween.redo(target, start, duration);
                     scalingTween.animate();
-                    SoundController.playSound("cutting");
 
                 } else {
                     scalingTween.redo(start, target, duration);
                     scalingTween.animate();
-                    SoundController.stopSound("cutting");
                 }
             }
 

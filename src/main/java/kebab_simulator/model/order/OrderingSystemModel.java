@@ -27,7 +27,7 @@ public class OrderingSystemModel {
     public void drawOrders(DrawTool drawTool) {
         for (int i = 0; i < this.queue.size(); i++) {
             var model = this.queue.get(i);
-            model.draw(drawTool,5 + 180 * i + 5 * i, 5);
+            model.draw(drawTool,5 + 180 * i, 5);
         }
     }
 

@@ -15,6 +15,7 @@ import kebab_simulator.model.entity.impl.food.EntityMeat;
 import kebab_simulator.model.entity.impl.food.IEntityCuttable;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.model.scene.GameScene;
+import kebab_simulator.model.sound.SoundManager;
 import kebab_simulator.physics.Collider;
 
 import java.awt.event.KeyEvent;
@@ -66,7 +67,10 @@ public class TableKnifeSpawner extends TableItemIntegration implements ITableSid
     @Override
     public void onFocusLost() {
         this.renderer.switchState(TableKnifeAnimationState.DEFAULT);
-        if (!this.items.isEmpty()) ((IEntityCuttable) this.items.get(0)).stopCut();
+        if (!this.items.isEmpty()) {
+            ((IEntityCuttable) this.items.get(0)).stopCut();
+            SoundManager.stopSound(Wrapper.getSoundConstants().SOUND_CUTTING[this.id.getIndex() - 1]);
+        }
     }
 
     @Override
@@ -76,6 +80,7 @@ public class TableKnifeSpawner extends TableItemIntegration implements ITableSid
                 && this.renderer.getCurrentAnimation().getState() != TableKnifeAnimationState.CUT) {
             this.renderer.switchState(TableKnifeAnimationState.CUT);
             ((IEntityCuttable) this.items.get(0)).cut();
+            SoundManager.playSound(Wrapper.getSoundConstants().SOUND_CUTTING[this.id.getIndex() - 1], true);
         }
     }
 

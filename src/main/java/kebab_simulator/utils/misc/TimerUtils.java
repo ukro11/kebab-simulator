@@ -7,13 +7,19 @@ public class TimerUtils {
     private double deltaTime = 0.0;
     private int fps = 0;
     private int frameCount = 0;
-    public int TARGET_FPS = 300;
+    public int TARGET_FPS = 120;
     private double FPS_UPDATE_INTERVAL = 1.0;
+    private double FRAME_TIME = 1000 / this.TARGET_FPS;
     private boolean updated = false;
 
     public void update() {
+        this.update(false);
+    }
+
+    public void update(boolean sleep) {
         double currentTime = System.nanoTime() / 1e9;
         this.deltaTime = (currentTime - this.lastTime);
+
         this.lastTime = currentTime;
 
         if (this.deltaTime == 0) this.deltaTime = 0.01;
@@ -26,6 +32,15 @@ public class TimerUtils {
             this.frameCount = 0;
             this.elapsedTime = 0;
             this.updated = true;
+        }
+
+        if (sleep) {
+            long sleepTime = Math.max(0, (long) (this.FRAME_TIME - this.deltaTime * 1000));
+            try {
+                Thread.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
