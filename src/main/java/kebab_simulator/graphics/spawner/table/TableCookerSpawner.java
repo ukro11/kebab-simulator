@@ -12,6 +12,7 @@ import kebab_simulator.model.entity.impl.food.IEntityCookable;
 import kebab_simulator.model.entity.impl.food.IEntityCuttable;
 import kebab_simulator.model.entity.impl.item.EntityPan;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
+import kebab_simulator.model.sound.SoundManager;
 import kebab_simulator.physics.Collider;
 
 public class TableCookerSpawner extends TableItemIntegration {
@@ -47,7 +48,10 @@ public class TableCookerSpawner extends TableItemIntegration {
 
     @Override
     public void onPickItem() {
-        if (!this.getPan().getItems().isEmpty()) ((IEntityCookable) this.getPan().getItems().get(0)).stopCook();
+        if (!this.getPan().getItems().isEmpty()) {
+            ((IEntityCookable) this.getPan().getItems().get(0)).stopCook();
+            SoundManager.stopSound(Wrapper.getSoundConstants().SOUND_FRYING[this.id.getIndex() - 1]);
+        }
         super.onPickItem();
     }
 
@@ -56,6 +60,7 @@ public class TableCookerSpawner extends TableItemIntegration {
         if (event == TableItemDropEvent.ITEM_PLATE_DROP) {
             var item = (IEntityCookable) Wrapper.getLocalPlayer().getInventory().getItemAsFood();
             item.cook();
+            SoundManager.playSound(Wrapper.getSoundConstants().SOUND_FRYING[this.id.getIndex() - 1], true);
             Wrapper.getLocalPlayer().getInventory().dropItem(((EntityPlate) this.items.get(0)));
 
         } else if (event == TableItemDropEvent.ITEM_TABLE_DROP) {
@@ -63,6 +68,7 @@ public class TableCookerSpawner extends TableItemIntegration {
             if (Wrapper.getLocalPlayer().getInventory().getItemInHand() instanceof EntityPan
                     && !Wrapper.getLocalPlayer().getInventory().getItemAsPlate().getItems().isEmpty()) {
                 ((IEntityCookable) Wrapper.getLocalPlayer().getInventory().getItemAsPlate().getItems().get(0)).cook();
+                SoundManager.playSound(Wrapper.getSoundConstants().SOUND_FRYING[this.id.getIndex() - 1], true);
             }
             Wrapper.getLocalPlayer().getInventory().dropItem(this);
         }

@@ -56,6 +56,7 @@ public class EntityOnion extends EntityFood implements IEntityCuttable {
             if (this.cuttingProgress >= 1) {
                 this.cuttingProgress = 1;
                 this.cuttingState = EntityCuttingState.CUT;
+                this.stopCut();
             }
 
 
@@ -113,6 +114,7 @@ public class EntityOnion extends EntityFood implements IEntityCuttable {
 
     @Override
     public void cut() {
+        IEntityCuttable.super.cut();
         if (this.cuttingState != EntityCuttingState.CUT) {
             this.cuttingState = EntityCuttingState.CUTTING;
         }
@@ -121,6 +123,7 @@ public class EntityOnion extends EntityFood implements IEntityCuttable {
 
     @Override
     public void stopCut() {
+        IEntityCuttable.super.stopCut();
         if (this.cuttingState != EntityCuttingState.CUT) {
             this.cuttingState = EntityCuttingState.IDLE;
         }
