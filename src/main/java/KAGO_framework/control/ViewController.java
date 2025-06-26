@@ -30,7 +30,8 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
     private static final Logger logger = LoggerFactory.getLogger(ViewController.class);
     private final ProgramController programController;
     private final DrawTool drawTool;
-    private final ListeningScheduledExecutorService physicsExecutor;
+    //private final ListeningScheduledExecutorService physicsExecutor;
+    private final ListeningExecutorService physicsExecutor;
 
     private final AtomicBoolean watchPhysics;
     private final AtomicBoolean initializing;
@@ -51,7 +52,8 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         ViewController.instance = this;
         this.programController = new ProgramController(this);
         this.drawTool = new DrawTool();
-        this.physicsExecutor = MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(2));
+        //this.physicsExecutor = MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(2));
+        this.physicsExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
         this.watchPhysics = new AtomicBoolean(true);
         this.initializing = new AtomicBoolean(true);
 
@@ -115,15 +117,22 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
     }
 
     private void startPhysicsEngine() {
-        var physicService = this.physicsExecutor.scheduleAtFixedRate(() -> {
-            if (this.watchPhysics.get()) {
-                Wrapper.getPhysicsTimer().update();
-                double dt = Wrapper.getPhysicsTimer().getDeltaTime();
-                Wrapper.getColliderManager().updateColliders(dt);
-                if (Scene.getCurrentScene() instanceof GameScene) GameScene.getInstance().updatePhysics(dt);
-            }
+        /*var physicService = this.physicsExecutor.scheduleAtFixedRate(() -> {
 
-        }, 0, 1000 / Wrapper.getTimer().getFPSCap(), TimeUnit.MILLISECONDS);
+        }, 0, 1000 / Wrapper.getTimer().getFPSCap(), TimeUnit.MILLISECONDS);*/
+        var physicService = this.physicsExecutor.submit(() -> {
+            while (true) {
+                if (this.watchPhysics.get()) {
+                    double dt = Wrapper.getPhysicsTimer().getDeltaTime();
+                    Wrapper.getColliderManager().updateColliders(dt);
+                    if (Scene.getCurrentScene() instanceof GameScene) GameScene.getInstance().updatePhysics(dt);
+                    Wrapper.getPhysicsTimer().update(true);
+
+                } else {
+                    Thread.sleep(100);
+                }
+            }
+        });
 
         Futures.addCallback(physicService, new FutureCallback<Object>() {
             @Override
@@ -219,7 +228,6 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             this.drawFrame.setVisible(true);
             this.drawFrame.setResizable(false);
             this.drawFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-            //gd.setFullScreenWindow(this.drawFrame);
 
         } else {
             this.drawFrame.setVisible(true);
@@ -237,16 +245,13 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             this.requestFocusInWindow();
             requested = !requested;
         }
+        Wrapper.getTimer().updateFrames();
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         this.drawTool.setGraphics2D(g2d,this);
         if (Scene.getCurrentScene() != null) Scene.getCurrentScene().draw(this.drawTool);
         if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().draw(this.drawTool);
         if (kebab_simulator.Config.WINDOW_FULLSCREEN) Toolkit.getDefaultToolkit().sync();
-
-        /*for (int i = 0; i < 10000; i++) {
-            System.out.println(i);
-        }*/
     }
 
     /**

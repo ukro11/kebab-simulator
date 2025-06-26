@@ -41,7 +41,7 @@ public class OrderingModelCard {
         BufferedImage icon = this.mealModel.getIcon();
 
         drawTool.push();
-        drawTool.setCurrentColor(Color.decode("#6c6e85"));
+        drawTool.setCurrentColor(Color.decode("#7c605d"));
         drawTool.drawFilledRectangle(
             x,
             y,
@@ -49,7 +49,7 @@ public class OrderingModelCard {
             this.cardHeight
         );
 
-        drawTool.setCurrentColor(this.CARD_TEXT_COLOR);
+        drawTool.setCurrentColor(Color.decode("#a53146"));
         drawTool.drawFilledRectangle(
                 x,
                 y,
