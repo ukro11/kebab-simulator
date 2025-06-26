@@ -14,7 +14,6 @@ public class ColliderPolygon extends Collider {
 
     public Vec2[] vertices;
     public Vec2[] normals;
-    private static double INV_3 = 1.0 / 3.0;
     private Vec2 center;
 
     public static ColliderPolygon createCIPolygon(String id, BodyType type, double x, double y, double width, double height, double curvedInFactor) {
@@ -40,7 +39,7 @@ public class ColliderPolygon extends Collider {
         this.id = id;
         this.type = type;
         if (vertices.length <= 2) {
-            throw new InvalidParameterException("Nice try diddy");
+            throw new InvalidParameterException("Polygons have atleast 3 vertices");
         }
         this.x = x;
         this.y = y;
@@ -201,7 +200,7 @@ public class ColliderPolygon extends Collider {
             // area weighted centroid
             // (p1 + p2) * (D / 3)
             // = (x1 + x2) * (yi * x(i+1) - y(i+1) * xi) / 3
-            center.add(p1.add(p2).mul(ColliderPolygon.INV_3).mul(triangleArea));
+            center.add(p1.add(p2).mul(1.0 / 3.0).mul(triangleArea));
         }
         if (Math.abs(area) <= Epsilon.E) {
             // zero area can only happen if all the points are the same point

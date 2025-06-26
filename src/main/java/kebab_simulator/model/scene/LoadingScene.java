@@ -1,43 +1,35 @@
 package kebab_simulator.model.scene;
 
-import KAGO_framework.control.Drawable;
-import KAGO_framework.control.Interactable;
 import KAGO_framework.view.DrawTool;
 import kebab_simulator.Config;
 import kebab_simulator.model.visual.VisualConstants;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoadingScene extends Scene {
 
-    private final List<Drawable> drawables;
-    private final List<Interactable> interactables;
     private double loadingProgress = 0;  // Wert zwischen 0.0 und 1.0
+    private double elapsed = 0;
+    private double duration = 5;
     private boolean loadingComplete = false;
 
     public LoadingScene() {
         super("loading");
-        this.drawables = new ArrayList<>();
-        this.interactables = new ArrayList<>();
     }
 
     @Override
     public void update(double dt) {
         // Fortschritt erhöhen (max 1.0)
-        if (loadingProgress < 1.0) {
-            loadingProgress += dt * 0.25;  // Geschwindigkeit anpassen (0.25 = ca. 4s)
-            if (loadingProgress >= 1.0) {
-                loadingProgress = 1.0;
+        if (elapsed < duration) {
+            elapsed += dt;  // Geschwindigkeit anpassen (0.25 = ca. 4s)
+            loadingProgress = elapsed / duration;
+            if (elapsed >= duration) {
                 loadingComplete = true;
 
                 // Beispiel: Wechsle zur GameScene oder MainMenuScene
                 // Wrapper.getSceneManager().changeScene(GameScene.getInstance());
             }
         }
-
-        this.drawables.forEach(d -> d.update(dt));
     }
 
     @Override
@@ -76,21 +68,11 @@ public class LoadingScene extends Scene {
         drawTool.drawText(percentText, barX + barWidth / 2 - 15, barY - 10);
 
         // Andere Elemente
-        this.drawables.forEach(d -> d.draw(drawTool));
         super.draw(drawTool);
 
         if (loadingComplete) {
             Scene.open(new StartScene());
         }
-    }
-
-
-    public List<Drawable> getDrawables() {
-        return drawables;
-    }
-
-    public List<Interactable> getInteractables() {
-        return interactables;
     }
 
     public boolean isLoadingComplete() {

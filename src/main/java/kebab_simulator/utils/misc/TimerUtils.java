@@ -2,35 +2,47 @@ package kebab_simulator.utils.misc;
 
 public class TimerUtils {
 
-    private static double elapsedTime = 0;
-    private static double lastTime = System.nanoTime() / 1e9;
-    private static double deltaTime = 0.0;
-    private static int fps = 0;
-    private static int frameCount = 0;
-    private static double fpsUpdateInterval = 1.0;
+    private double elapsedTime = 0;
+    private double lastTime = System.nanoTime() / 1e9;
+    private double deltaTime = 0.0;
+    private int fps = 0;
+    private int frameCount = 0;
+    public int TARGET_FPS = 300;
+    private double FPS_UPDATE_INTERVAL = 1.0;
+    private boolean updated = false;
 
-    public static void update() {
+    public void update() {
         double currentTime = System.nanoTime() / 1e9;
-        TimerUtils.deltaTime = (currentTime - TimerUtils.lastTime);
-        if (TimerUtils.deltaTime == 0) TimerUtils.deltaTime = 0.01;
+        this.deltaTime = (currentTime - this.lastTime);
+        this.lastTime = currentTime;
 
-        TimerUtils.lastTime = currentTime;
-        TimerUtils.frameCount++;
-        TimerUtils.elapsedTime += TimerUtils.deltaTime;
+        if (this.deltaTime == 0) this.deltaTime = 0.01;
 
-        if (TimerUtils.elapsedTime >= TimerUtils.fpsUpdateInterval) {
-            TimerUtils.fps = TimerUtils.frameCount;
-            TimerUtils.frameCount = 0;
-            TimerUtils.elapsedTime = 0;
+        this.frameCount++;
+        this.elapsedTime += this.deltaTime;
+
+        if (this.elapsedTime >= this.FPS_UPDATE_INTERVAL) {
+            this.fps = this.frameCount;
+            this.frameCount = 0;
+            this.elapsedTime = 0;
+            this.updated = true;
         }
     }
 
-    public static double getDeltaTime() {
-        return TimerUtils.deltaTime;
+    public int getFPSCap() {
+        return this.TARGET_FPS;
     }
 
-    public static int getFPS() {
-        return TimerUtils.fps;
+    public double getDeltaTime() {
+        return this.deltaTime;
+    }
+
+    public int getFPS() {
+        return this.fps;
+    }
+
+    public boolean fpsUpdated() {
+        return this.updated;
     }
 }
 

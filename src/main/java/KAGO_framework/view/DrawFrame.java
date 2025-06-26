@@ -1,7 +1,5 @@
 package KAGO_framework.view;
 
-import KAGO_framework.Config;
-
 import javax.swing.*;
 
 /** Entspricht einem Fenster, das DrawingPanels beinhalten kann.
@@ -28,7 +26,7 @@ public class DrawFrame extends JFrame {
         setSize(width,height);
         setTitle(name);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setVisible(true);
+        //setVisible(true);
     }
 
     /**

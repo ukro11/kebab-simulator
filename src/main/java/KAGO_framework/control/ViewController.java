@@ -9,7 +9,6 @@ import kebab_simulator.Wrapper;
 import kebab_simulator.event.events.KeyPressedEvent;
 import kebab_simulator.model.scene.*;
 import kebab_simulator.model.visual.impl.gui.GuiScreen;
-import kebab_simulator.utils.misc.TimerUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +16,6 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,11 +31,10 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
     private final ProgramController programController;
     private final SoundController soundController;
     private final DrawTool drawTool;
-    private final ListeningExecutorService physicsExecutor;
+    private final ListeningScheduledExecutorService physicsExecutor;
 
     private final AtomicBoolean watchPhysics;
     private final AtomicBoolean initializing;
-    private final int threadSleep = 1;
 
     private DrawFrame drawFrame;
     private boolean requested = false;
@@ -55,7 +52,7 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         ViewController.instance = this;
         this.programController = new ProgramController(this);
         this.drawTool = new DrawTool();
-        this.physicsExecutor = MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(2));
+        this.physicsExecutor = MoreExecutors.listeningDecorator(Executors.newScheduledThreadPool(2));
         this.watchPhysics = new AtomicBoolean(true);
         this.initializing = new AtomicBoolean(true);
 
@@ -64,13 +61,13 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                e.printStackTrace();
             }
         }
         logger.info("PreStart Setup is finished.");
         logger.info("Starting Engine.");
 
-        this.createWindow();
+        SwingUtilities.invokeLater(() -> this.createWindow());
 
         if(kebab_simulator.Config.USE_SOUND || kebab_simulator.Config.RUN_ENV == kebab_simulator.Config.Environment.PRODUCTION) {
             this.soundController = new SoundController();
@@ -101,7 +98,7 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             this.startGameEngine();
 
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
@@ -109,29 +106,36 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         this.programController.startProgram();
         this.setWatchPhyics(true);
         Wrapper.getProcessManager().processPostGame();
-        while (true) {
-            TimerUtils.update();
-            this.programController.updateProgram(TimerUtils.getDeltaTime());
-            if (Scene.getCurrentScene() != null) Scene.getCurrentScene().update(TimerUtils.getDeltaTime());
-            if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().update(TimerUtils.getDeltaTime());
-            // if (this.soundController != null) this.soundController.update(TimerUtils.getDeltaTime());
-            repaint();
-            Thread.sleep(this.threadSleep);
+        Timer swingTimer = new Timer(1000 / Wrapper.getTimer().getFPSCap(), new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                startGameLoop();
+                repaint();
+            }
+        });
+        swingTimer.start();
+    }
+
+    private void startGameLoop() {
+        if (Wrapper.getTimer().fpsUpdated()) {
+            double dt = Wrapper.getTimer().getDeltaTime();
+            this.programController.updateProgram(dt);
+            if (Scene.getCurrentScene() != null) Scene.getCurrentScene().update(dt);
+            if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().update(dt);
         }
     }
 
     private void startPhysicsEngine() {
-        var physicService = this.physicsExecutor.submit(() -> {
-            while (true) {
-                if (!this.watchPhysics.get()) {
-                    Thread.sleep(100);
-                    continue;
-                }
-                Wrapper.getColliderManager().updateColliders(TimerUtils.getDeltaTime());
-                if (Scene.getCurrentScene() instanceof GameScene) GameScene.getInstance().updatePhysics(TimerUtils.getDeltaTime());
-                Thread.sleep(this.threadSleep);
+        var physicService = this.physicsExecutor.scheduleAtFixedRate(() -> {
+            if (this.watchPhysics.get()) {
+                Wrapper.getPhysicsTimer().update();
+                double dt = Wrapper.getPhysicsTimer().getDeltaTime();
+                Wrapper.getColliderManager().updateColliders(dt);
+                if (Scene.getCurrentScene() instanceof GameScene) GameScene.getInstance().updatePhysics(dt);
             }
-        });
+
+        }, 0, 1000 / Wrapper.getTimer().getFPSCap(), TimeUnit.MILLISECONDS);
+
         Futures.addCallback(physicService, new FutureCallback<Object>() {
             @Override
             public void onSuccess(Object result) {}
@@ -173,21 +177,19 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
     }
 
     private void createWindow(){
-        //
-        // #947052
         this.setBackground(Color.decode("#d0b99c"));
         this.setDoubleBuffered(true);
+        logger.info("Creating Window...");
 
-        GraphicsDevice gd = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice gd = env.getDefaultScreenDevice();
         int width = gd.getDisplayMode().getWidth();
         int height = gd.getDisplayMode().getHeight();
         int x = width / 2 - kebab_simulator.Config.WINDOW_WIDTH / 2;
         int y = height / 2 - kebab_simulator.Config.WINDOW_HEIGHT / 2;
-        //Scene.open(new WinScene());
-        //Scene.open(new LoseScene());
+        logger.info("Graphics Device: {}", gd.getIDstring());
+
         Scene.open(new LoadingScene());
-        //Scene.open(new StartScene());
-        //Scene.open(GameScene.getInstance());
         this.drawFrame = new DrawFrame(kebab_simulator.Config.WINDOW_TITLE, x, y, kebab_simulator.Config.WINDOW_WIDTH, kebab_simulator.Config.WINDOW_HEIGHT, this);
         this.drawFrame.setResizable(false);
 
@@ -224,8 +226,14 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
         });
 
         if (kebab_simulator.Config.WINDOW_FULLSCREEN) {
+            this.drawFrame.setUndecorated(true);
+            this.drawFrame.setVisible(true);
             this.drawFrame.setResizable(false);
             this.drawFrame.setExtendedState(JFrame.MAXIMIZED_BOTH);
+            //gd.setFullScreenWindow(this.drawFrame);
+
+        } else {
+            this.drawFrame.setVisible(true);
         }
         this.drawFrame.setActiveDrawingPanel(this);
     }
@@ -238,12 +246,13 @@ public class ViewController extends JPanel implements KeyListener, MouseListener
             addMouseMotionListener(this);
             setFocusable(true);
             this.requestFocusInWindow();
-            requested = ! requested;
+            requested = !requested;
         }
+        Wrapper.getTimer().update();
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         this.drawTool.setGraphics2D(g2d,this);
-        if (this.soundController != null) this.soundController.update(TimerUtils.getDeltaTime());
+        if (this.soundController != null) this.soundController.update(Wrapper.getTimer().getDeltaTime());
         if (Scene.getCurrentScene() != null) Scene.getCurrentScene().draw(this.drawTool);
         if (GuiScreen.getCurrentScreen() != null) GuiScreen.getCurrentScreen().draw(this.drawTool);
         if (kebab_simulator.Config.WINDOW_FULLSCREEN) Toolkit.getDefaultToolkit().sync();

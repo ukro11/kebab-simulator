@@ -74,7 +74,7 @@ public class SoundController {
      * Sorgt für ein zeitverzögertes Laden der Sounds, damit berücksichtigt wird,
      * dass der JavaFX ggf. nicht sofort verfügbar ist.
      */
-    public void update(double dt){
+    public synchronized void update(double dt){
         if (initialized){
             if (soundDelay > 0) soundDelay -= dt;
             if(!started){

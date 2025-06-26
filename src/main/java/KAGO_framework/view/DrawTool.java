@@ -21,7 +21,7 @@ import java.util.List;
 public class DrawTool {
 
     // Referenzen
-    private KebabGraphics kebabGraphics; //java-spezifisches Objekt zum Arbeiten mit 2D-Grafik
+    private static KebabGraphics kebabGraphics; //java-spezifisches Objekt zum Arbeiten mit 2D-Grafik
     private JComponent parent;
 
     /**
@@ -497,6 +497,43 @@ public class DrawTool {
         double textY = y + ((height - metrics.getHeight()) / 2) + metrics.getAscent();
         kebabGraphics.getGraphics2D().setFont(font);
         this.drawText(text, textX, textY);
+    }
+
+    public int getWindowX() {
+        return this.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().x;
+    }
+
+    public int getWindowY() {
+        return this.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().y;
+    }
+
+    public int getWindowWidth() {
+        return this.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().width;
+    }
+
+    public int getWindowHeight() {
+        return this.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().height;
+    }
+
+    // Window Height without title bar -> Content height
+    public int getContentHeight() {
+        return DrawTool.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().height - 29;
+    }
+
+    public static int getX() {
+        return DrawTool.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().x;
+    }
+
+    public int getY() {
+        return DrawTool.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().y;
+    }
+
+    public int getWidth() {
+        return DrawTool.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().width;
+    }
+
+    public int getHeight() {
+        return DrawTool.kebabGraphics.getGraphics2D().getDeviceConfiguration().getBounds().height;
     }
 
     public double getFontWidth(String text) {

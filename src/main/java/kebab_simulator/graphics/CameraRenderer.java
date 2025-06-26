@@ -80,7 +80,7 @@ public class CameraRenderer {
         drawTool.push();
         drawTool.getGraphics2D().translate(-Math.floor(this.x), -Math.floor(this.y));
         drawTool.getGraphics2D().scale(this.zoom, this.zoom);
-        drawTool.getGraphics2D().rotate(this.angle);
+        drawTool.getGraphics2D().rotate(Math.toRadians(this.angle));
     }
 
     public void detach(DrawTool drawTool) {

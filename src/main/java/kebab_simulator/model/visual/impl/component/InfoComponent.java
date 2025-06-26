@@ -5,7 +5,6 @@ import kebab_simulator.Config;
 import kebab_simulator.Wrapper;
 import kebab_simulator.model.visual.VisualConstants;
 import kebab_simulator.model.visual.VisualModel;
-import kebab_simulator.utils.misc.TimerUtils;
 
 import java.awt.*;
 
@@ -30,7 +29,7 @@ public class InfoComponent extends VisualModel {
         drawTool.getGraphics2D().setFont(this.debugFont);
 
         drawTool.drawTextOutline(
-            String.format("FPS: %s", TimerUtils.getFPS()),
+            String.format("FPS: %s", Wrapper.getTimer().getFPS()),
             20,
             this.startY + this.margin,
             Color.decode("#b29f99"),

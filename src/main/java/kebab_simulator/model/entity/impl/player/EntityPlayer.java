@@ -57,6 +57,11 @@ public class EntityPlayer extends Entity {
     }
 
     @Override
+    public double zIndex() {
+        return super.zIndex() + 5;
+    }
+
+    @Override
     protected void drawEntity(DrawTool drawTool) {
         if (this.renderer != null && this.renderer.getCurrentFrame() != null) {
             drawTool.getGraphics2D().drawImage(

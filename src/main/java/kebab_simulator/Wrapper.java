@@ -10,6 +10,7 @@ import kebab_simulator.model.entity.EntityManager;
 import kebab_simulator.model.entity.impl.food.IEntityCookable;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
 import kebab_simulator.physics.ColliderManager;
+import kebab_simulator.utils.misc.TimerUtils;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -23,6 +24,8 @@ public class Wrapper {
     private final static EventProcessingQueue processManager = new EventProcessingQueue();
     private final static TooltipManager tooltipManager = new TooltipManager();
     private final static GameHandlerModel gameHandlerModel = new GameHandlerModel();
+    private final static TimerUtils timer = new TimerUtils();
+    private final static TimerUtils physicsTimer = new TimerUtils();
 
     public static EventManager getEventManager() {
         return eventManager;
@@ -43,6 +46,10 @@ public class Wrapper {
     public static EntityPlayer getLocalPlayer() { return ViewController.getInstance().getProgramController().player; }
 
     public static SoundController getSoundController() { return ViewController.getInstance().getSoundController(); }
+
+    public static TimerUtils getTimer() { return timer; }
+
+    public static TimerUtils getPhysicsTimer() { return physicsTimer; }
 
     public static GameHandlerModel getGameHandler() { return gameHandlerModel; }
 

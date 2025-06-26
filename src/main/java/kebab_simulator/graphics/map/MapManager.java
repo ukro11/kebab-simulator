@@ -238,19 +238,22 @@ public class MapManager {
     public void draw(DrawTool drawTool) {
         Graphics gr = drawTool.getGraphics2D();
         for (Quad quad : this.staticQuads) {
-            gr.drawImage(quad.getQuadImage(), (int) quad.getX(), (int) quad.getY(), (int) quad.getWidth(), (int) quad.getHeight(), null);
+            if (this.inView(quad)) {
+                gr.drawImage(quad.getQuadImage(), (int) quad.getX(), (int) quad.getY(), (int) quad.getWidth(), (int) quad.getHeight(), null);
+            }
         }
-        // TODO: OrderRenderer sort render order between quads and entities
     }
 
     public void drawAfterPlayer(DrawTool drawTool) {
         Graphics gr = drawTool.getGraphics2D();
         for (Quad quad : this.staticQuadsAfterPlayer) {
-            gr.drawImage(quad.getQuadImage(), (int) quad.getX(), (int) quad.getY(), (int) quad.getWidth(), (int) quad.getHeight(), null);
+            if (this.inView(quad)) {
+                gr.drawImage(quad.getQuadImage(), (int) quad.getX(), (int) quad.getY(), (int) quad.getWidth(), (int) quad.getHeight(), null);
+            }
         }
     }
 
-    private boolean inView(Quad quad) {
+    private static boolean inView(Quad quad) {
         int quadSize = 32;
         if (quad.getX() >= GameScene.getInstance().getCameraRenderer().getX() / GameScene.getInstance().getCameraRenderer().getZoom() - quadSize && quad.getY() >= GameScene.getInstance().getCameraRenderer().getY() / GameScene.getInstance().getCameraRenderer().getZoom() - quadSize) {
             if (quad.getX() + quad.getWidth() <= (GameScene.getInstance().getCameraRenderer().getX() + Config.WINDOW_WIDTH) / GameScene.getInstance().getCameraRenderer().getZoom() + quadSize &&
@@ -328,6 +331,11 @@ public class MapManager {
             this.y = y;
             this.width = width;
             this.height = height;
+        }
+
+        @Override
+        public boolean shouldRender() {
+            return inView(this);
         }
 
         @Override

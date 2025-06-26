@@ -13,10 +13,10 @@ public class AABB {
 
     public AABB(double minX, double minY, double maxX, double maxY) {
         if (minX > maxX)
-            throw new InvalidParameterException("nice try diddy");
+            throw new InvalidParameterException("minX cannot be greater than maxX");
 
         if (minY > maxY)
-            throw new InvalidParameterException("nice try diddy");
+            throw new InvalidParameterException("minY cannot be greater than maxY");
 
         this.minX = minX;
         this.minY = minY;
@@ -34,7 +34,7 @@ public class AABB {
 
     public AABB(Vec2 center, double radius) {
         if (radius < 0)
-            throw new InvalidParameterException("nice try diddy");
+            throw new InvalidParameterException("radius < 0 does not work");
 
         if (center == null) {
             this.minX = -radius;
