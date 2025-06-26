@@ -9,6 +9,7 @@ import kebab_simulator.model.entity.impl.EntityItem;
 import kebab_simulator.model.entity.impl.item.EntityPan;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
+import kebab_simulator.model.sound.SoundManager;
 import kebab_simulator.physics.Collider;
 
 import java.awt.event.KeyEvent;
@@ -45,6 +46,7 @@ public class TableGarbageSpawner extends TableItemIntegration {
             Wrapper.getEntityManager().spawnPlate();
         }
         this.items.clear();
+        SoundManager.playSound(Wrapper.getSoundConstants().SOUND_TRASH);
     }
 
     @Override

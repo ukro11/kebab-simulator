@@ -8,6 +8,7 @@ import kebab_simulator.graphics.spawner.ObjectIdResolver;
 import kebab_simulator.model.entity.Entity;
 import kebab_simulator.model.entity.impl.item.EntityPlate;
 import kebab_simulator.model.entity.impl.player.EntityPlayer;
+import kebab_simulator.model.sound.SoundManager;
 import kebab_simulator.physics.Collider;
 
 import java.awt.event.KeyEvent;
@@ -39,6 +40,7 @@ public class TableServingSpawner extends TableItemIntegration {
             Wrapper.getGameHandler().scorePoints(((EntityPlate) this.items.get(0)).getMealModel());
             ((EntityPlate) this.items.get(0)).destroy();
             this.items.clear();
+            SoundManager.playSound(Wrapper.getSoundConstants().SOUND_REWARD);
         }
     }
 
